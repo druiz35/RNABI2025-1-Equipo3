@@ -1,0 +1,38 @@
+---
+output:
+  html_document:
+    toc: false
+    css: apa_style.css
+    theme: united
+    highlight: pygments
+    df_print: paged
+    number_sections: false
+  pdf_document:
+    toc: false
+---
+
+<!-- Portada del Trabajo -->
+
+::: {style="text-align: center; color: black; margin-top: 60px;"}
+<h1>TRABAJO 1: OPTIMIZACIÓN HEURÍSTICA</h1>
+
+<h2>REDES NEURONALES Y ALGORITMOS BIOINSPIRADOS</h2>
+
+<br><br><br>
+
+<p><strong>Presentado por:</strong></p>
+
+<p>Marcos David Carrillo Builes<br> Tomás Escobar Rivera Monsalve<br> Jose Fernando López Ramírez <br> Esteban Vásquez Pérez</p>
+
+<br><br>
+
+<p><strong>Profesor:</strong> Juan David Ospina Arango</p>
+
+<p><strong>Monitor:</strong> Andrés Mauricio Zapata Rincón</p>
+
+<br> <img src="logo_unal.png" alt="University Logo" width="100px"/> <br><br>
+
+<p>Universidad Nacional de Colombia<br> Facultad de Minas<br> Ingeniería de Sistemas e Informática</p>
+
+<p><strong>`r format(Sys.Date(), "%d de %B de %Y")`</strong></p>
+:::

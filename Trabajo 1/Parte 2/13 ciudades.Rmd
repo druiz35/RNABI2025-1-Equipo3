@@ -1,0 +1,82 @@
+---
+title: "mapa_13_ciudades_colombia"
+author: "Leonardo Federico Corona Torres"
+date: "2025-04-25"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(leaflet)
+library(osrm)
+library(sf)
+library(dplyr)
+
+# Coordenadas de las 13 principales ciudades
+ciudades <- tibble::tibble(
+  Ciudad = c("Bogotá", "Medellín", "Cali", "Barranquilla", "Cartagena", 
+             "Cúcuta", "Soledad", "Ibagué", "Bucaramanga", "Villavicencio", 
+             "Santa Marta", "Manizales", "Pereira"),
+  Latitud = c(4.7110, 6.2442, 3.4516, 10.9685, 10.3910, 
+              7.8941, 10.9264, 4.4389, 7.1193, 4.1420, 
+              11.2408, 5.0703, 4.8143),
+  Longitud = c(-74.0721, -75.5812, -76.5320, -74.7813, -75.4794, 
+               -72.5078, -74.8055, -75.2322, -73.1227, -73.6298, 
+               -74.1990, -75.5138, -75.6946)
+)
+
+```
+
+```{r}
+# Convertimos a objeto espacial
+puntos <- st_as_sf(ciudades, coords = c("Longitud", "Latitud"), crs = 4326)
+
+```
+
+```{r}
+# Rutas seleccionadas entre algunas ciudades
+pares_rutas <- list(
+  c("Bogotá", "Medellín"),
+  c("Bogotá", "Cali"),
+  c("Bogotá", "Barranquilla"),
+  c("Bogotá", "Bucaramanga"),
+  c("Bogotá", "Villavicencio"),
+  c("Cali", "Medellín"),
+  c("Cartagena", "Barranquilla"),
+  c("Santa Marta", "Barranquilla"),
+  c("Cali", "Pereira"),
+  c("Manizales", "Medellín"),
+  c("Cúcuta", "Bucaramanga")
+)
+```
+
+```{r}
+# Obtener rutas con osrm
+rutas <- list()
+for (par in pares_rutas) {
+  origen <- puntos[ciudades$Ciudad == par[1], ]
+  destino <- puntos[ciudades$Ciudad == par[2], ]
+  ruta <- try(osrmRoute(src = origen, dst = destino, ), silent = TRUE)
+  if (!inherits(ruta, "try-error")) {
+    rutas <- append(rutas, list(ruta))
+  }
+}
+```
+
+```{r}
+# Crear el mapa
+mapa <- leaflet() %>%
+  addTiles() %>%
+  addCircleMarkers(data = puntos, label = ~Ciudad, radius = 6, color = "blue", fillOpacity = 0.8)
+
+# Añadir las rutas en rojo
+for (ruta in rutas) {
+  mapa <- mapa %>% addPolylines(data = ruta, color = "red", weight = 3)
+}
+
+mapa
+
+```

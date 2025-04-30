@@ -1,0 +1,711 @@
+---
+output: html_notebook
+---
+
+---
+output:
+  html_document:
+    toc: false
+    css: apa_style.css
+    theme: united
+    highlight: pygments
+    df_print: paged
+    number_sections: false
+  pdf_document:
+    toc: false
+---
+
+::: {style="text-align: center; color: black; margin-top: 60px;"}
+<h1>REPORTE TRABAJO 1: SOLUCIÓN DE PROBLEMAS DE OPTIMIZACIÓN CON MÉTODOS HEURÍSTICOS</h1>
+
+<h2>REDES NEURONALES Y ALGORITMOS BIOINSPIRADOS</h2>
+
+<br><br><br>
+
+<p><strong>Presentado por:</strong></p>
+
+<p>Leonardo Federico Corona Torres<br> David Escobar Ruiz<br> Sebastian Soto Arcila</p>
+
+<br><br>
+
+<p><strong>Profesor:</strong> Juan David Ospina Arango</p>
+
+<p><strong>Monitor:</strong> Andrés Mauricio Zapata Rincón</p>
+
+<br> <img src="logo_unal.png" alt="University Logo" width="100px"/> <br><br>
+
+<p>Universidad Nacional de Colombia<br> Facultad de Minas<br> Ingeniería de Sistemas e Informática</p>
+
+<p><strong>`r format(Sys.Date(), "%d de %B de %Y")`</strong></p>
+:::
+
+# Introducción
+
+# Parte 1. Optimización numérica
+
+[Contextualización de la parte 1 del trabajo]
+
+[Statement presentando lo que se va a realizar en la parte 1 a manera general]
+
+[Statement explicando brevemente lo realizado con optimización de descenso de gradiente, lo esperado antes de la ejecución y lo obtenido post-ejecución]
+
+[Statement explicando brevemente lo realizado con métodos heurísticos, lo esperado antes de la ejecución y lo obtenido post-ejecución]
+
+## 1.1 Selección e implementación de las funciones de prueba
+
+Para observar el comportamiento de cada uno de los métodos de optimización implementados, se optó por la selección de dos funciones de prueba comúnmente utilizadas en contextos de optimización: Función de Rosenbrock y Función de Rastrigin. Ambas funciones cuentan con características particulares que permiten probar el rendimiento de cada método bajo distintas condiciones que se discutirán más adelante.
+
+Previo a la implementación de los algoritmos en el lenguaje R y previo a la recopilación de resultados y la derivación de conclusiones a partir de estos, el equipo decidió realizar una breve investigación general de lo que son las funciones de prueba para problemas de optimización. La investigación se realizó de tal forma que, una vez concluída, se pudieran comprender los conceptos hasta el punto de estar en las capacidades responder las siguientes preguntas implícitamente en una breve sección de este trabajo:
+
+-   ¿Qué es una función de prueba en optimización?
+
+-   ¿Para qué se utiliza una función de prueba en optimización?
+
+-   ¿Cómo se pueden clasificar las funciones de prueba?
+
+-   ¿Cuáles son algunas de las funciones de prueba más utilizadas?
+
+A continuación se presenta dicha sección para luego continuar con el estudio más detallado de las funciones escogidas.
+
+### 1.1.1 Breve explicación de las funciones de prueba para problemas de optimización
+
+Según (Yang, 2010), una función de prueba es una función con unas propiedades especiales que permite probar si el rendimiento de un método de optimización implementado es aceptable bajo las condiciones especiales que impone la función de prueba. 
+
+Esto es especialmente útil para verificar que el método sea eficiente bajo distintas condiciones en las que se espera que se implemente, como por ejemplo, casos en los que la función tiene múltiples mínimos y/o máximos locales.
+
+Según (Molga, 2005), las funciones de prueba se pueden ubicar en una de las siguientes clases, todas siendo funciones continuas:
+
+-   **Clase 1:** Unimodal, convexa, multidimensional.
+-   **Clase 2:** Multimodal, dos dimensiones con un número pequeño de extremos locales.
+-   **Clase 3**: Multimodal, dos dimensiones con un gran número de extremos locales.
+-   **Clase 4:** Multimodal, multidimensional, con un número amplio de extremos locales.
+
+En el caso de las funciones elegidas, la función de Rosenbrock se clasificaría como Clase 3 y la de Rastrigin como Clase 2.
+
+Como ejemplo, en la Figura 1 se presentan algunas funciones de prueba que no se eligieron para este trabajo, pero que son igual de relevantes, importantes y comúnmente utilizadas en la práctica (Molga, 2005):
+
+-   Función de De Jong (Clase 1).
+
+-   Función de Griewangk (Clase 2).
+
+-   Función de Langermann (Clase 3).
+
+-   Función de Ackley (Clase 4).
+
+### 1.1.2 Función de Rosenbrock
+
+Definición en n dimensiones:
+
+f(x)=i=1n-1100(xi+1-xi2)2+(1-xI)2
+
+Definición en 2D:
+
+f(x,y) =100(y-x2)2+(1-x)2
+
+Definición en 3D:
+
+f(x,y,z) =100(y-x2)2+(z-y2)2+(1-x)2+(1-y)2
+
+Algunas características y propiedades importantes  son las siguientes:
+
+-   Mínimo global: 
+
+    -   n=2 f(1,1)=0
+
+    -   n=3 f(1,1, 1)=0
+
+    -   n\>3 f(1,...,1)=0
+
+-   Dominio de búsqueda: 
+
+    -   -xi
+
+    -   1in
+
+-   Conocida también como la función banana de Rosenbrock.
+
+-   Tiene forma de valle, el cual es trivial encontrarlo. Sin embargo, la convergencia al mínimo global es difícil(Wikipedia, s.f., Rosenbrock function).
+
+Estas son algunas hipótesis y expectativas que se tuvieron para el rendimiento de cada método implementado con esta función:
+
+-   **Método de descenso de gradiente:**
+
+    -   Si se ubica el punto inicial sobre las rectas tangentes con mayor gradiente a la función entonces el método llegará más rápido a un mínimo.
+
+    -   Por el contrario, si la recta tangente tiene una gradiente más cercana a cero, el método llegará más lentamente, es decir, requerirá de más iteraciones para llegar al punto mínimo.
+
+-   **Método de algoritmos evolutivos:**
+
+-   **Método de optimización de partículas:**
+
+-   **Método de evolución diferencial:**
+
+La implementación de la función de Rosenbrock en 2, 3 y N dimensiones se muestra a continuación:
+
+```{r}
+# 2 Dimensiones
+f_rosenbrock_2d <- function(x, y) {   
+  f_value <- 100*(y-(x^2))^2 + ((1-x)^2)   
+  return(f_value) 
+}  
+
+# 3 Dimensiones
+f_rosenbrock_3d <- function(x, y, z) {   
+  f_value <- 100*((y-x^2)^2 + (z-y^2)^2) + (1-x)^2 + (1-y)^2   
+  return(f_value) 
+}
+
+# N Dimensiones
+f_rosenbrock <- function(x){
+  x_1 <- tail(x, -1)
+  x <- head(x, -1)
+  z <- sum((100*((x_1-(x^2))^2))+((1-x)^2))
+  return(z)
+}
+```
+
+Las gráficas de la función de Rosenbrock en 2 y 3 dimensiones se muestran a continuación:
+
+```{r}
+n_length <- 100
+x1 <- seq(-5, 5, length.out = n_length)
+x2 <- seq(-5, 5, length.out = n_length)
+X <- expand.grid(x1, x2)
+z <- f_rosenbrock_2d(X[,1], X[,2])
+Z <- matrix(z, ncol = n_length, nrow = n_length)
+contour(
+  x = x1,
+  y = x2,
+  z = Z,
+  nlevels = 100,
+  las = 1,
+  xlab = expression(x[1]),
+  ylab = expression(x[2]),
+  main = expression(paste(
+    "Función de Rosenbrock: ",
+    f(x[1],x[2])==100*(x[2]-x[1]^2)^2+(1-x[1])^2
+  )),
+  sub = "Curvas de nivel de la función"
+)
+```
+
+### 1.1.3 Función de Rastrigin
+
+Definición en n dimensiones:
+
+f(x)=An+i=1nxi2-A(2xi) , A=10
+
+Definición en 2D:
+
+f(x,y)=x2+y2+A2-(2x)-(2y), A=10
+
+Definición en 3D:
+
+f(x,y,z)=x2+y2+z2+A3-(2x)-(2y)-(2z), A=10
+
+Algunas características y propiedades importantes son las siguientes:
+
+-   Mínimo global:
+
+    -   f(0,...,0)=0
+
+-   Dominio de búsqueda:
+
+    -   -5.12xi5.12
+
+-   Particularmente, hallar el mínimo de esta función es un problema difícil debido a la larga cantidad de mínimos locales (Wikipedia, s.f., Rastrigin function).
+
+Estas son algunas hipótesis y expectativas que se tuvieron para el rendimiento de cada método implementado con esta función:
+
+-   **Método de descenso de gradiente:**
+
+    -   El éxito del método en alcanzar un mínimo dependerá enormemente del punto inicial elegido debido a los múltiples mínimos locales que tiene esta función. 
+
+-   **Método de algoritmos evolutivos:**
+
+-   **Método de optimización de partículas:**
+
+-   **Método de evolución diferencial:**
+
+La implementación de la función de Rastrigin en 2, 3 y N dimensiones se muestra a continuación:
+
+```{r}
+# 2 Dimensiones 
+f_rastrigin_2d <- function(x, y) {
+  A = 10   
+  f_value <- x^2 + y^2 + A*(2 - cos(2*pi*x) - cos(2*pi*y))   
+  return(f_value) 
+}  
+
+# 3 Dimensiones 
+f_rastrigin_3d <- function(x, y, z) {   
+  A = 10   
+  f_value <- x^2 + y^2 + z^2 + A*(3 - cos(2*pi*x) - cos(2*pi*y) - cos(2*pi*z))   
+  return(f_value) 
+}
+
+# N Dimensiones
+f_rastrigin <-function(x){
+  A <- 10
+  n <- length(x)
+  z <- (A*n) + sum(x^2 - A*cos(2*pi*x))
+  return(z)
+}
+```
+
+Las gráficas de la función de Rastrigin en 2 y 3 dimensiones se muestran a continuación:
+
+```{r}
+n_length <- 100
+x1 <- seq(-5.12, 5.12, length.out = n_length)
+x2 <- seq(-5.12, 5.12, length.out = n_length)
+X <- expand.grid(x1, x2)
+z <- f_rastrigin_2d(X[,1], X[,2])
+Z <- matrix(z, ncol = n_length, nrow = n_length)
+contour(
+  x = x1,
+  y = x2,
+  z = Z,
+  nlevels = 40,
+  las = 1,
+  xlab = expression(x[1]),
+  ylab = expression(x[2]),
+  main = expression(paste(
+    "Función de Rastrigin: ",
+    f(x[1],x[2])==20 + x[1]^2 - 10*cos(2*pi*x[1]) + x[2]^2 - 10*cos(2*pi*x[2])
+  )),
+  sub = "Curvas de nivel de la función"
+)
+```
+
+## 1.2 Implementación en R de métodos de optimización a utilizar
+
+## 1.3 Método de descenso de gradiente
+
+### 1.3.1 Implementación en R de descenso por gradiente
+
+#### Implementación de derivada parcial
+
+```{r}
+partial_dev <- function(x,i,fun,h=0.01){
+    e <- x*0 # crea un vector de ceros de la misma longitud de x
+    e[i] <- h
+    y <- (fun(x+e)-fun(x-e))/(2*h)
+  return(y)
+}
+```
+
+#### Implementación del gradiente
+
+```{r}
+num_grad <- function(x,fun,h=0.01){
+  # x: punto del espacio donde se debe evaluar el gradiente
+  # fun: función para la que se desea calcular el gradiente en x
+  # h: es el tamaño de ventana para el cálculo de la derivada numérica
+  d <- length(x)
+  y <- mapply(FUN=partial_dev,i=1:d,MoreArgs=list(x=x,h=h,fun=fun))
+  return(y)
+}
+```
+
+#### Implementación de derivada del gradiente
+
+```{r}
+deriv_grad <- function(x,fun,i=1,h=0.01){
+  # x: punto en el que se evalúa el gradiente
+  # fun: función para la cual se calcula la derivada del gradiente respecto a la íesima componente
+  # i: i-ésima componente del vector x con respecto a la que se deriva
+    e <- x*0 # crea un vector de ceros de la misma longitud de x
+    e[i] <- h
+    y <- (num_grad(x+e,fun=fun,h=h)-num_grad(x-e,fun=fun,h=h))/(2*h)
+    return(y)
+}
+```
+
+#### Implementación de matriz Hessiana
+
+```{r}
+matriz_hessiana <- function(x,fun,h=0.01){
+  # x: punto en el que se evalúa la matriz hessiana
+  # fun: función a la que se le calcula la matriz hessiana en x
+  # h: es el tamaño de ventana para el cálculo de la derivada numérica
+  d <- length(x)
+  y <- mapply(FUN=deriv_grad,i=1:d,MoreArgs=list(x=x,h=h,fun=fun),SIMPLIFY = TRUE)
+  return(y)
+}
+```
+
+#### Implementación completa de optimizador multivariado por descenso de gradiente
+
+```{r}
+optimizador_mult_numdev <- function(x0,fun,max_eval=100,h=0.01,eta=0.01){
+  x <- matrix(NA,ncol =length(x0), nrow = max_eval)
+  x[1,] <- x0
+  for (i in 2:max_eval){
+    num_grad_fun <- num_grad(x[i-1,],fun,h)
+    H <- matriz_hessiana(x[i-1,],fun,h)
+    cambio <- - eta*solve(H)%*%num_grad_fun
+    x[i,] <- x[i-1,] + cambio
+    cambio_opt <- sqrt(sum((x[i-1,]-x[i,])^2))
+    if (cambio_opt<0.00001){
+      break
+    }
+  }
+  return(x[1:i,])
+}
+```
+
+### 1.3.2 Optimización de la función de Rosenbrock en 2 dimensiones
+
+```{r}
+# Ejecución del método
+sol_rosen <- optimizador_mult_numdev(f_rosenbrock,x0=c(-4,-4),eta=1)
+
+# Graficación del proceso de optimización
+n_length <- 100
+x1 <- seq(-5, 5, length.out = n_length)
+x2 <- seq(-5, 5, length.out = n_length)
+X <- expand.grid(x1, x2)
+z <- f_rosenbrock_2d(X[,1], X[,2])
+Z <- matrix(z, ncol = n_length, nrow = n_length)
+contour(
+  x = x1,
+  y = x2,
+  z = Z,
+  nlevels = 100,
+  las = 1,
+  xlab = expression(x[1]),
+  ylab = expression(x[2]),
+  main = expression(paste(
+    "Función de Rosenbrock: ",
+    f(x[1],x[2])==100*(x[2]-x[1]^2)^2+(1-x[1])^2)
+  ),
+  sub = "Curvas de nivel de la función"
+)
+lines(sol_rosen, type="b",cex=1.5,col="red")
+
+```
+
+### 1.3.3 Optimización de la función de Rosenbrock en 3 dimensiones
+
+```{r}
+# Ejecución del método
+sol_rosen <- optimizador_mult_numdev(f_rosenbrock,x0=c(-4,-4,-4),eta=1)
+
+# Graficación del proceso de optimización
+## TODO: Revisar y corregir
+n_length <- 100
+x1 <- seq(-5, 5, length.out = n_length)
+x2 <- seq(-5, 5, length.out = n_length)
+x3 <- seq(-5, 5, length.out = n_length)
+X <- expand.grid(x1, x2, x3)
+z <- f_rosenbrock_3d(X[,1], X[,2], X[,3])
+Z <- matrix(z, ncol = n_length, nrow = n_length)
+contour(
+  x = x1,
+  y = x2,
+  z = Z,
+  nlevels = 100,
+  las = 1,
+  xlab = expression(x[1]),
+  ylab = expression(x[2]),
+  main = expression(paste(
+    "Función de Rosenbrock: ",
+    f(x[1],x[2])==100*(x[2]-x[1]^2)^2+(1-x[1])^2)
+  ),
+  sub = "Curvas de nivel de la función"
+)
+lines(sol_rosen, type="b",cex=1.5,col="red")
+
+```
+
+### 1.3.4 Optimización de la función de Rastrigin en 2 dimensiones
+
+```{r}
+# Ejecución del método
+sol_rosen <- optimizador_mult_numdev(f_rastrigin,x0=c(-4,-4),eta=1)
+
+# Graficación del proceso de optimización
+n_length <- 100
+x1 <- seq(-5, 5, length.out = n_length)
+x2 <- seq(-5, 5, length.out = n_length)
+X <- expand.grid(x1, x2)
+z <- f_rastrigin_2d(X[,1], X[,2])
+Z <- matrix(z, ncol = n_length, nrow = n_length)
+contour(
+  x = x1,
+  y = x2,
+  z = Z,
+  nlevels = 100,
+  las = 1,
+  xlab = expression(x[1]),
+  ylab = expression(x[2]),
+  main = expression(paste(
+    "Función de Rosenbrock: ",
+    f(x[1],x[2])==100*(x[2]-x[1]^2)^2+(1-x[1])^2)
+  ),
+  sub = "Curvas de nivel de la función"
+)
+lines(sol_rosen, type="b",cex=1.5,col="red")
+
+```
+
+### 1.3.5 Optimización de la función de Rastrigin en 3 dimensiones
+
+```{r}
+# Ejecución del método
+sol_rosen <- optimizador_mult_numdev(f_rastrigin,x0=c(-4,-4,-4),eta=1)
+
+# Graficación del proceso de optimización
+## TODO: Revisar y corregir
+n_length <- 100
+x1 <- seq(-5, 5, length.out = n_length)
+x2 <- seq(-5, 5, length.out = n_length)
+X <- expand.grid(x1, x2)
+z <- f_rastrigin_3d(X[,1], X[,2], X[,3])
+Z <- matrix(z, ncol = n_length, nrow = n_length)
+contour(
+  x = x1,
+  y = x2,
+  z = Z,
+  nlevels = 100,
+  las = 1,
+  xlab = expression(x[1]),
+  ylab = expression(x[2]),
+  main = expression(paste(
+    "Función de Rosenbrock: ",
+    f(x[1],x[2])==100*(x[2]-x[1]^2)^2+(1-x[1])^2)
+  ),
+  sub = "Curvas de nivel de la función"
+)
+lines(sol_rosen, type="b",cex=1.5,col="red")
+
+```
+
+### 1.3.6 Conclusiones método de descenso por gradiente
+
+## 1.4 Método de algoritmos evolutivos
+
+### 1.4.1 Implementación en R de algoritmos evolutivos
+
+### 1.4.2 Optimización de la función de Rosenbrock en 2 dimensiones
+
+```{r}
+# Ejecución del método
+
+# Graficación del proceso de optimización
+```
+
+### 1.4.3 Optimización de la función de Rosenbrock en 3 dimensiones
+
+```{r}
+# Ejecución del método
+
+# Graficación del proceso de optimización
+```
+
+### 1.4.4 Optimización de la función de Rastrigin en 2 dimensiones
+
+```{r}
+# Ejecución del método
+
+# Graficación del proceso de optimización
+```
+
+### 1.4.5 Optimización de la función de Rastrigin en 3 dimensiones
+
+```{r}
+# Ejecución del método
+
+# Graficación del proceso de optimización
+```
+
+### 1.4.6 Conclusiones método de algoritmos evolutivos
+
+## 1.5 Método de optimización de partículas
+
+### 1.5.1 Implementación en R de optimización de partículas
+
+```{r}
+install.packages("psoptim")
+install.packages("pso")
+install.packages("stats")
+```
+
+```{r}
+library("pso")
+## Some examples of using the functions in the package
+
+## Using basic "optim" interface to minimize a function
+set.seed(1)
+psoptim(rep(NA,2),function(x) 20+sum(x^2-10*cos(2*pi*x)),
+        lower=-5,upper=5,control=list(abstol=1e-8))
+
+## Parabola
+p <- test.problem("parabola",10) # one local=global minimum
+set.seed(1)
+o1 <- psoptim(p,control=list(trace=1,REPORT=50))
+show(o1)
+
+set.seed(1)
+o2 <- psoptim(p,control=list(trace=1,REPORT=50,w=c(.7,.1)))
+show(o2)
+
+set.seed(1)
+o3 <- psoptim(p,control=list(trace=1,REPORT=1,hybrid=TRUE))
+show(o3) ## hybrid much faster
+
+## Griewank
+set.seed(2)
+p <- test.problem("griewank",10) # lots of local minima
+o1 <- psoptim(p,control=list(trace=1,REPORT=50))
+show(o1)
+
+## The above sometimes get stuck in a local minima.
+## Adding a restart to increase robustness.
+set.seed(2)
+o2 <- psoptim(p,control=list(trace=1,REPORT=50,reltol=1e-4))
+show(o2)
+
+## An then adding the hybrid
+set.seed(2)
+o3 <- psoptim(p,control=list(trace=1,REPORT=50,reltol=1e-4,
+              hybrid=TRUE,hybrid.control=list(maxit=10)))
+show(o3)
+
+## Rosenbrock
+set.seed(1)
+p <- test.problem("rosenbrock",1)
+o1 <- psoptim(p,control=list(trace=1,REPORT=50))
+show(o1)
+
+## Change to fully informed
+set.seed(1)
+o2 <- psoptim(p,control=list(trace=1,REPORT=50,p=1))
+show(o2)
+
+## Rastrigin
+p <- test.problem("rastrigin",10)
+set.seed(1)
+o1 <- psoptim(p,control=list(trace=1,REPORT=50))
+show(o1)
+
+set.seed(1)
+o2 <- psoptim(p,control=list(trace=1,REPORT=50,hybrid=TRUE,
+              hybrid.control=list(maxit=10)))
+show(o2) # better
+plot(o1,xlim=c(0,p@maxf),ylim=c(0,100))
+lines(o2,col=2) # and much faster convergence
+
+## Ackley
+set.seed(1)
+p <- test.problem("ackley",10)
+o1 <- psoptim(p,control=list(trace=1,REPORT=50))
+show(o1)
+```
+
+### 1.5.2 Optimización de la función de Rosenbrock en 2 dimensiones
+
+```{r}
+# Ejecución del método
+
+# Graficación del proceso de optimización
+```
+
+### 1.5.3 Optimización de la función de Rosenbrock en 3 dimensiones
+
+```{r}
+# Ejecución del método
+
+# Graficación del proceso de optimización
+```
+
+### 1.5.4 Optimización de la función de Rastrigin en 2 dimensiones
+
+```{r}
+# Ejecución del método
+
+# Graficación del proceso de optimización
+```
+
+### 1.5.5 Optimización de la función de Rastrigin en 3 dimensiones
+
+```{r}
+# Ejecución del método
+
+# Graficación del proceso de optimización
+```
+
+### 1.5.6 Conclusiones método de optimización de partículas
+
+## 1.6 Método de evolución diferencial
+
+### 1.6.1 Implementación en R de evolución diferencial
+
+### 1.6.2 Optimización de la función de Rosenbrock en 2 dimensiones
+
+```{r}
+# Ejecución del método
+
+# Graficación del proceso de optimización
+```
+
+### 1.6.3 Optimización de la función de Rosenbrock en 3 dimensiones
+
+```{r}
+# Ejecución del método
+
+# Graficación del proceso de optimización
+```
+
+### 1.6.4 Optimización de la función de Rastrigin en 2 dimensiones
+
+```{r}
+# Ejecución del método
+
+# Graficación del proceso de optimización
+```
+
+### 1.6.5 Optimización de la función de Rastrigin en 3 dimensiones
+
+```{r}
+# Ejecución del método
+
+# Graficación del proceso de optimización
+```
+
+### 1.6.6 Conclusiones método de evolución diferencial
+
+## 1.7 Conclusiones parte 1
+
+# Parte 2. Optimización combinatoria
+
+## 2.1 Planteamiento del problema
+
+## 2.2 Primer método: Colonia de hormigas
+
+## 2.3 Segundo método: Algoritmo genético
+
+## 2.4 Conclusones parte 2
+
+# Conclusiones finales
+
+# Reporte de contribución individual
+
+## Leonardo Federico Corona Torres
+
+## David Escobar Ruiz
+
+## Sebastian Soto Arcila
+
+# Bibliografía
+
+<https://www.researchgate.net/publication/45932888_Test_Problems_in_Optimization>
+
+<https://robertmarks.org/Classes/ENGR5358/Papers/functions.pdf>
+
+<https://en.wikipedia.org/wiki/Test_functions_for_optimization>
+
+<https://en.wikipedia.org/wiki/Rosenbrock_function>
+
+<https://en.wikipedia.org/wiki/Rastrigin_function>

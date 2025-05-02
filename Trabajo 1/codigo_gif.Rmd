@@ -1,0 +1,75 @@
+---
+title: "codigo_gif_optimizacion_rastrigin2d"
+author: "Leonardo Federico Corona Torres"
+date: "2025-05-02"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(GA)
+library(ggplot2)
+library(gganimate)
+library(gifski)
+```
+
+```{r}
+# 1. Definir la función Rastrigin 2D
+rastrigin2d <- function(x) {
+  20 + sum(x^2 - 10 * cos(2 * pi * x))
+}
+```
+
+```{r}
+# 2. Crear el entorno para almacenar la evolución de la población
+pop_data <- data.frame()
+```
+
+```{r}
+# 3. Ejecutar el algoritmo genético, capturando las poblaciones
+ga_rastrigin <- ga(
+  type = "real-valued",
+  fitness = function(x) -rastrigin2d(x),
+  lower = c(-5.12, -5.12), upper = c(5.12, 5.12),
+  popSize = 50, maxiter = 50, run = 50,
+  monitor = function(obj) {
+    gen <- obj@iter
+    pop <- obj@population
+    df <- data.frame(
+      X1 = pop[, 1],
+      X2 = pop[, 2],
+      Generacion = gen
+    )
+    pop_data <<- rbind(pop_data, df)
+  }
+)
+```
+
+```{r}
+# 4. Crear grilla para visualizar la función Rastrigin
+x <- seq(-5.12, 5.12, length.out = 100)
+y <- seq(-5.12, 5.12, length.out = 100)
+grid <- expand.grid(X1 = x, X2 = y)
+grid$Z <- apply(grid, 1, rastrigin2d)
+```
+
+```{r}
+# 5. Graficar y animar
+base_plot <- ggplot() +
+  geom_raster(data = grid, aes(x = X1, y = X2, fill = Z), interpolate = TRUE) +
+  scale_fill_viridis_c() +
+  geom_point(data = pop_data, aes(x = X1, y = X2), color = "red", size = 1, alpha = 0.6) +
+  labs(title = "Optimización de Rastrigin usando GA", subtitle = "Generación: {closest_state}",
+       x = "x1", y = "x2") +
+  transition_states(Generacion, transition_length = 2, state_length = 1) +
+  theme_minimal()
+```
+
+```{r}
+# 6. Exportar como GIF
+anim_save("optim_rastrigin_ga.gif", animation = animate(base_plot, renderer = gifski_renderer(), fps = 5, width = 600, height = 500))
+
+```

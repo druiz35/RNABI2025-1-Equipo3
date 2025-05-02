@@ -13,15 +13,14 @@ knitr::opts_chunk$set(echo = TRUE)
 
 La evolución diferencial es un algoritmo de optimización inspirado en la evolución biológica. Funciona manteniendo una población de soluciones, y mejorándolas generación tras generación mediante operaciones de mutación, recombinación y selección.
 
-- **Mutación**: se combinan 3 individuos distintos de la población para crear una variante.
-- **Recombinación**: se mezcla esa variante con el individuo actual.
-- **Selección**: se escoge el mejor entre el original y el nuevo.
+-   **Mutación**: se combinan 3 individuos distintos de la población para crear una variante.
+-   **Recombinación**: se mezcla esa variante con el individuo actual.
+-   **Selección**: se escoge el mejor entre el original y el nuevo.
 
 Este proceso se repite varias veces hasta encontrar una solución óptima.
 
-
-
 ## Funciones objetivo
+
 ```{r}
 # Función de Rosenbrock (n-dimensional)
 f_rosenbrock <- function(x){
@@ -40,6 +39,7 @@ f_rastrigin <- function(x){
 ```
 
 ## Implementación de Evolución Diferencial (DE)
+
 ```{r}
 evolucion_diferencial <- function(fun_obj, dim = 2, NP = 30, F = 0.8, CR = 0.9,
                                   gens = 100, bounds = c(-5, 5)) {
@@ -93,6 +93,7 @@ evolucion_diferencial <- function(fun_obj, dim = 2, NP = 30, F = 0.8, CR = 0.9,
 ```
 
 ## Optimización de Rosenbrock en 2D
+
 ```{r}
 set.seed(123)
 res_rosen <- evolucion_diferencial(f_rosenbrock, dim = 2)
@@ -110,17 +111,15 @@ contour(x1, x2, z, nlevels = 50,
 lines(res_rosen$trayectoria[,1], res_rosen$trayectoria[,2], col = "red", type = "b")
 
 ```
+
 En este gráfico se muestran las curvas de nivel de la función de Rosenbrock en dos dimensiones. Estas curvas representan líneas donde la función tiene igual valor, y el valle curvado al centro es donde está el mínimo global (en el punto (1,1)(1,1)).
 
 La línea roja representa la trayectoria que siguió el algoritmo de evolución diferencial durante las iteraciones. Se puede observar cómo el enjambre de soluciones se fue acercando progresivamente hacia el mínimo, mejorando su posición en cada generación.
-    
-El resultado final obtenido fue:
-[1] 1.000000 1.000001
-Valor mínimo encontrado: 1.91e-12
 
-
+El resultado final obtenido fue: [1] 1.000000 1.000001 Valor mínimo encontrado: 1.91e-12
 
 ## Optimización de Rastrigin en 2D
+
 ```{r}
 set.seed(456)
 res_ras <- evolucion_diferencial(f_rastrigin, dim = 2)
@@ -143,12 +142,10 @@ Aquí se grafican las curvas de nivel de la función de Rastrigin, que es multim
 
 La línea azul muestra cómo la evolución diferencial se mueve por el espacio de búsqueda y logra escapar de los mínimos locales hasta acercarse al óptimo global, que se encuentra en (0,0)(0,0).
 
-Resultado obtenido:
-[1]  2.176697e-06 -2.015785e-07
-Valor mínimo: 9.48e-10
-
+Resultado obtenido: [1] 2.176697e-06 -2.015785e-07 Valor mínimo: 9.48e-10
 
 ## Optimización en 3D (sin gráficas, solo resultados)
+
 ```{r}
 res_rosen_3d <- evolucion_diferencial(f_rosenbrock, dim = 3)
 res_rosen_3d$mejor

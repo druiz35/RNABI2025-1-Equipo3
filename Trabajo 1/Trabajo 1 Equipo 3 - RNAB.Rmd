@@ -28,7 +28,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 <p><strong>Presentado por:</strong></p>
 
-<p>Leonardo Federico Corona Torres<br> David Escobar Ruiz<br> Sebastian Soto Arcila</p>
+<p>Leonardo Federico Corona Torres<br> David Escobar Ruiz<br> `Johan Sebastian Robles Rincón<br> `{=html}Sebastian Soto Arcila</p>
 
 <br><br>
 
@@ -45,7 +45,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Introducción
 
-La optimización numérica es esencial en diversas áreas científicas e ingenieriles para encontrar los valores óptimos de funciones objetivo dadas ciertas restricciones. Los algoritmos genéticos (AG) son metaheurísticas inspiradas en procesos evolutivos biológicos, que han demostrado eficacia en la búsqueda global de óptimos en funciones complejas​jstatsoft.org Los AG simulan la selección natural, la recombinación (cruce) y la mutación para iterativamente mejorar un conjunto de soluciones candidatas (población). Estas técnicas estocásticas son adecuadas para funciones no lineales, discontinuas o con múltiples óptimos locales donde los métodos basados en derivadas pueden fallar. Como casos de estudio se usan funciones clásicas de prueba en optimización: Rosenbrock y Rastrigin, en dimensiones 2D y 3D. La función Rosenbrock, introducida en 1960 por H. H. Rosenbrock, es no convexa y conocida por su característico “valle en forma de banana”​La función Rastrigin (1974) es también no convexa y altamente multimodal, con numerosos mínimos locales, lo que la hace difícil de optimizar​en.wikipedia.org - luca-scr.github.io. Analizaremos cada función en 2 y 3 dimensiones, graficando su paisaje antes de la optimización y luego aplicando un AG con múltiples corridas para evaluar la robustez de los resultados. Se calcularán estadísticas (media y desviación estándar) del mejor valor de fitness obtenido en 30 ejecuciones independientes de cada caso y se resumirán en una tabla.
+La optimización numérica es esencial en diversas áreas científicas e ingenieriles para encontrar los valores óptimos de funciones objetivo dadas ciertas restricciones.
 
 # Marco Teórico
 
@@ -70,9 +70,21 @@ Para los casos 3D (tres variables) es difícil visualizar directamente la funci�
 Para implementar y documentar la optimización se emplea R Markdown, combinando código R y texto explicativo. Se utilizan las siguientes librerías de R: GA (para el algoritmo genético) y knitr (para formateo de tablas).
 
 ```{r instalacion de librerias}
-install.packages("pso")
-install.packages("gifski")
-install.packages("sf")
+# DESCOMENTAR PARA INSTALAR PAQUETES FALTANTES
+#install.packages("GA")
+#install.packages("tidyverse")
+#install.packages("viridis")
+#install.packages("ggplot2")
+#install.packages("gganimate")
+#install.packages("gifski")
+#install.packages("dplyr")
+#install.packages("tidyr")
+#install.packages("purrr")
+#install.packages("pso")
+#install.packages("leaflet")
+#install.packages("osrm")
+#install.packages("sf")
+#install.packages("gor")
 
 ```
 
@@ -193,10 +205,6 @@ Estas son algunas hipótesis y expectativas que se tuvieron para el rendimiento 
 Se definen las funciones a usar para generar los gráficos de cada función:
 
 ```{r}
-#install.packages("viridis")
-#install.packages("tidyverse")
-
-
 generate_function_graph <- function(func_2d, low_bound, upper_bound) {
   x1 <- seq(low_bound, upper_bound, length.out = 50)
   x2 <- seq(low_bound, upper_bound, length.out = 50)
@@ -712,8 +720,6 @@ Resultado obtenido: [1] 2.176697e-06 -2.015785e-07 Valor mínimo: 9.48e-10
 res_ras_3d <- evolucion_diferencial(f_rastrigin, dim = 3)
 res_ras_3d$mejor
 res_ras_3d$valor
-
-# Graficación del proceso de optimización
 ```
 
 En este caso, el algoritmo encontró una solución cercana al mínimo global, aunque no exacta. Esto es esperable, ya que Rastrigin es mucho más difícil en 3D debido a la gran cantidad de mínimos locales.
@@ -875,6 +881,10 @@ o_pso <- particle_swarm_optimization(n,f_rastrigin,lower_bounds,upper_bounds)
 
 ## 1.6 Método de algoritmos evolutivos
 
+Los algoritmos genéticos (AG) son metaheurísticas inspiradas en procesos evolutivos biológicos, que han demostrado eficacia en la búsqueda global de óptimos en funciones complejas​jstatsoft.org Los AG simulan la selección natural, la recombinación (cruce) y la mutación para iterativamente mejorar un conjunto de soluciones candidatas (población). Estas técnicas estocásticas son adecuadas para funciones no lineales, discontinuas o con múltiples óptimos locales donde los métodos basados en derivadas pueden fallar. Como casos de estudio se usan funciones clásicas de prueba en optimización: Rosenbrock y Rastrigin, en dimensiones 2D y 3D. La función Rosenbrock, introducida en 1960 por H. H. Rosenbrock, es no convexa y conocida por su característico “valle en forma de banana”​
+
+La función Rastrigin (1974) es también no convexa y altamente multimodal, con numerosos mínimos locales, lo que la hace difícil de optimizar​en.wikipedia.org - luca-scr.github.io. Analizaremos cada función en 2 y 3 dimensiones, graficando su paisaje antes de la optimización y luego aplicando un AG con múltiples corridas para evaluar la robustez de los resultados. Se calcularán estadísticas (media y desviación estándar) del mejor valor de fitness obtenido en 30 ejecuciones independientes de cada caso y se resumirán en una tabla.
+
 Para evaluar la robustez de los GA, se realizarán múltiples ejecuciones independientes y se analizará la dispersión del fitness resultante.
 
 Se utilizan las siguientes librerías de R: GA (para el algoritmo genético) y knitr (para formateo de tablas).
@@ -955,14 +965,13 @@ animate_ga_optimization(f_rosenbrock)
 set.seed(123)  # semilla reproducible
 best_vals_ros <- replicate(30, {
   GA <- ga(type = "real-valued",
-           fitness = function(x) -rosenbrock2d(x),
+           fitness = function(x) -f_rosenbrock(x),
            lower = c(-5, -5), upper = c(5, 5),
            popSize = 50, maxiter = 100, run = 50)
   -GA@fitnessValue  # convertir a valor positivo
 })
 mean_ros <- mean(best_vals_ros)
 sd_ros   <- sd(best_vals_ros)
-# Similarmente para Rastrigin 2D, Rosenbrock 3D, Rastrigin 3D.
 ```
 
 ### 1.6.3 Optimización de la función de Rosenbrock en 3 dimensiones
@@ -981,7 +990,7 @@ summary(ga_ros3d)
 set.seed(123)  # semilla reproducible
 best_vals_ros3d <- replicate(30, {
   GA <- ga(type = "real-valued",
-           fitness = function(x) -rosenbrock3d(x),
+           fitness = function(x) -f_rosenbrock(x),
            lower = c(-5, -5, 3), upper = c(5, 5, 3),
            popSize = 50, maxiter = 100, run = 50)
   -GA@fitnessValue  # convertir a valor positivo
@@ -1013,7 +1022,7 @@ animate_ga_optimization(f_rastrigin)
 set.seed(123)  # semilla reproducible
 best_vals_ras2d <- replicate(30, {
   GA <- ga(type = "real-valued",
-           fitness = function(x) -rastrigin2d(x),
+           fitness = function(x) -f_rastrigin(x),
            lower = c(-5, -5), upper = c(5, 5),
            popSize = 50, maxiter = 100, run = 50)
   -GA@fitnessValue  # convertir a valor positivo
@@ -1031,22 +1040,19 @@ ga_ras3d <- ga(type = "real-valued",
                lower = c(-5, -12,3), upper = c(5, 12,3 ),
                popSize = 50, maxiter = 100, run = 50)
 summary(ga_ras3d)
-
-# Graficación del proceso de optimización
 ```
 
 ```{r}
 set.seed(123)  # semilla reproducible
 best_vals_ras3d <- replicate(30, {
   GA <- ga(type = "real-valued",
-           fitness = function(x) -rastrigin3d(x),
+           fitness = function(x) -f_rastrigin(x),
            lower = c(-5, -5, 3), upper = c(5, 5, 3),
            popSize = 50, maxiter = 100, run = 50)
   -GA@fitnessValue  # convertir a valor positivo
 })
 mean_ras3d <- mean(best_vals_ras3d)
 sd_ras3d   <- sd(best_vals_ras3d)
-#  Rastrigin 3D.
 ```
 
 ### 1.6.6 Cálculo de estadísticas y análisis
@@ -1085,8 +1091,6 @@ kable(res_df, caption = "Tabla 1. Estadísticas (media y desviación estándar) 
 ### 1.6.7 Conclusiones método de algoritmos evolutivos
 
 Los resultados confirman que el algoritmo genético es capaz de aproximarse a los mínimos globales de ambos problemas en múltiples dimensiones. Como era de esperar, Rastrigin mostró mayor variabilidad en los valores de fitness debido a sus muchos mínimos locales, lo que implica que algunas ejecuciones del GA pueden quedarse atrapadas en óptimos locales alejados del global. En contraste, Rosenbrock (aunque es no convexa) tiende a un único valle principal; por ello, la mayoría de las corridas alcanzaron valores cercanos al mínimo global con menor dispersión. En general se observa que al aumentar la dimensión (de 2D a 3D) la tarea se complica y la media del fitness aumenta (peor óptimo encontrado), reflejando la maldición de la dimensionalidad. El uso de múltiples ejecuciones independientes es esencial para evaluar la robustez de los AG. Debido a su naturaleza estocástica, cada ejecución puede converger a soluciones distintas. Al analizar la media y desviación estándar de los fitness finales se obtiene una medida de fiabilidad del algoritmo: una baja desviación indica resultados consistentes. En la literatura sobre algoritmos genéticos se reconoce que en muchos casos una sola ejecución puede no ser representativa​jstatsoft.org. Aunque un análisis comparativo profundo (p.ej., usando poblaciones más grandes o múltiples corridas en paralelo) queda fuera del alcance de este documento, nuestros resultados ilustran este fenómeno. Este estudio es reproducible: todo el código R necesario está incluido, permitiendo a otros investigadores replicar los experimentos, variar parámetros del GA (tasa de cruce, mutación, tamaño de población, etc.) y comparar con otros algoritmos de optimización.:Conclusiones Se ha presentado una documentación completa de la optimización de las funciones de Rosenbrock y Rastrigin en 2D y 3D empleando algoritmos genéticos en R. Mediante visualizaciones 3D iniciales se ilustraron las características de cada función de prueba. Se implementó el paquete GA para resolver cada caso y se realizaron 30 ejecuciones independientes para evaluar la robustez. Los resultados muestran que el GA puede encontrar aproximaciones al mínimo global en ambos problemas, aunque la función Rastrigin (múltiples mínimos locales) presenta más variabilidad y dificultad, especialmente en 3D.
-
-## 1.7 Conclusiones parte 1
 
 # Parte 2. Optimización combinatoria
 
@@ -1235,7 +1239,9 @@ matriz_costos <- costos_vendedor + costos_peajes + costos_combustible
 print(matriz_costos)
 ```
 
-## 2.2 Primer método: Colonia de hormigas
+## 2.2 Implementación Método de Colonia de hormigas
+
+A continuación, se implementa el método de colonia de hormigas para encontrar
 
 ```{r}
 # Número de ciudades
@@ -1258,26 +1264,25 @@ print(recorrido_optimizado$tour)
 ```
 
 ```{r}
-# Tour más óptimo: 1  8  3 13 12  2  5  7  4 11  6  9 10
-# Bogotá -> Ibagué -> Cali -> Pereira -> Manizales -> Medellín -> Cartagena
-# -> Soledad -> Barranquilla -> Santa Marta -> Cúcuta -> Bucaramanga -> Villavicencio
+# Tour más óptimo: 1 10  7  3  8 13 12  2  5  4 11  6  9
+# Bogotá->Villavicencio->Pasto->Cali->Ibagué->Pereira->Manizales->Medellín->Cartagena->Barranquilla->Santa Marta->Cúcuta->Bucaramanga
 
 # Rutas seleccionadas entre algunas ciudades
 print("RUTA IDEAL: ")
-print("Bogotá -> Ibagué -> Cali -> Pereira -> Manizales -> Medellín -> Cartagena -> Soledad -> Barranquilla -> Santa Marta -> Cúcuta -> Bucaramanga -> Villavicencio")
+print("Bogotá->Villavicencio->Pasto->Cali->Ibagué->Pereira->Manizales->Medellín->Cartagena->Barranquilla->Santa Marta->Cúcuta->Bucaramanga")
 pares_rutas <- list(
-  c("Bogotá", "Ibagué"),
-  c("Ibagué", "Cali"),
-  c("Cali", "Pereira"),
+  c("Bogotá", "Villavicencio"),
+  c("Villavicencio", "Pasto"),
+  c("Pasto", "Cali"),
+  c("Cali", "Ibagué"),
+  c("Ibagué", "Pereira"),
   c("Pereira", "Manizales"),
   c("Manizales", "Medellín"),
   c("Medellín", "Cartagena"),
-  c("Cartagena", "Soledad"),
-  c("Soledad", "Barranquilla"),
+  c("Cartagena", "Barranquilla"),
   c("Barranquilla", "Santa Marta"),
   c("Santa Marta", "Cúcuta"),
-  c("Cúcuta", "Bucaramanga"),
-  c("Bucaramanga", "Villavicencio")
+  c("Cúcuta", "Bucaramanga")
 )
 
 # Convertimos a objeto espacial
@@ -1306,26 +1311,24 @@ for (ruta in rutas) {
 
 print("COSTO FINAL DEL RECORRIDO: ")
 costos <- c(
-  matriz_costos[1,8], #"Bogotá" -> "Ibagué"
-  matriz_costos[8,3], #"Ibagué" -> "Cali"
-  matriz_costos[3,13], #"Cali" -> "Pereira"
+  matriz_costos[1,10], #"Bogotá" -> "Villavicencio"
+  matriz_costos[10,7], #"Villavicencio" -> "Pasto"
+  matriz_costos[7,3], #"Pasto" -> "Cali"
+  matriz_costos[3,8], #"Cali" -> "Ibagué"
+  matriz_costos[8,13], #"Ibagué" -> "Pereira"
   matriz_costos[13,12], #"Pereira" -> "Manizales"
   matriz_costos[12,2], #"Manizales" -> "Medellín"
   matriz_costos[2,5], #"Medellín" -> "Cartagena"
-  matriz_costos[5,7], #"Cartagena" -> "Soledad"
-  matriz_costos[7,4], #"Soledad" -> "Barranquilla"
+  matriz_costos[5,4], #"Cartagena" -> "Barranquilla"
   matriz_costos[4,11], #"Barranquilla" -> "Santa Marta"
   matriz_costos[11,6], #"Santa Marta" -> "Cúcuta"
-  matriz_costos[6,9], #"Cúcuta" -> "Bucaramanga"
-  matriz_costos[9,10] #"Bucaramanga" -> "Villavicencio"
+  matriz_costos[6,9] #"Cúcuta" -> "Bucaramanga"
 )
 print(sum(costos))
 mapa
 ```
 
-## 2.3 Segundo método: Algoritmo genético
-
-## 2.4 Conclusiones parte 2
+## 2.3 Conclusiones
 
 # Conclusiones finales
 

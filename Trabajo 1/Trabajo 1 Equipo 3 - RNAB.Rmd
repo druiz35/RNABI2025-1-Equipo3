@@ -72,6 +72,7 @@ Para implementar y documentar la optimización se emplea R Markdown, combinando 
 ```{r instalacion de librerias}
 install.packages("pso")
 install.packages("gifski")
+install.packages("sf")
 
 ```
 
@@ -86,7 +87,10 @@ library(dplyr)
 library(tidyr)
 library(purrr)
 library(pso)
-
+library(leaflet)
+library(osrm)
+library(sf)
+library(gor)
 ```
 
 # Parte 1. Optimización numérica
@@ -561,33 +565,8 @@ lines(sol_rosen, type="b",cex=1.5,col="red")
 ### 1.3.5 Optimización de la función de Rastrigin en 3 dimensiones
 
 ```{r}
-# Ejecución del método
-sol_rosen <- optimizador_mult_numdev(f_rastrigin,x0=c(-4,-4,-4),eta=1)
 
-# Graficación del proceso de optimización
-## TODO: Revisar y corregir
-n_length <- 100
-x1 <- seq(-5, 5, length.out = n_length)
-x2 <- seq(-5, 5, length.out = n_length)
-X <- expand.grid(x1, x2)
-z <- f_rastrigin_3d(X[,1], X[,2], X[,3])
-Z <- matrix(z, ncol = n_length, nrow = n_length)
-contour(
-  x = x1,
-  y = x2,
-  z = Z,
-  nlevels = 100,
-  las = 1,
-  xlab = expression(x[1]),
-  ylab = expression(x[2]),
-  main = expression(paste(
-    "Función de Rosenbrock: ",
-    f(x[1],x[2])==100*(x[2]-x[1]^2)^2+(1-x[1])^2)
-  ),
-  sub = "Curvas de nivel de la función"
-)
-lines(sol_rosen, type="b",cex=1.5,col="red")
-
+# Pendiente de implementar
 ```
 
 ### 1.3.6 Conclusiones método de descenso por gradiente
@@ -845,8 +824,7 @@ lower_bounds <- -5
 upped_bounds <- 5
 
 # Ejecución del método
-particle_swarm_optimization(n,f_rosenbrock,lower_bounds,upper_bounds)
-
+o_pso <- particle_swarm_optimization(n,f_rosenbrock,lower_bounds,upper_bounds)
 # Graficación del proceso de optimización
 ```
 
@@ -866,14 +844,16 @@ o_pso <- particle_swarm_optimization(n,f_rastrigin,lower_bounds,upper_bounds)
 # Graficación del proceso de optimización (minimización)
 o_min <- o_pso$o_min
 o_min_particles_positions <- o_min$stats$x
-animate_pso(o_min_particles_positions, f_rastrigin_2d)
+gif_name <- "pso_rastrigin_min.gif"
+animate_pso(o_min_particles_positions, f_rastrigin_2d, gif_name)
 ```
 
 ```{r}
 # Graficación del proceso de optimización (maximización)
 o_max <- o_pso$o_max
 o_max_particles_positions <- o_max$stats$x
-animate_pso(o_max_particles_positions, f_rastrigin_2d)
+gif_name <- "pso_rastrigin_max.gif"
+animate_pso(o_max_particles_positions, f_rastrigin_2d, gif_name)
 ```
 
 ### 1.5.5 Optimización de la función de Rastrigin en 3 dimensiones
@@ -884,8 +864,7 @@ n <- 3
 lower_bounds <- -5
 upped_bounds <- 5
 # Ejecución del método
-particle_swarm_optimization(n,f_rastrigin,lower_bounds,upper_bounds)
-# Graficación del proceso de optimización
+o_pso <- particle_swarm_optimization(n,f_rastrigin,lower_bounds,upper_bounds)
 ```
 
 ### 1.5.6 Conclusiones método de optimización de partículas
@@ -904,10 +883,10 @@ Adicionalmente, se definen algunas funciones para poder mostrar por medio de una
 
 ```{r}
 animate_ga_optimization <- function(func) {
-  # 2. Crear el entorno para almacenar la evolución de la población
+  # 1. Crear el entorno para almacenar la evolución de la población
   pop_data <- data.frame()
   
-  # 3. Ejecutar el algoritmo genético, capturando las poblaciones
+  # 2. Ejecutar el algoritmo genético, capturando las poblaciones
   ga_rastrigin <- ga(
     type = "real-valued",
     fitness = function(x) -func(x),
@@ -925,13 +904,13 @@ animate_ga_optimization <- function(func) {
     }
   )
   
-  # 4. Crear grilla para visualizar la función Rastrigin
+  # 3. Crear grilla para visualizar la función Rastrigin
   x <- seq(-5.12, 5.12, length.out = 100)
   y <- seq(-5.12, 5.12, length.out = 100)
   grid <- expand.grid(X1 = x, X2 = y)
   grid$Z <- apply(grid, 1, func)
   
-  # 5. Graficar y animar
+  # 4. Graficar y animar
   base_plot <- ggplot() +
     geom_raster(data = grid, aes(x = X1, y = X2, fill = Z), interpolate = TRUE) +
     scale_fill_viridis_c() +
@@ -941,7 +920,7 @@ animate_ga_optimization <- function(func) {
     transition_states(Generacion, transition_length = 2, state_length = 1) +
     theme_minimal()
   
-  # 6. Exportar como GIF
+  # 5. Exportar como GIF
   anim_save("optim_rastrigin_ga.gif", animation = animate(base_plot, renderer = gifski_renderer(), fps = 5, width = 600, height = 500))
 }
 
@@ -1101,11 +1080,11 @@ kable(res_df, caption = "Tabla 1. Estadísticas (media y desviación estándar) 
 
 ```
 
-Tabla 1. Estadísticas (media y desviación estándar) del fitness mínimo alcanzado en 30 corridas independientes para cada función y dimensión.
+**Tabla 1.** Estadísticas (media y desviación estándar) del fitness mínimo alcanzado en 30 corridas independientes para cada función y dimensión.
 
 ### 1.6.7 Conclusiones método de algoritmos evolutivos
 
-Discusión:los resultados confirman que el algoritmo genético es capaz de aproximarse a los mínimos globales de ambos problemas en múltiples dimensiones. Como era de esperar, Rastrigin mostró mayor variabilidad en los valores de fitness debido a sus muchos mínimos locales, lo que implica que algunas ejecuciones del GA pueden quedarse atrapadas en óptimos locales alejados del global. En contraste, Rosenbrock (aunque es no convexa) tiende a un único valle principal; por ello, la mayoría de las corridas alcanzaron valores cercanos al mínimo global con menor dispersión. En general se observa que al aumentar la dimensión (de 2D a 3D) la tarea se complica y la media del fitness aumenta (peor óptimo encontrado), reflejando la maldición de la dimensionalidad. El uso de múltiples ejecuciones independientes es esencial para evaluar la robustez de los AG. Debido a su naturaleza estocástica, cada ejecución puede converger a soluciones distintas. Al analizar la media y desviación estándar de los fitness finales se obtiene una medida de fiabilidad del algoritmo: una baja desviación indica resultados consistentes. En la literatura sobre algoritmos genéticos se reconoce que en muchos casos una sola ejecución puede no ser representativa​jstatsoft.org. Aunque un análisis comparativo profundo (p.ej., usando poblaciones más grandes o múltiples corridas en paralelo) queda fuera del alcance de este documento, nuestros resultados ilustran este fenómeno. Este estudio es reproducible: todo el código R necesario está incluido, permitiendo a otros investigadores replicar los experimentos, variar parámetros del GA (tasa de cruce, mutación, tamaño de población, etc.) y comparar con otros algoritmos de optimización.:Conclusiones Se ha presentado una documentación completa de la optimización de las funciones de Rosenbrock y Rastrigin en 2D y 3D empleando algoritmos genéticos en R. Mediante visualizaciones 3D iniciales se ilustraron las características de cada función de prueba. Se implementó el paquete GA para resolver cada caso y se realizaron 30 ejecuciones independientes para evaluar la robustez. Los resultados muestran que el GA puede encontrar aproximaciones al mínimo global en ambos problemas, aunque la función Rastrigin (múltiples mínimos locales) presenta más variabilidad y dificultad, especialmente en 3D.
+Los resultados confirman que el algoritmo genético es capaz de aproximarse a los mínimos globales de ambos problemas en múltiples dimensiones. Como era de esperar, Rastrigin mostró mayor variabilidad en los valores de fitness debido a sus muchos mínimos locales, lo que implica que algunas ejecuciones del GA pueden quedarse atrapadas en óptimos locales alejados del global. En contraste, Rosenbrock (aunque es no convexa) tiende a un único valle principal; por ello, la mayoría de las corridas alcanzaron valores cercanos al mínimo global con menor dispersión. En general se observa que al aumentar la dimensión (de 2D a 3D) la tarea se complica y la media del fitness aumenta (peor óptimo encontrado), reflejando la maldición de la dimensionalidad. El uso de múltiples ejecuciones independientes es esencial para evaluar la robustez de los AG. Debido a su naturaleza estocástica, cada ejecución puede converger a soluciones distintas. Al analizar la media y desviación estándar de los fitness finales se obtiene una medida de fiabilidad del algoritmo: una baja desviación indica resultados consistentes. En la literatura sobre algoritmos genéticos se reconoce que en muchos casos una sola ejecución puede no ser representativa​jstatsoft.org. Aunque un análisis comparativo profundo (p.ej., usando poblaciones más grandes o múltiples corridas en paralelo) queda fuera del alcance de este documento, nuestros resultados ilustran este fenómeno. Este estudio es reproducible: todo el código R necesario está incluido, permitiendo a otros investigadores replicar los experimentos, variar parámetros del GA (tasa de cruce, mutación, tamaño de población, etc.) y comparar con otros algoritmos de optimización.:Conclusiones Se ha presentado una documentación completa de la optimización de las funciones de Rosenbrock y Rastrigin en 2D y 3D empleando algoritmos genéticos en R. Mediante visualizaciones 3D iniciales se ilustraron las características de cada función de prueba. Se implementó el paquete GA para resolver cada caso y se realizaron 30 ejecuciones independientes para evaluar la robustez. Los resultados muestran que el GA puede encontrar aproximaciones al mínimo global en ambos problemas, aunque la función Rastrigin (múltiples mínimos locales) presenta más variabilidad y dificultad, especialmente en 3D.
 
 ## 1.7 Conclusiones parte 1
 
@@ -1113,7 +1092,236 @@ Discusión:los resultados confirman que el algoritmo genético es capaz de aprox
 
 ## 2.1 Planteamiento del problema
 
+El problema se puede plantear como una instancia particular del problema del viajero en ciencias de la computación. En la Tabla 1 se muestran las 13 ciudades principales de Colombia con su respectivas latitudes y longitudes.
+
+|                   |             |              |
+|-------------------|-------------|--------------|
+|                   | **Latitud** | **Longitud** |
+| **Bogotá**        | 4.7110      | -74.0721     |
+| **Medellín**      | 6.2442      | -75.5812     |
+| **Cali**          | 3.4516      | -76.5320     |
+| **Barranquilla**  | 10.9685     | -74.7813     |
+| **Cartagena**     | 10.3910     | -75.4794     |
+| **Cúcuta**        | 7.8941      | -72.5078     |
+| **Soledad**       | 10.9264     | -74.8055     |
+| **Ibagué**        | 4.4389      | -75.2322     |
+| **Bucaramanga**   | 7.1193      | -73.1227     |
+| **Villavicencio** | 4.1420      | -73.6298     |
+| **Santa Marta**   | 11.2408     | -74.1990     |
+| **Manizales**     | 5.0703      | -75.5138     |
+| **Pereira**       | 4.8143      | -75.6946     |
+
+**Tabla 1.** Ciudades principales de Colombia junto con su latencia y longitud.
+
+El objetivo de este problema es optimizar con respecto a los costos y no a las distancias entre ciudades, por lo que se tienen que considerar los costos de combustible, de peajes y cuánto cobra el vendedor por hora de trabajo. Sin embargo, la distancia afectará al valor de todos estos costos, y por lo tanto hay que considerarla. Adicionalmente, todos estos costos están en función de la distancia en metros, por lo que es necesario realizar la conversión de latitud-longitud a coordenadas en metros. Para esto se usó la librería "sf" para realizar la conversión al sistema de coordenadas planas UTM, el cual representa los puntos del globo en metros.
+
+La tabla de coordenadas en metros utilizando la información de la Tabla 1 se implementa a continuación:
+
+```{r}
+nombre_ciudades <- c("Bogotá", "Medellín", "Cali", "Barranquilla", "Cartagena", 
+             "Cúcuta", "Pasto", "Ibagué", "Bucaramanga", "Villavicencio", 
+             "Santa Marta", "Manizales", "Pereira")
+
+# Definición de ciudades, latitud y longitud de cada ciudad.
+ciudades <- tibble::tibble(
+  Ciudad = nombre_ciudades,
+  Latitud = c(4.7110, 6.2442, 3.4516, 10.9685, 10.3910, 
+              7.8941, 1.2136, 4.4389, 7.1193, 4.1420, 
+              11.2408, 5.0703, 4.8143),
+  Longitud = c(-74.0721, -75.5812, -76.5320, -74.7813, -75.4794, 
+               -72.5078, -77.2811, -75.2322, -73.1227, -73.6298, 
+               -74.1990, -75.5138, -75.6946)
+)
+
+# Time zone value
+# Por simplicidad, se elige el mismo punto común para calcular el timezone.
+# Se utiliza la longitud de Bogotá como punto común para calcular el utm_zone.
+utm_zone <- floor((-74.0721 + 180)/6) + 1 + 32700
+
+# Convertimos a objeto espacial
+puntos <- st_as_sf(ciudades, coords = c("Longitud", "Latitud"), crs = 4326)
+
+puntos_en_utm <- st_transform(puntos, crs=utm_zone)
+ciudades_en_metros <- st_coordinates(puntos_en_utm)
+tabla_coordenadas_ciudades <- data.frame(
+  ciudad = nombre_ciudades,
+  coord_x_en_metros = ciudades_en_metros[,1],
+  coord_y_en_metros = ciudades_en_metros[,2]
+)
+tabla_coordenadas_ciudades
+
+```
+
+Luego, se crea la matriz de distancias en metros entre cada ciudad.
+
+```{r}
+coordenadas_ciudades <- data.matrix(tabla_coordenadas_ciudades[,c(2,3)])
+distancias <- compute_distance_matrix(coordenadas_ciudades)
+print(distancias)
+```
+
+Ahora, hay que considerar los costos para poder crear una matriz de costos para resolver el problema de optimización.
+
+Con respecto al costo del combustible, este dependerá del vehículo que el vendedor utilizará para realizar las entregas. Para este problema, se utilizará un furgón DFSK C35, el cual tiene un consumo de combustible de 7.6 litros aproximado por cada 100 Km de recorrido, que se puede traducir en 0.000076 litros por cada 1 metro (). Adicionalmente, se considera el precio promedio de la gasolina en Colombia que, segun (), tiene un valor de \$15.827 pesos colombianos por galón, que se puede traducir en \$4.022 pesos colombianos por litro aproximadamente.
+
+```{r}
+gasto_litro_por_metro <- 0.000076
+precio_gasolina_por_litro <- 4.022 
+costos_combustible <- distancias * gasto_litro_por_metro * precio_gasolina_por_litro
+rownames(costos_combustible) <- nombre_ciudades
+colnames(costos_combustible) <- nombre_ciudades
+print(costos_combustible)
+```
+
+Considerando el costo de los peajes, se usarán los datos de (autofact, ...) para calcular el valor promedio de cada peaje de las ciudades consideradas y se asumirá que el vendedor pagará el valor promedio del peaje de la ciudad de origen y de la ciudad de destino exactamente 1 vez cada que las recorra.
+
+```{r}
+peajes = c(
+  # Cundinamarca (Bogotá)
+  mean(c(12800,13800,16500,16500,14100,11200,11200,10300,10300,6400,12800,12800,11100,11100,13300,13300,12300,12300,12300,16900)),
+  # Antioquia (Medellín)
+  mean(c(16800,12200,12100,22900,15800,10500,16200,10500,10900,20600,18000,16700,16700,14600,15900)),
+  # Valle del Cauca (Cali)
+  mean(c(14600,11100,11100,11000,11000,11000,11000,11000,10300)),
+  # Atlántico (Barranquilla)
+  mean(c(3000,17200,8300,8300,11900,11900)),
+  # Bolívar (Cartagena)
+  mean(c(18400,16300,11100,11200,11200,5100,11400)),
+  # Norte de Santander (Cúcuta)
+  mean(c(7900,19700)),
+  # Nariño (Pasto)
+  mean(c(14200)),
+  # Tolima (Ibagué)
+  mean(c(13800,12700,14200,13700,13700,13700,15700)),
+  # Santander (Bucaramanga)
+  mean(c(16700,10900,13500,13500,13500)),
+  # Meta (Villavicencio)
+  mean(c(23000,13100,13100,6900,6900,16900,8600,4800)),
+  # Magdalena (Santa Marta)
+  mean(c(12300,10900,11700,11700)),
+  # Caldas (Manizales)
+  mean(c(16100,14000,14600,14600,14600,14600,21000,10500)),
+  # Risaralda (Pereira)
+  mean(c(16100))
+)
+
+costos_peajes <- outer(peajes, peajes, "+")
+rownames(costos_peajes) <- nombre_ciudades
+colnames(costos_peajes) <- nombre_ciudades
+diag(costos_peajes) <- rep(0, 13)
+print(costos_peajes)
+```
+
+Por último, se debe de considerar el salario por horas promedio de un vendedor que haga dichos recorridos para entregar los pedidos. Adicional a ser vendedor, esta persona realizará las entregas y la conducción de la mercancía, por lo que también hay que considerar su pago como transportista. Dicho esto, se promediaron salarios de un transportista y un vendedor para poder determinar el salario final de la persona. Según (talent.com, ...), un transportista gana en promedio \$9.341 pesos colombianos la hora y un vendedor hace \$7.144 la hora; por lo tanto, el salario a utilizar será el \$8.242 pesos la hora.
+
+Asumiendo que el vendedor conducirá a una velocidad media de 50 km/h al día, que se podrían traducir en 50000 m/h para facilitar cálculos, se procede a calcular el tiempo de viaje y, junto con esto, cuánto se le pagará al vendedor por cada viaje.
+
+```{r}
+velocidad_media_metros_por_hora <- 50000
+salario_vendedor_colombia <- 7144
+salario_transportista_colombia <- 9341
+salario_final <- (salario_vendedor_colombia + salario_transportista_colombia)/2
+costos_vendedor <- distancias*(1/velocidad_media_metros_por_hora)*salario_final
+rownames(costos_vendedor) <- nombre_ciudades
+colnames(costos_vendedor) <- nombre_ciudades
+costos_vendedor
+
+```
+
+Concluyendo, la matriz de costos simplemente sería el resultado de la suma de las anteriores matrices previamente definidas, y esta será la matriz que se utilizarán en los distintos algoritmos para encontrar la mejor ruta.
+
+```{r}
+matriz_costos <- costos_vendedor + costos_peajes + costos_combustible
+print(matriz_costos)
+```
+
 ## 2.2 Primer método: Colonia de hormigas
+
+```{r}
+# Número de ciudades
+n_ciudades <- 13
+
+# Función para normalizar la matriz de costos, ya que search_tour_ants
+# funciona con valores normalizados.
+# Se optó por usar normalización zscore.
+normalize_zscore <- function(m) {
+  (m - mean(m)) / sd(m)
+}
+
+# Normalización de matriz de costos
+matriz_costos_normalizada <- normalize_zscore(matriz_costos)
+
+# Ejecución del método de colonia de hormigas
+recorrido_optimizado <- search_tour_ants(matriz_costos_normalizada, n_ciudades, K = 80, N = 40, log=TRUE)
+print("MEJOR RECORRIDO: ")
+print(recorrido_optimizado$tour)
+```
+
+```{r}
+# Tour más óptimo: 1  8  3 13 12  2  5  7  4 11  6  9 10
+# Bogotá -> Ibagué -> Cali -> Pereira -> Manizales -> Medellín -> Cartagena
+# -> Soledad -> Barranquilla -> Santa Marta -> Cúcuta -> Bucaramanga -> Villavicencio
+
+# Rutas seleccionadas entre algunas ciudades
+print("RUTA IDEAL: ")
+print("Bogotá -> Ibagué -> Cali -> Pereira -> Manizales -> Medellín -> Cartagena -> Soledad -> Barranquilla -> Santa Marta -> Cúcuta -> Bucaramanga -> Villavicencio")
+pares_rutas <- list(
+  c("Bogotá", "Ibagué"),
+  c("Ibagué", "Cali"),
+  c("Cali", "Pereira"),
+  c("Pereira", "Manizales"),
+  c("Manizales", "Medellín"),
+  c("Medellín", "Cartagena"),
+  c("Cartagena", "Soledad"),
+  c("Soledad", "Barranquilla"),
+  c("Barranquilla", "Santa Marta"),
+  c("Santa Marta", "Cúcuta"),
+  c("Cúcuta", "Bucaramanga"),
+  c("Bucaramanga", "Villavicencio")
+)
+
+# Convertimos a objeto espacial
+puntos <- st_as_sf(ciudades, coords = c("Longitud", "Latitud"), crs = 4326)
+
+# Obtener rutas con osrm
+rutas <- list()
+for (par in pares_rutas) {
+  origen <- puntos[ciudades$Ciudad == par[1], ]
+  destino <- puntos[ciudades$Ciudad == par[2], ]
+  ruta <- try(osrmRoute(src = origen, dst = destino, ), silent = TRUE)
+  if (!inherits(ruta, "try-error")) {
+    rutas <- append(rutas, list(ruta))
+  }
+}
+
+# Crear el mapa
+mapa <- leaflet() %>%
+  addTiles() %>%
+  addCircleMarkers(data = puntos, label = ~Ciudad, radius = 6, color = "blue", fillOpacity = 0.8)
+
+# Añadir las rutas en rojo
+for (ruta in rutas) {
+  mapa <- mapa %>% addPolylines(data = ruta, color = "red", weight = 3)
+}
+
+print("COSTO FINAL DEL RECORRIDO: ")
+costos <- c(
+  matriz_costos[1,8], #"Bogotá" -> "Ibagué"
+  matriz_costos[8,3], #"Ibagué" -> "Cali"
+  matriz_costos[3,13], #"Cali" -> "Pereira"
+  matriz_costos[13,12], #"Pereira" -> "Manizales"
+  matriz_costos[12,2], #"Manizales" -> "Medellín"
+  matriz_costos[2,5], #"Medellín" -> "Cartagena"
+  matriz_costos[5,7], #"Cartagena" -> "Soledad"
+  matriz_costos[7,4], #"Soledad" -> "Barranquilla"
+  matriz_costos[4,11], #"Barranquilla" -> "Santa Marta"
+  matriz_costos[11,6], #"Santa Marta" -> "Cúcuta"
+  matriz_costos[6,9], #"Cúcuta" -> "Bucaramanga"
+  matriz_costos[9,10] #"Bucaramanga" -> "Villavicencio"
+)
+print(sum(costos))
+mapa
+```
 
 ## 2.3 Segundo método: Algoritmo genético
 
@@ -1140,3 +1348,17 @@ Discusión:los resultados confirman que el algoritmo genético es capaz de aprox
 <https://en.wikipedia.org/wiki/Rosenbrock_function>
 
 <https://en.wikipedia.org/wiki/Rastrigin_function>
+
+PARTE 2
+
+<http://static.multiaviso.com/vehicle/specs/22-VRZC564XLBE6-dfsk-otros-modelos-2017-furgon-c35.pdf>
+
+<https://www.autofact.com.co/blog/mi-carro/peajes/peajes-colombia-precios>
+
+<https://co.talent.com/salary?job=transporte+de+carga>
+
+<https://co.talent.com/salary?job=vendedor>
+
+<https://www.larepublica.co/precio-de-la-gasolina>
+
+<https://creg.gov.co/publicaciones/15565/precios-de-combustibles-liquidos/>

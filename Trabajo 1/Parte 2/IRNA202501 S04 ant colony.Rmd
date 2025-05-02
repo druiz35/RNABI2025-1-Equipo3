@@ -46,7 +46,7 @@ print(distancias)
 Ahora encontremos el recorrido óptimo:
 
 ```{r}
-recorrido_optimizado <- search_tour_ants(distancias, n_ciudades, K = 70, N = 20)
+recorrido_optimizado <- search_tour_ants(distancias, n_ciudades, K = 70, N = 20, log=TRUE)
 ```
 
 Visualicemos el mejor recorrido:

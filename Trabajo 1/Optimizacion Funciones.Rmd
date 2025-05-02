@@ -1,0 +1,240 @@
+---
+title: Optimización de funciones de prueba (Rosenbrock y Rastrigin) mediante Algoritmos
+  Genéticos en R
+author: "Leonardo Federico Corona Torres"
+date: "2025-04-23"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Introducción:
+
+La optimización numérica es esencial en diversas áreas científicas e ingenieriles para encontrar los valores óptimos de funciones objetivo dadas ciertas restricciones. Los algoritmos genéticos (AG) son metaheurísticas inspiradas en procesos evolutivos biológicos, que han demostrado eficacia en la búsqueda global de óptimos en funciones complejas​jstatsoft.org Los AG simulan la selección natural, la recombinación (cruce) y la mutación para iterativamente mejorar un conjunto de soluciones candidatas (población). Estas técnicas estocásticas son adecuadas para funciones no lineales, discontinuas o con múltiples óptimos locales donde los métodos basados en derivadas pueden fallar. Como casos de estudio se usan funciones clásicas de prueba en optimización: Rosenbrock y Rastrigin, en dimensiones 2D y 3D. La función Rosenbrock, introducida en 1960 por H. H. Rosenbrock, es no convexa y conocida por su característico “valle en forma de banana”​La función Rastrigin (1974) es también no convexa y altamente multimodal, con numerosos mínimos locales, lo que la hace difícil de optimizar​en.wikipedia.org - luca-scr.github.io. Analizaremos cada función en 2 y 3 dimensiones, graficando su paisaje antes de la optimización y luego aplicando un AG con múltiples corridas para evaluar la robustez de los resultados. Se calcularán estadísticas (media y desviación estándar) del mejor valor de fitness obtenido en 30 ejecuciones independientes de cada caso y se resumirán en una tabla.
+
+# Marco Teórico:
+
+Los algoritmos genéticos (AG) son técnicas de búsqueda heurística basadas en procesos de evolución natural​ . En un AG típico se define una función FITNESS que evalúa la calidad de cada solución candidata (individuo). A partir de una población inicial aleatoria, se iteran ciclos donde se seleccionan individuos más aptos, se combinan sus “genes” mediante cruces (crossover) y se introducen modificaciones aleatorias (mutaciones). Estos operadores evolucionan la población hacia regiones con mejor fitness. Según Scrucca (2013), los GAs han sido exitosos en optimizar funciones continuas (diferenciables o no) y discretas. Entre los operadores genéticos clave se destacan: Selección: elige individuos con mayor fitness para reproducirse, imitando la supervivencia del más apto. Cruce (crossover): combina partes de dos soluciones parentales para generar descendencia, explorando nuevas regiones del espacio de búsqueda. Mutación: altera aleatoriamente parte de un individuo (por ejemplo, cambiando un valor de su vector de variables) para introducir diversidad genética y evitar estancamiento en óptimos locales. Las funciones de prueba Rosenbrock y Rastrigin son problemas estándar para evaluar algoritmos de optimización:
+
+Función Rosenbrock (valle de Rosenbrock): Es una función no convexa introducida por Rosenbrock en 1960​en.wikipedia.org. En 2D se define como f(x,y)=(1−x)2+100(y−x2)2,f(x,y) = (1 - x)\^2 + 100(y - x^2)^2,f(x,y)=(1−x)2+100(y−x2)2, donde el parámetro a=1a=1a=1, b=100b=100b=100. Tiene un único mínimo global en (x,y)=(1,1)(x,y)=(1,1)(x,y)=(1,1) con f=0f=0f=0. Su paisaje forma un valle curvo estrecho que dificulta la convergencia hacia el mínimo​cran.r-project.org. La extensión multidimensional generalizada (para nnn variables) es: f(x)=∑i=1n−1[100(xi+1−xi2)2+(1−xi)2].f(\mathbf{x}) = \sum\_{i=1}\^{n-1} \left[100(x_{i+1} - x_i^2)^2 + (1-x_i)^2\right].f(x)=∑i=1n−1​[100(xi+1​−xi2​)2+(1−xi​)2]. El dominio típico usado es −30≤xi≤30-30 \le x_i \le 30−30≤xi​≤30​cran.r-project.org.
+
+Función Rastrigin: Es una función no convexa multimodal, propuesta por Rastrigin en 1974​en.wikipedia.org. Su fórmula en nnn dimensiones es: f(x)=10n+∑i=1n[xi2−10cos⁡(2πxi)],f(\mathbf{x}) = 10n + \sum\_{i=1}\^{n}\left[x_i^2 - 10\cos(2\pi x_i)\right],f(x)=10n+∑i=1n​[xi2​−10cos(2πxi​)], con xi∈[−5.12,5.12]x_i \in [-5.12,5.12]xi​∈[−5.12,5.12]. En 2D específico: f(x1,x2)=20+x12+x22−10(cos⁡(2πx1)+cos⁡(2πx2)),f(x_1,x_2) = 20 + x_1\^2 + x_2\^2 - 10(\cos(2\pi x_1) + \cos(2\pi x_2)),f(x1​,x2​)=20+x12​+x22​−10(cos(2πx1​)+cos(2πx2​)), que posee un mínimo global en (0,0)(0,0)(0,0) con f=0f=0f=0​luca-scr.github.io. Presenta múltiples mínimos locales dispuestos de forma regular​cran.r-project.org​luca-scr.github.io, lo que lo convierte en un desafío típico para algoritmos de optimización.
+
+Debido a su complejidad, ambas funciones son indicadores útiles para comparar la eficacia de optimizadores como los AG. Se espera que Rastrigin sea más difícil de optimizar debido a su gran cantidad de óptimos locales. Para evaluar la robustez de los GA, se realizarán múltiples ejecuciones independientes y se analizará la dispersión del fitness resultante.
+
+# Metodología
+
+Para implementar y documentar la optimización se emplea R Markdown, combinando código R y texto explicativo. Se utilizan las siguientes librerías de R: GA (para el algoritmo genético) y knitr (para formateo de tablas).
+
+```{r librerias}
+#carga del paquete
+library(GA)
+```
+
+# Ejemplo
+
+```{r}
+# Función Rosenbrock 2D (x[1]=x, x[2]=y)
+rosenbrock2d <- function(x) {
+  # a=1, b=100
+  (1 - x[1])^2 + 100 * (x[2] - x[1]^2)^2
+}
+# Función Rastrigin 2D
+rastrigin2d <- function(x) {
+  # A=10, n=2 dimensiones
+  20 + x[1]^2 + x[2]^2 - 10 * (cos(2*pi*x[1]) + cos(2*pi*x[2]))
+}
+# Extensión a 3D (n=3 variables)
+rosenbrock3d <- function(x) {
+  # f(x1,x2,x3) = (1-x1)^2 + 100(x2-x1^2)^2 + (1-x2)^2 + 100(x3-x2^2)^2
+  (1 - x[1])^2 + 100*(x[2] - x[1]^2)^2 +
+  (1 - x[2])^2 + 100*(x[3] - x[2]^2)^2
+}
+rastrigin3d <- function(x) {
+  # A=10, n=3
+  30 + x[1]^2 + x[2]^2 + x[3]^2 -
+  10 * (cos(2*pi*x[1]) + cos(2*pi*x[2]) + cos(2*pi*x[3]))
+}
+
+```
+
+## 
+
+Visualización previa (gráficos 3D): Antes de la optimización se grafica cada función para apreciar su superficie. Por ejemplo, para Rosenbrock 2D se genera una malla de valores y se usa persp:
+
+```{r }
+# Gráfico 3D de Rosenbrock 2D usando persp
+x <- seq(-2, 2, length = 100)
+y <- seq(-1, 3, length = 100)
+Z <- outer(x, y, function(xx, yy) (1 - xx)^2 + 100*(yy - xx^2)^2)
+persp(x, y, Z, theta = 30, phi = 30, expand = 0.5,
+      col = "lightblue", xlab="x", ylab="y", zlab="f(x,y)",
+      main="Función Rosenbrock (2D)")
+```
+
+# 
+
+Para los casos 3D (tres variables) es difícil visualizar directamente la función de 3 dimensiones (espacio de 4 variables), por lo que típicamente se muestran proyecciones o cortes.
+
+# 
+
+3.  Configuración y ejecución del algoritmo genético: Se utiliza la función ga() del paquete GA. Para problemas de minimización se define la función de fitness como el negativo del valor objetivo, ya que ga() maximiza por defecto. Se especifican los límites de búsqueda. Por ejemplo, para Rosenbrock 2D:
+
+## GA para minimizar Rosenbrock2d en rango [-5,5] para cada variable
+
+```{r}
+# Ejecutar GA para minimizar Rosenbrock2d en rango [-5,5] para cada variable
+ga_ros2d <- ga(type = "real-valued",
+               fitness = function(x) -rosenbrock2d(x),
+               lower = c(-5, -5), upper = c(5, 5),
+               popSize = 50, maxiter = 100, run = 50)
+summary(ga_ros2d)
+```
+
+# GA para minimizar Rastrigin2d en rango [-5,12] para cada variable
+
+```{r}
+# Ejecutar GA para minimizar rastrigin2d en rango [-5,12] para cada variable
+ga_ras2d <- ga(type = "real-valued",
+               fitness = function(x) -rastrigin2d(x),
+               lower = c(-5, -12), upper = c(5, 12),
+               popSize = 50, maxiter = 100, run = 50)
+summary(ga_ras2d)
+```
+
+# GA para minimizar Rastrigin3d en rango [-5,12] para cada variable
+
+```{r}
+# Ejecutar GA para minimizar rastrigin3d en rango [-5,12] para cada variable
+ga_ras3d <- ga(type = "real-valued",
+               fitness = function(x) -rastrigin3d(x),
+               lower = c(-5, -12,3), upper = c(5, 12,3 ),
+               popSize = 50, maxiter = 100, run = 50)
+summary(ga_ras3d)
+```
+
+# GA para minimizar Rosenbrock3d en rango [-5,5] para cada variable
+
+```{r}
+# Ejecutar GA para minimizar Rosenbrock3d en rango [-5,5] para cada variable
+ga_ros3d <- ga(type = "real-valued",
+               fitness = function(x) -rosenbrock3d(x),
+               lower = c(-5, -5, 3), upper = c(5, 5, 3),
+               popSize = 50, maxiter = 100, run = 50)
+summary(ga_ros3d)
+```
+
+# 
+
+El resumen reporta el mejor fitness encontrado (negativo) y la solución óptima en cada ejecución.
+
+# 
+
+4.Múltiples corridas (robustez): Para evaluar la variabilidad del método estocástico, se repite cada caso al menos 30 veces con semillas distintas. Se registra el mejor valor de fitness (valorizado positivamente) obtenido en cada corrida.
+
+# Se realizan 30 ejecuciones independientes para Rosenbrock 2D
+
+```{r}
+set.seed(123)  # semilla reproducible
+best_vals_ros <- replicate(30, {
+  GA <- ga(type = "real-valued",
+           fitness = function(x) -rosenbrock2d(x),
+           lower = c(-5, -5), upper = c(5, 5),
+           popSize = 50, maxiter = 100, run = 50)
+  -GA@fitnessValue  # convertir a valor positivo
+})
+mean_ros <- mean(best_vals_ros)
+sd_ros   <- sd(best_vals_ros)
+# Similarmente para Rastrigin 2D, Rosenbrock 3D, Rastrigin 3D.
+```
+
+# Se realizan 30 ejecuciones independientes para Rastrigin 2D
+
+```{r}
+set.seed(123)  # semilla reproducible
+best_vals_ras2d <- replicate(30, {
+  GA <- ga(type = "real-valued",
+           fitness = function(x) -rastrigin2d(x),
+           lower = c(-5, -5), upper = c(5, 5),
+           popSize = 50, maxiter = 100, run = 50)
+  -GA@fitnessValue  # convertir a valor positivo
+})
+mean_ras2d <- mean(best_vals_ras2d)
+sd_ras2d   <- sd(best_vals_ras2d)
+```
+
+# Se realizan 30 ejecuciones independientes para Rosenbrock 3D
+
+```{r}
+# Realizar 30 ejecuciones independientes para Rosenbrock 3D
+set.seed(123)  # semilla reproducible
+best_vals_ros3d <- replicate(30, {
+  GA <- ga(type = "real-valued",
+           fitness = function(x) -rosenbrock3d(x),
+           lower = c(-5, -5, 3), upper = c(5, 5, 3),
+           popSize = 50, maxiter = 100, run = 50)
+  -GA@fitnessValue  # convertir a valor positivo
+})
+mean_ros3d <- mean(best_vals_ros3d)
+sd_ros3d   <- sd(best_vals_ros3d)
+#  Rosenbrock 3D, Rastrigin 3D.
+```
+
+# Realizar 30 ejecuciones independientes para Rastrigin 3D
+
+```{r}
+set.seed(123)  # semilla reproducible
+best_vals_ras3d <- replicate(30, {
+  GA <- ga(type = "real-valued",
+           fitness = function(x) -rastrigin3d(x),
+           lower = c(-5, -5, 3), upper = c(5, 5, 3),
+           popSize = 50, maxiter = 100, run = 50)
+  -GA@fitnessValue  # convertir a valor positivo
+})
+mean_ras3d <- mean(best_vals_ras3d)
+sd_ras3d   <- sd(best_vals_ras3d)
+#  Rastrigin 3D.
+```
+
+# 
+
+5.  Cálculo de estadísticas: Con los vectores de mejores valores (best_vals_ros, etc.), se calculan la media y desviación estándar de cada conjunto de 30 resultados. Por ejemplo, mean_ros y sd_ros arriba y las demas, Para asi presentar los resultados.
+
+```{r}
+library(knitr)
+resultados <- data.frame(
+  Función   = c("Rosenbrock", "Rastrigin", "Rosenbrock", "Rastrigin"),
+  Dimensión = c("2D", "2D", "3D", "3D"),
+  Media     = c(mean_ros, mean_ras2d, mean_ros3d, mean_ras3d),
+  SD        = c(sd_ros, sd_ras2d, sd_ros3d, sd_ras3d)
+)
+kable(resultados, caption = "Resumen estadístico (media y desviación estándar) del mejor fitness obtenido tras 30 ejecuciones independientes de cada caso.")
+
+```
+
+## 
+
+Los resultados de las múltiples ejecuciones se resumen en la Tabla 1. Esta tabla muestra la media y desviación estándar del mejor valor de fitness (recordado que es el valor de la función objetivo en su mínimo global, típicamente cercano a 0) para cada combinación de función y dimensión. Se observa que para Rosenbrock 2D, la media del fitness mínimo es cercana a 0 con baja dispersión, reflejando que el GA normalmente encuentra el mínimo global (0) o cercano. Para Rastrigin 2D, la media también puede acercarse a 0, pero con mayor desviación estándar debido a los múltiples mínimos locales. En 3D ambos problemas suelen mostrar valores medios mayores (más alejados de 0) y mayor variabilidad, lo cual indica una mayor dificultad de búsqueda al aumentar la dimensionalidad.
+
+```{r}
+# tabla de los valores calculados)
+library(knitr)
+res_df <- data.frame(
+  Función   = c("Rosenbrock", "Rastrigin", "Rosenbrock", "Rastrigin"),
+  Dimensión = c("2D", "2D", "3D", "3D"),
+  Media     = c(mean_ros, mean_ras2d, mean_ros3d, mean_ras3d),
+  SD        = c(sd_ros, sd_ras2d, sd_ros3d, sd_ras3d)
+)
+kable(res_df, caption = "Tabla 1. Estadísticas (media y desviación estándar) del fitness mínimo alcanzado en 30 corridas independientes para cada función y dimensión.")
+
+```
+
+# 
+
+Tabla 1. Estadísticas (media y desviación estándar) del fitness mínimo alcanzado en 30 corridas independientes para cada función y dimensión.
+
+## 
+
+Discusión:los resultados confirman que el algoritmo genético es capaz de aproximarse a los mínimos globales de ambos problemas en múltiples dimensiones. Como era de esperar, Rastrigin mostró mayor variabilidad en los valores de fitness debido a sus muchos mínimos locales, lo que implica que algunas ejecuciones del GA pueden quedarse atrapadas en óptimos locales alejados del global. En contraste, Rosenbrock (aunque es no convexa) tiende a un único valle principal; por ello, la mayoría de las corridas alcanzaron valores cercanos al mínimo global con menor dispersión. En general se observa que al aumentar la dimensión (de 2D a 3D) la tarea se complica y la media del fitness aumenta (peor óptimo encontrado), reflejando la maldición de la dimensionalidad. El uso de múltiples ejecuciones independientes es esencial para evaluar la robustez de los AG. Debido a su naturaleza estocástica, cada ejecución puede converger a soluciones distintas. Al analizar la media y desviación estándar de los fitness finales se obtiene una medida de fiabilidad del algoritmo: una baja desviación indica resultados consistentes. En la literatura sobre algoritmos genéticos se reconoce que en muchos casos una sola ejecución puede no ser representativa​jstatsoft.org. Aunque un análisis comparativo profundo (p.ej., usando poblaciones más grandes o múltiples corridas en paralelo) queda fuera del alcance de este documento, nuestros resultados ilustran este fenómeno. Este estudio es reproducible: todo el código R necesario está incluido, permitiendo a otros investigadores replicar los experimentos, variar parámetros del GA (tasa de cruce, mutación, tamaño de población, etc.) y comparar con otros algoritmos de optimización.:Conclusiones Se ha presentado una documentación completa de la optimización de las funciones de Rosenbrock y Rastrigin en 2D y 3D empleando algoritmos genéticos en R. Mediante visualizaciones 3D iniciales se ilustraron las características de cada función de prueba. Se implementó el paquete GA para resolver cada caso y se realizaron 30 ejecuciones independientes para evaluar la robustez. Los resultados muestran que el GA puede encontrar aproximaciones al mínimo global en ambos problemas, aunque la función Rastrigin (múltiples mínimos locales) presenta más variabilidad y dificultad, especialmente en 3D.

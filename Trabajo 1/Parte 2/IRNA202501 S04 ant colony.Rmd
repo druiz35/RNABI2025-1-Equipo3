@@ -1,0 +1,66 @@
+---
+title: "Ilustración de Colonias de Hormigas para Optimización"
+author: "Juan David Ospina Arango"
+date: "2025-04-22"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Ilustración de la solución del problema del vendedor viajero con Colonias de Hormigas
+
+Carguemos la librería:
+
+```{r gor_loading}
+library(gor)
+```
+
+Generamos una muestra de ciudades aleatorias:
+
+```{r}
+set.seed(1983)
+n_ciudades <- 15
+coordenadas <- matrix(runif(2*n_ciudades), ncol = 2)
+```
+
+Veamos las ciudades:
+
+```{r}
+plot(coordenadas)
+```
+
+Calculemos la matriz de distancias:
+
+```{r}
+distancias <- compute_distance_matrix(coordenadas)
+```
+
+Veamos esta matriz:
+
+```{r}
+print(distancias)
+```
+
+Ahora encontremos el recorrido óptimo:
+
+```{r}
+recorrido_optimizado <- search_tour_ants(distancias, n_ciudades, K = 70, N = 20)
+```
+
+Visualicemos el mejor recorrido:
+
+```{r}
+plot_tour(coordenadas, recorrido_optimizado)
+```
+
+El costo total incurrido (entendido como la distancia) es:
+
+```{r}
+print(recorrido_optimizado$distance)
+```
+
+## Actividad:
+
+Explorar el paquete metaheuristicOpt.

@@ -1,0 +1,165 @@
+---
+title: "Optimización por Evolución Diferencial"
+author: "Grupo 3"
+date: "2025-05-02"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+La evolución diferencial es un algoritmo de optimización inspirado en la evolución biológica. Funciona manteniendo una población de soluciones, y mejorándolas generación tras generación mediante operaciones de mutación, recombinación y selección.
+
+- **Mutación**: se combinan 3 individuos distintos de la población para crear una variante.
+- **Recombinación**: se mezcla esa variante con el individuo actual.
+- **Selección**: se escoge el mejor entre el original y el nuevo.
+
+Este proceso se repite varias veces hasta encontrar una solución óptima.
+
+
+
+## Funciones objetivo
+```{r}
+# Función de Rosenbrock (n-dimensional)
+f_rosenbrock <- function(x){
+  x1 <- head(x, -1)
+  x2 <- tail(x, -1)
+  sum(100 * (x2 - x1^2)^2 + (1 - x1)^2)
+}
+
+# Función de Rastrigin (n-dimensional)
+f_rastrigin <- function(x){
+  A <- 10
+  n <- length(x)
+  A * n + sum(x^2 - A * cos(2 * pi * x))
+}
+
+```
+
+## Implementación de Evolución Diferencial (DE)
+```{r}
+evolucion_diferencial <- function(fun_obj, dim = 2, NP = 30, F = 0.8, CR = 0.9,
+                                  gens = 100, bounds = c(-5, 5)) {
+
+  # Inicializar población
+  poblacion <- matrix(runif(NP * dim, bounds[1], bounds[2]), ncol = dim)
+  fitness <- apply(poblacion, 1, fun_obj)
+
+  historial <- numeric(gens)
+  mejores <- matrix(NA, gens, dim)
+
+  for (gen in 1:gens) {
+    for (i in 1:NP) {
+      # Seleccionar 3 índices distintos
+      indices <- sample(setdiff(1:NP, i), 3)
+      x1 <- poblacion[indices[1], ]
+      x2 <- poblacion[indices[2], ]
+      x3 <- poblacion[indices[3], ]
+
+      # Mutación
+      mutado <- x1 + F * (x2 - x3)
+
+      # Recombinar
+      trial <- poblacion[i, ]
+      jrand <- sample(1:dim, 1)
+      for (j in 1:dim) {
+        if (runif(1) < CR || j == jrand) {
+          trial[j] <- mutado[j]
+        }
+      }
+
+      # Selección
+      if (fun_obj(trial) < fitness[i]) {
+        poblacion[i, ] <- trial
+        fitness[i] <- fun_obj(trial)
+      }
+    }
+
+    # Guardar mejor resultado
+    best_idx <- which.min(fitness)
+    historial[gen] <- fitness[best_idx]
+    mejores[gen, ] <- poblacion[best_idx, ]
+  }
+
+  list(mejor = poblacion[which.min(fitness), ],
+       valor = min(fitness),
+       historial = historial,
+       trayectoria = mejores)
+}
+
+```
+
+## Optimización de Rosenbrock en 2D
+```{r}
+set.seed(123)
+res_rosen <- evolucion_diferencial(f_rosenbrock, dim = 2)
+
+# Mostrar mejor solución
+res_rosen$mejor
+res_rosen$valor
+
+# Graficar trayectoria
+x1 <- seq(-3, 3, length.out = 100)
+x2 <- seq(-3, 3, length.out = 100)
+z <- outer(x1, x2, Vectorize(function(x, y) f_rosenbrock(c(x, y))))
+contour(x1, x2, z, nlevels = 50,
+        main = "Rosenbrock 2D - Trayectoria", xlab = "x", ylab = "y")
+lines(res_rosen$trayectoria[,1], res_rosen$trayectoria[,2], col = "red", type = "b")
+
+```
+En este gráfico se muestran las curvas de nivel de la función de Rosenbrock en dos dimensiones. Estas curvas representan líneas donde la función tiene igual valor, y el valle curvado al centro es donde está el mínimo global (en el punto (1,1)(1,1)).
+
+La línea roja representa la trayectoria que siguió el algoritmo de evolución diferencial durante las iteraciones. Se puede observar cómo el enjambre de soluciones se fue acercando progresivamente hacia el mínimo, mejorando su posición en cada generación.
+    
+El resultado final obtenido fue:
+[1] 1.000000 1.000001
+Valor mínimo encontrado: 1.91e-12
+
+
+
+## Optimización de Rastrigin en 2D
+```{r}
+set.seed(456)
+res_ras <- evolucion_diferencial(f_rastrigin, dim = 2)
+
+# Mostrar mejor solución
+res_ras$mejor
+res_ras$valor
+
+# Graficar trayectoria
+x1 <- seq(-5.12, 5.12, length.out = 100)
+x2 <- seq(-5.12, 5.12, length.out = 100)
+z <- outer(x1, x2, Vectorize(function(x, y) f_rastrigin(c(x, y))))
+contour(x1, x2, z, nlevels = 50,
+        main = "Rastrigin 2D - Trayectoria", xlab = "x", ylab = "y")
+lines(res_ras$trayectoria[,1], res_ras$trayectoria[,2], col = "blue", type = "b")
+
+```
+
+Aquí se grafican las curvas de nivel de la función de Rastrigin, que es multimodal, es decir, tiene muchos mínimos locales (patrón ondulado). La búsqueda es mucho más compleja que en Rosenbrock.
+
+La línea azul muestra cómo la evolución diferencial se mueve por el espacio de búsqueda y logra escapar de los mínimos locales hasta acercarse al óptimo global, que se encuentra en (0,0)(0,0).
+
+Resultado obtenido:
+[1]  2.176697e-06 -2.015785e-07
+Valor mínimo: 9.48e-10
+
+
+## Optimización en 3D (sin gráficas, solo resultados)
+```{r}
+res_rosen_3d <- evolucion_diferencial(f_rosenbrock, dim = 3)
+res_rosen_3d$mejor
+res_rosen_3d$valor
+
+res_ras_3d <- evolucion_diferencial(f_rastrigin, dim = 3)
+res_ras_3d$mejor
+res_ras_3d$valor
+
+```
+
+En esta parte del informe se muestran los resultados numéricos para la optimización de las funciones en 3D. Dado que no se puede visualizar fácilmente en una gráfica 3D de trayectoria, se reportan las mejores posiciones y valores obtenido
+
+En este caso, el algoritmo encontró una solución cercana al mínimo global, aunque no exacta. Esto es esperable, ya que Rastrigin es mucho más difícil en 3D debido a la gran cantidad de mínimos locales.

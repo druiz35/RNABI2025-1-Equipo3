@@ -28,7 +28,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 <p><strong>Presentado por:</strong></p>
 
-<p>Leonardo Federico Corona Torres<br> David Escobar Ruiz<br> `Johan Sebastian Robles Rincón<br> `{=html}Sebastian Soto Arcila</p>
+<p>Leonardo Federico Corona Torres<br> David Escobar Ruiz<br> `Johan Sebastian Robles Rincón<br> `{=html}Sebastián Soto Arcila</p>
 
 <br><br>
 
@@ -193,14 +193,25 @@ Estas son algunas hipótesis y expectativas que se tuvieron para el rendimiento 
 -   **Método de descenso de gradiente:**
 
     -   Si se ubica el punto inicial sobre las rectas tangentes con mayor gradiente a la función entonces el método llegará más rápido a un mínimo.
-
     -   Por el contrario, si la recta tangente tiene una gradiente más cercana a cero, el método llegará más lentamente, es decir, requerirá de más iteraciones para llegar al punto mínimo.
+
 
 -   **Método de algoritmos evolutivos:**
 
+    -   Los criterios para seleccionar los individuos a reproducir va a ser muy importante para el rendimiento del método.
+
+
 -   **Método de optimización de partículas:**
+    
+    -   Este método no va a tener muchas dificultades para encontrar el punto óptimo es la función de Rosenbrock.
+    -   El criterio para parar las iteraciones no va a cambiar mucho los resultados en este caso.
+
+
 
 -   **Método de evolución diferencial:**
+
+    -   Se comporta similar a los métodos evolutivos en 2 dimensiones.
+    
 
 Se definen las funciones a usar para generar los gráficos de cada función:
 
@@ -346,13 +357,27 @@ Estas son algunas hipótesis y expectativas que se tuvieron para el rendimiento 
 
 -   **Método de descenso de gradiente:**
 
-    -   El éxito del método en alcanzar un mínimo dependerá enormemente del punto inicial elegido debido a los múltiples mínimos locales que tiene esta función. 
+    -   El éxito del método en alcanzar un mínimo dependerá enormemente del punto inicial elegido debido a los múltiples mínimos locales que tiene esta función.
 
--   **Método de algoritmos evolutivos:** Se espera que Rastrigin sea más difícil de optimizar debido a su gran cantidad de óptimos locales.
+
+-   **Método de algoritmos evolutivos:**
+
+    -   Es importante hacer una buena representación de los individuos, ya que el rendimiento puede variar dependiendo de la selección.
+    -   La población inicial debe ser representativa, diferentes entre ellos y que no sean demasiados.
+Para esta función en particular encontrar la solución óptima va a depender mucho de la probabilidad de mutación
+
+
 
 -   **Método de optimización de partículas:**
+    
+    -   La ubicación de la nube de partículas va a afectar el rendimiento en esta función, ya que el algoritmo puede quedarse estancado en un mínimo local si la ubicación no es la mejor.
+    -   El criterio para detener el algoritmo debe estar bien ajustado, para evitar estancamientos. 
+
 
 -   **Método de evolución diferencial:**
+
+    -   Es más eficiente que los otros métodos evolutivos ya que su fuerte son las múltiples dimensiones.
+
 
 La implementación de la función de Rastrigin en 2, 3 y N dimensiones se muestra a continuación:
 
@@ -506,6 +531,37 @@ lines(sol_rosen, type="b",cex=1.5,col="red")
 
 ```
 
+Animación de la optimización
+
+```{r}
+# Transforma la solución en un data.frame
+sol <- as.data.frame(sol_ras2d)
+colnames(sol) <- c("x1", "x2")
+sol$step <- 1:nrow(sol)
+
+# Prepara los datos de fondo
+x1 <- seq(-5, 5, length.out = 100)
+x2 <- seq(-5, 5, length.out = 100)
+X <- expand.grid(x1 = x1, x2 = x2)
+
+X$z <- f_rosenbrock_2d(X$x1, X$x2)
+
+# Crea la animación
+p <- ggplot() +
+  geom_contour(data = X, aes(x = x1, y = x2, z = z), bins = 20, color = "gray70") +
+  geom_point(data = sol, aes(x = x1, y = x2), color = "red", size = 3) +
+  geom_path(data = sol, aes(x = x1, y = x2), color = "red", linewidth = 1) +
+  transition_reveal(step) +
+  labs(
+    title = "Optimización sobre la función de Rosenbrock con descenso del gradiente",
+    x = expression(x[1]),
+    y = expression(x[2])
+  ) +
+  theme_minimal()
+
+animate(p, fps = 10, duration = 5, width = 600, height = 500, renderer = gifski_renderer("rosenbrock_opt.gif"))
+```
+
 ### 1.3.3 Optimización de la función de Rosenbrock en 3 dimensiones
 
 ```{r}
@@ -542,13 +598,11 @@ lines(sol_rosen, type="b",cex=1.5,col="red")
 ### 1.3.4 Optimización de la función de Rastrigin en 2 dimensiones
 
 ```{r}
-# Ejecución del método
-sol_rosen <- optimizador_mult_numdev(f_rastrigin,x0=c(-4,-4),eta=1)
+sol_ras2d <- optimizador_mult_numdev(f_rastrigin,x0=c(4.5,4.5),eta=2)
 
-# Graficación del proceso de optimización
 n_length <- 100
-x1 <- seq(-5, 5, length.out = n_length)
-x2 <- seq(-5, 5, length.out = n_length)
+x1 <- seq(-5.12, 5.12, length.out = n_length)
+x2 <- seq(-5.12, 5.12, length.out = n_length)
 X <- expand.grid(x1, x2)
 z <- f_rastrigin_2d(X[,1], X[,2])
 Z <- matrix(z, ncol = n_length, nrow = n_length)
@@ -556,25 +610,82 @@ contour(
   x = x1,
   y = x2,
   z = Z,
-  nlevels = 100,
+  nlevels = 10,
   las = 1,
   xlab = expression(x[1]),
   ylab = expression(x[2]),
   main = expression(paste(
-    "Función de Rosenbrock: ",
-    f(x[1],x[2])==100*(x[2]-x[1]^2)^2+(1-x[1])^2)
-  ),
+    "Función de Rastrigin: ",
+    f(x[1],x[2])==20 + x[1]^2 - 10*cos(2*pi*x[1]) + x[2]^2 - 10*cos(2*pi*x[2])
+  )),
   sub = "Curvas de nivel de la función"
 )
-lines(sol_rosen, type="b",cex=1.5,col="red")
-
+lines(sol_ras, type="b",cex=1.5,col="red")
 ```
+
+
+Animación de la optimización
+
+```{r}
+# Transforma la solución en un data.frame
+sol <- as.data.frame(sol_ras2d)
+colnames(sol) <- c("x1", "x2")
+sol$step <- 1:nrow(sol)
+
+#Prepara los datos de fondo
+x1 <- seq(-5.12, 5.12, length.out = 100)
+x2 <- seq(-5.12, 5.12, length.out = 100)
+X <- expand.grid(x1 = x1, x2 = x2)
+
+X$z <- f_rastrigin_2d(X$x1, X$x2)
+
+# Crea la animación
+p <- ggplot() +
+  geom_contour(data = X, aes(x = x1, y = x2, z = z), bins = 20, color = "gray70") +
+  geom_point(data = sol, aes(x = x1, y = x2), color = "red", size = 3) +
+  geom_path(data = sol, aes(x = x1, y = x2), color = "red", linewidth = 1) +
+  transition_reveal(step) +
+  labs(
+    title = "Optimización sobre la función de Rastrigin con descenso del gradiente",
+    x = expression(x[1]),
+    y = expression(x[2])
+  ) +
+  theme_minimal()
+
+animate(p, fps = 10, duration = 5, width = 600, height = 500, renderer = gifski_renderer("rastrigin_opt.gif"))
+```
+
 
 ### 1.3.5 Optimización de la función de Rastrigin en 3 dimensiones
 
 ```{r}
+# Ejecución del método
+sol_ras3d <- optimizador_mult_numdev(f_rastrigin,x0=c(-4,-4,-4),eta=3)
 
-# Pendiente de implementar
+# Graficación del proceso de optimización
+n_length <- 100
+x1 <- seq(-5.12, 5.12, length.out = n_length)
+x2 <- seq(-5.12, 5.12, length.out = n_length)
+x3 <- seq(-5.12, 5.12, length.out = n_length)
+X <- expand.grid(x1, x2, x3)
+z <- f_rastrigin_3d(X[,1], X[,2], X[,3])
+Z <- matrix(z, ncol = n_length, nrow = n_length)
+contour(
+  x = x1,
+  y = x2,
+  z = Z,
+  nlevels = 10,
+  las = 1,
+  xlab = expression(x[1]),
+  ylab = expression(x[2]),
+  main = expression(paste(
+    "Función de Rastrigin: ",
+    f(x[1],x[2])==20 + x[1]^2 - 10*cos(2*pi*x[1]) + x[2]^2 - 10*cos(2*pi*x[2])
+  )),
+  sub = "Curvas de nivel de la función"
+)
+lines(sol_rosen, type="b",cex=1.5,col="red")
+
 ```
 
 ### 1.3.6 Conclusiones método de descenso por gradiente

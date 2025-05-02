@@ -1,0 +1,469 @@
+---
+title: "Descenso de gradiente"
+author: "SebastianSotoAr"
+date: "2025-04-27"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+install.packages("pso")
+install.packages("gifski")
+install.packages("tidyverse")
+install.packages("viridis")
+install.packages("gganimate")
+library(GA)
+library(tidyverse)
+library(viridis)
+library(ggplot2)
+library(gganimate)
+library(gifski)
+library(dplyr)
+library(tidyr)
+library(purrr)
+library(pso)
+```
+
+```{r}
+#install.packages("viridis")
+#install.packages("tidyverse")
+
+
+generate_function_graph <- function(func_2d, low_bound, upper_bound) {
+  x1 <- seq(low_bound, upper_bound, length.out = 50)
+  x2 <- seq(low_bound, upper_bound, length.out = 50)
+  f_x <- outer(x1,x2, FUN = func_2d)
+  
+  colores        <- viridis::magma(n = 100, alpha = 0.7)
+  z.facet.center <- (f_x[-1, -1] + f_x[-1, -ncol(f_x)] +
+                       f_x[-nrow(f_x), -1] +
+                       f_x[-nrow(f_x), -ncol(f_x)])/4
+  z.facet.range  <- cut(z.facet.center, 100)
+  
+  par(mai = c(0,0,0,0))
+  persp(x = x1, y = x2, z = f_x,
+        shade = 0.8,
+        phi = 30,
+        theta = 30,
+        col = colores[z.facet.range],
+        axes = FALSE)
+}
+
+#Fúnción nueva
+generate_level_curves <- function(func_2d, low_bound, upper_bound, n_levels, f_expression) {
+  n_length <- 100
+  x1 <- seq(low_bound, upper_bound, length.out = n_length)
+  x2 <- seq(low_bound, upper_bound, length.out = n_length)
+  X <- expand.grid(x1, x2)
+  z <- func_2d(X[,1], X[,2])
+  Z <- matrix(z, ncol = n_length, nrow = n_length)
+  contour(
+    x = x1,
+    y = x2,
+    z = Z,
+    nlevels = n_levels, #Cambié el valor original
+    las = 1,
+    xlab = expression(x[1]),
+    ylab = expression(x[2]),
+    main = f_expression, #Cambié el valor original
+    sub = "Curvas de nivel de la función"
+  )
+}
+
+generate_level_curves_2 <- function(func_2d, low_bound, upper_bound) {
+  x1 <- seq(low_bound, upper_bound, length.out = 50)
+  x2 <- seq(low_bound, upper_bound, length.out = 50)
+  
+  datos <- expand.grid(x1 = x1, x2 = x2)
+  datos <- datos %>%
+           mutate(f_x = map2_dbl(x1, x2, .f = func_2d))
+  
+  f_level_curves <- ggplot(data = datos, aes(x = x1, y = x2, z = f_x)) +
+    geom_contour(aes(colour = stat(level)), bins = 30) +
+    labs(title = "f(x1,x2) = x1^2 + x2^2") +
+    theme_bw() +
+    theme(legend.position = "none")
+  return(f_level_curves)
+}
+
+generate_countour <- function(func_2d, low_bound, upper_bound) {
+  n_length <- 100
+  x1 <- seq(low_bound, upper_bound, length.out = n_length)
+  x2 <- seq(low_bound, upper_bound, length.out = n_length)
+  expand.grid(X1 = x1, X2 = x2) %>%
+    mutate(Z = func_2d(X1, X2)) %>%
+    ggplot(aes(X1, X2, z = Z)) +
+    geom_contour() +
+    geom_contour_filled()
+}
+```
+
+# Programación de funciones
+
+## Función de Rosenbrock
+
+### Definición de dos variables
+
+```{r}
+f_rosenbrock_2d <- function(x, y) {   
+  f_value <- 100*(y-(x^2))^2 + ((1-x)^2)   
+  return(f_value) 
+}  
+```
+
+### Definición de tres variables
+
+```{r}
+f_rosenbrock_3d <- function(x, y, z) {   
+  f_value <- 100*((y-x^2)^2 + (z-y^2)^2) + (1-x)^2 + (1-y)^2
+  return(f_value) 
+}
+```
+
+### Definición multidimencional
+
+```{r}
+f_rosenbrock <- function(x){
+  x_1 <- tail(x, -1)
+  x <- head(x, -1)
+  z <- sum((100*((x_1-(x^2))^2))+((1-x)^2))
+  return(z)
+}
+```
+
+### Gráfica de la Función
+
+```{r}
+generate_countour(f_rosenbrock_2d, -5, 5)
+```
+
+```{r}
+generate_level_curves(
+  f_rosenbrock_2d,
+  -5,
+  5,
+  100,
+  expression(paste(
+      "Función de Rosenbrock: ",
+      f(x[1],x[2])==100*(x[2]-x[1]^2)^2+(1-x[1])^2
+  ))
+)
+```
+
+```{r}
+generate_function_graph(f_rosenbrock_2d, -5, 5)
+```
+
+## Función de Rastrigin
+
+### Definición de dos variables
+
+```{r}
+f_rastrigin_2d <- function(x, y) {
+  A = 10   
+  f_value <- x^2 + y^2 + A*(2 - cos(2*pi*x) - cos(2*pi*y))   
+  return(f_value) 
+}  
+```
+
+### Definición de dos variables
+
+```{r}
+f_rastrigin_3d <- function(x, y, z) {   
+  A = 10   
+  f_value <- x^2 + y^2 + z^2 + A*(3 - cos(2*pi*x) - cos(2*pi*y) - cos(2*pi*z))   
+  return(f_value) 
+}
+```
+
+### Definición multidimencional
+
+```{r}
+f_rastrigin <-function(x){
+  A <- 10
+  n <- length(x)
+  z <- (A*n) + sum(x^2 - A*cos(2*pi*x))
+  return(z)
+}
+```
+
+### Gráfica de la Función
+
+```{r}
+generate_countour(f_rastrigin_2d, -10, 10)
+```
+
+```{r}
+generate_level_curves(
+  f_rastrigin_2d,
+  -10,
+  10,
+  10,
+  expression(paste(
+    "Función de Rastrigin: ",
+    f(x[1],x[2])==20 + x[1]^2 - 10*cos(2*pi*x[1]) + x[2]^2 - 10*cos(2*pi*x[2])
+  ))
+)
+```
+
+```{r}
+generate_level_curves_2(f_rastrigin_2d, -10, 10)
+```
+
+```{r}
+generate_function_graph(f_rastrigin_2d, -10, 10)
+```
+
+# Optimización Númerica
+
+## Optimización con Descenso del Gradiente
+
+Definición de Derivada Parcial
+
+```{r}
+partial_dev <- function(x,i,fun,h=0.01){
+    e <- x*0 # crea un vector de ceros de la misma longitud de x
+    e[i] <- h
+    y <- (fun(x+e)-fun(x-e))/(2*h)
+  return(y)
+}
+```
+
+Definición del Gradiente
+
+```{r}
+num_grad <- function(x,fun,h=0.01){
+  # x: punto del espacio donde se debe evaluar el gradiente
+  # fun: función para la que se desea calcular el gradiente en x
+  # h: es el tamaño de ventana para el cálculo de la derivada numérica
+  d <- length(x)
+  y <- mapply(FUN=partial_dev,i=1:d,MoreArgs=list(x=x,h=h,fun=fun))
+  return(y)
+}
+```
+
+Definición de Derivada del Gradiente
+
+```{r}
+deriv_grad <- function(x,fun,i=1,h=0.01){
+  # x: punto en el que se evalúa el gradiente
+  # fun: función para la cual se calcula la derivada del gradiente respecto a la íesima componente
+  # i: i-ésima componente del vector x con respecto a la que se deriva
+    e <- x*0 # crea un vector de ceros de la misma longitud de x
+    e[i] <- h
+    y <- (num_grad(x+e,fun=fun,h=h)-num_grad(x-e,fun=fun,h=h))/(2*h)
+    return(y)
+}
+```
+
+Definición de Matriz Hessiana
+
+```{r}
+matriz_hessiana <- function(x,fun,h=0.01){
+  # x: punto en el que se evalúa la matriz hessiana
+  # fun: función a la que se le calcula la matriz hessiana en x
+  # h: es el tamaño de ventana para el cálculo de la derivada numérica
+  d <- length(x)
+  y <- mapply(FUN=deriv_grad,i=1:d,MoreArgs=list(x=x,h=h,fun=fun),SIMPLIFY = TRUE)
+  return(y)
+}
+```
+
+Definición de Optimizador Multivariado por Descenso del Gradiente
+
+```{r}
+optimizador_mult_numdev <- function(x0,fun,max_eval=100,h=0.01,eta=0.01){
+  x <- matrix(NA,ncol =length(x0), nrow = max_eval)
+  x[1,] <- x0
+  for (i in 2:max_eval){
+    num_grad_fun <- num_grad(x[i-1,],fun,h)
+    H <- matriz_hessiana(x[i-1,],fun,h)
+    cambio <- - eta*solve(H)%*%num_grad_fun
+    x[i,] <- x[i-1,] + cambio
+    cambio_opt <- sqrt(sum((x[i-1,]-x[i,])^2))
+    if (cambio_opt<0.00001){
+      break
+    }
+  }
+  return(x[1:i,])
+}
+```
+
+### Optimización de Función de Rosenbrock
+
+```{r}
+sol_rosen <- optimizador_mult_numdev(f_rosenbrock,x0=c(-4,-4),eta=1)
+```
+
+```{r}
+n_length <- 100
+x1 <- seq(-10, 10, length.out = n_length)
+x2 <- seq(-10, 10, length.out = n_length)
+X <- expand.grid(x1, x2)
+z <- f_rosenbrock_2d(X[,1], X[,2])
+Z <- matrix(z, ncol = n_length, nrow = n_length)
+contour(
+  x = x1,
+  y = x2,
+  z = Z,
+  nlevels = 100,
+  las = 1,
+  xlab = expression(x[1]),
+  ylab = expression(x[2]),
+  main = expression(paste(
+    "Función de Rosenbrock: ",
+    f(x[1],x[2])==100*(x[2]-x[1]^2)^2+(1-x[1])^2)
+  ),
+  sub = "Curvas de nivel de la función"
+)
+lines(sol_rosen, type="b",cex=1.5,col="red")
+```
+
+### 1.3.3 Optimización de la función de Rosenbrock en 3 dimensiones
+
+```{r}
+# Ejecución del método
+sol_rosen <- optimizador_mult_numdev(f_rosenbrock,x0=c(-4,-4,-4),eta=1)
+
+# Graficación del proceso de optimización
+## TODO: Revisar y corregir
+n_length <- 100
+x1 <- seq(-5, 5, length.out = n_length)
+x2 <- seq(-5, 5, length.out = n_length)
+x3 <- seq(-5, 5, length.out = n_length)
+X <- expand.grid(x1, x2, x3)
+z <- f_rosenbrock_3d(X[,1], X[,2], X[,3])
+Z <- matrix(z, ncol = n_length, nrow = n_length)
+contour(
+  x = x1,
+  y = x2,
+  z = Z,
+  nlevels = 100,
+  las = 1,
+  xlab = expression(x[1]),
+  ylab = expression(x[2]),
+  main = expression(paste(
+    "Función de Rosenbrock: ",
+    f(x[1],x[2])==100*(x[2]-x[1]^2)^2+(1-x[1])^2)
+  ),
+  sub = "Curvas de nivel de la función"
+)
+lines(sol_rosen, type="b",cex=1.5,col="red")
+
+```
+
+Animación de la optimización
+
+```{r}
+sol <- as.data.frame(sol_ras2d)
+colnames(sol) <- c("x1", "x2")
+sol$step <- 1:nrow(sol)
+
+x1 <- seq(-5, 5, length.out = 100)
+x2 <- seq(-5, 5, length.out = 100)
+X <- expand.grid(x1 = x1, x2 = x2)
+
+X$z <- f_rosenbrock_2d(X$x1, X$x2)
+
+p <- ggplot() +
+  geom_contour(data = X, aes(x = x1, y = x2, z = z), bins = 20, color = "gray70") +
+  geom_point(data = sol, aes(x = x1, y = x2), color = "red", size = 3) +
+  geom_path(data = sol, aes(x = x1, y = x2), color = "red", linewidth = 1) +
+  transition_reveal(step) +
+  labs(
+    title = "Optimización sobre la función de Rosenbrock con descenso del gradiente",
+    x = expression(x[1]),
+    y = expression(x[2])
+  ) +
+  theme_minimal()
+
+animate(p, fps = 10, duration = 5, width = 600, height = 500, renderer = gifski_renderer("rosenbrock_opt.gif"))
+```
+
+### Optimización de Función de Rastrigin
+
+```{r}
+sol_ras2d <- optimizador_mult_numdev(f_rastrigin,x0=c(4.5,4.5),eta=2)
+
+n_length <- 100
+x1 <- seq(-5.12, 5.12, length.out = n_length)
+x2 <- seq(-5.12, 5.12, length.out = n_length)
+X <- expand.grid(x1, x2)
+z <- f_rastrigin_2d(X[,1], X[,2])
+Z <- matrix(z, ncol = n_length, nrow = n_length)
+contour(
+  x = x1,
+  y = x2,
+  z = Z,
+  nlevels = 10,
+  las = 1,
+  xlab = expression(x[1]),
+  ylab = expression(x[2]),
+  main = expression(paste(
+    "Función de Rastrigin: ",
+    f(x[1],x[2])==20 + x[1]^2 - 10*cos(2*pi*x[1]) + x[2]^2 - 10*cos(2*pi*x[2])
+  )),
+  sub = "Curvas de nivel de la función"
+)
+lines(sol_ras, type="b",cex=1.5,col="red")
+```
+
+```{r}
+# Ejecución del método
+sol_ras3d <- optimizador_mult_numdev(f_rastrigin,x0=c(-4,-4,-4),eta=3)
+
+# Graficación del proceso de optimización
+## TODO: Revisar y corregir
+n_length <- 100
+x1 <- seq(-5.12, 5.12, length.out = n_length)
+x2 <- seq(-5.12, 5.12, length.out = n_length)
+x3 <- seq(-5.12, 5.12, length.out = n_length)
+X <- expand.grid(x1, x2, x3)
+z <- f_rastrigin_3d(X[,1], X[,2], X[,3])
+Z <- matrix(z, ncol = n_length, nrow = n_length)
+contour(
+  x = x1,
+  y = x2,
+  z = Z,
+  nlevels = 10,
+  las = 1,
+  xlab = expression(x[1]),
+  ylab = expression(x[2]),
+  main = expression(paste(
+    "Función de Rastrigin: ",
+    f(x[1],x[2])==20 + x[1]^2 - 10*cos(2*pi*x[1]) + x[2]^2 - 10*cos(2*pi*x[2])
+  )),
+  sub = "Curvas de nivel de la función"
+)
+lines(sol_rosen, type="b",cex=1.5,col="red")
+
+```
+
+Animación de la optimización
+
+```{r}
+sol <- as.data.frame(sol_ras2d)
+colnames(sol) <- c("x1", "x2")
+sol$step <- 1:nrow(sol)
+
+x1 <- seq(-5.12, 5.12, length.out = 100)
+x2 <- seq(-5.12, 5.12, length.out = 100)
+X <- expand.grid(x1 = x1, x2 = x2)
+
+X$z <- f_rastrigin_2d(X$x1, X$x2)
+
+p <- ggplot() +
+  geom_contour(data = X, aes(x = x1, y = x2, z = z), bins = 20, color = "gray70") +
+  geom_point(data = sol, aes(x = x1, y = x2), color = "red", size = 3) +
+  geom_path(data = sol, aes(x = x1, y = x2), color = "red", linewidth = 1) +
+  transition_reveal(step) +
+  labs(
+    title = "Optimización sobre la función de Rastrigin con descenso del gradiente",
+    x = expression(x[1]),
+    y = expression(x[2])
+  ) +
+  theme_minimal()
+
+animate(p, fps = 10, duration = 5, width = 600, height = 500, renderer = gifski_renderer("rastrigin_opt.gif"))
+```

@@ -509,7 +509,7 @@ Animación de la optimización
 
 ```{r}
 # Transforma la solución en un data.frame
-sol <- as.data.frame(sol_ras2d)
+sol <- as.data.frame(sol_rosen)
 colnames(sol) <- c("x1", "x2")
 sol$step <- 1:nrow(sol)
 
@@ -536,6 +536,8 @@ p <- ggplot() +
 animate(p, fps = 10, duration = 5, width = 600, height = 500, renderer = gifski_renderer("rosenbrock_opt.gif"))
 ```
 
+![](images/rosenbrock_opt.gif)
+
 ### 1.3.3 Optimización de la función de Rosenbrock en 3 dimensiones
 
 ```{r}
@@ -543,7 +545,6 @@ animate(p, fps = 10, duration = 5, width = 600, height = 500, renderer = gifski_
 sol_rosen <- optimizador_mult_numdev(f_rosenbrock,x0=c(-4,-4,-4),eta=1)
 
 # Graficación del proceso de optimización
-## TODO: Revisar y corregir
 n_length <- 100
 x1 <- seq(-5, 5, length.out = n_length)
 x2 <- seq(-5, 5, length.out = n_length)
@@ -566,7 +567,6 @@ contour(
   sub = "Curvas de nivel de la función"
 )
 lines(sol_rosen, type="b",cex=1.5,col="red")
-
 ```
 
 ### 1.3.4 Optimización de la función de Rastrigin en 2 dimensiones
@@ -594,7 +594,7 @@ contour(
   )),
   sub = "Curvas de nivel de la función"
 )
-lines(sol_ras, type="b",cex=1.5,col="red")
+lines(sol_ras2d, type="b",cex=1.5,col="red")
 ```
 
 Animación de la optimización
@@ -628,6 +628,8 @@ p <- ggplot() +
 animate(p, fps = 10, duration = 5, width = 600, height = 500, renderer = gifski_renderer("rastrigin_opt.gif"))
 ```
 
+![](images/rastrigin_opt.gif)
+
 ### 1.3.5 Optimización de la función de Rastrigin en 3 dimensiones
 
 ```{r}
@@ -656,7 +658,7 @@ contour(
   )),
   sub = "Curvas de nivel de la función"
 )
-lines(sol_rosen, type="b",cex=1.5,col="red")
+lines(sol_ras3d, type="b",cex=1.5,col="red")
 
 ```
 
@@ -813,7 +815,11 @@ La evolución diferencial demostró ser un método confiable y efectivo para res
 
 ## 1.5 Método de optimización de partículas
 
+El método de optimización por enjambre de partículas (PSO, por sus siglas en inglés) es un algoritmo inspirado en el comportamiento colectivo de animales como bandadas de aves o bancos de peces. Funciona mediante un conjunto de partículas (soluciones potenciales) que exploran el espacio de búsqueda moviéndose en función de su propia experiencia y la de sus vecinas. Cada partícula ajusta su posición y velocidad iterativamente para acercarse a la mejor solución conocida, guiada por su mejor posición histórica y la mejor posición global encontrada por el enjambre. Con el tiempo, las partículas tienden a converger hacia una solución óptima o cercana al óptimo.
+
 ### 1.5.1 Implementación en R de optimización de partículas
+
+Se utiliza el paquete pos para implementar el método de la optimización de partículas. Adicionalmente, se implementa una función adicional para crear las animaciones del método de optimización.
 
 ```{r}
 list_to_matrix <- function(data) {
@@ -895,6 +901,8 @@ gif_name <- "pso_rosenbrock_min.gif"
 animate_pso(o_min_particles_positions, f_rosenbrock_2d, gif_name)
 ```
 
+![](images/pso_rosenbrock_min-01.gif)
+
 ```{r}
 # Graficación del proceso de optimización (maximización)
 o_max <- o_pso$o_max
@@ -902,6 +910,8 @@ o_max_particles_positions <- o_max$stats$x
 gif_name <- "pso_rosenbrock_max.gif"
 animate_pso(o_max_particles_positions, f_rosenbrock_2d, gif_name)
 ```
+
+![](images/pso_rosenbrock_max-01.gif)
 
 ### 1.5.3 Optimización de la función de Rosenbrock en 3 dimensiones
 
@@ -936,6 +946,8 @@ gif_name <- "pso_rastrigin_min.gif"
 animate_pso(o_min_particles_positions, f_rastrigin_2d, gif_name)
 ```
 
+![](images/pso_rastrigin_min.gif)
+
 ```{r}
 # Graficación del proceso de optimización (maximización)
 o_max <- o_pso$o_max
@@ -943,6 +955,8 @@ o_max_particles_positions <- o_max$stats$x
 gif_name <- "pso_rastrigin_max.gif"
 animate_pso(o_max_particles_positions, f_rastrigin_2d, gif_name)
 ```
+
+![](images/pso_rastrigin_max.gif)
 
 ### 1.5.5 Optimización de la función de Rastrigin en 3 dimensiones
 
@@ -956,6 +970,10 @@ o_pso <- particle_swarm_optimization(n,f_rastrigin,lower_bounds,upper_bounds)
 ```
 
 ### 1.5.6 Conclusiones método de optimización de partículas
+
+En el caso de la optimización maximizando las funciones, llegan muy rápido a una solución óptima (dentro de 10 iteraciones). Por otro lado, la optimización minimizando las funciones tardaba un poco más en llegar al óptimo, pero se acercaba mucho al mínimo global.
+
+Estos resultados pueden deberse a la distribución de las partículas por el espacio de búsqueda, permitiendo una optimización más "abierta" a comparación con el método de descenso de gradiente.
 
 ## 1.6 Método de algoritmos evolutivos
 
@@ -1043,6 +1061,8 @@ gif_name <- "optim_rosenbrock_ga.gif"
 animate_ga_optimization(f_rosenbrock)
 ```
 
+![](images/optim_rastrigin_ga.gif)
+
 ```{r}
 set.seed(123)  # semilla reproducible
 best_vals_ros <- replicate(30, {
@@ -1099,6 +1119,8 @@ summary(ga_ras2d)
 gif_name <- "optim_rastrigin_ga.gif"
 animate_ga_optimization(f_rastrigin)
 ```
+
+![](images/optim_rastrigin_ga-01.gif)
 
 ```{r}
 set.seed(123)  # semilla reproducible
@@ -1180,7 +1202,7 @@ Los resultados confirman que el algoritmo genético es capaz de aproximarse a lo
 
 ## 2.1 Planteamiento del problema
 
-El problema se puede plantear como una instancia particular del problema del viajero en ciencias de la computación. En la Tabla 1 se muestran las 13 ciudades principales de Colombia con su respectivas latitudes y longitudes.
+El problema se puede plantear como una instancia particular del problema del viajero en ciencias de la computación. En la Tabla 2 se muestran las 13 ciudades principales de Colombia con su respectivas latitudes y longitudes.
 
 |                   |             |              |
 |-------------------|-------------|--------------|
@@ -1199,7 +1221,7 @@ El problema se puede plantear como una instancia particular del problema del via
 | **Manizales**     | 5.0703      | -75.5138     |
 | **Pereira**       | 4.8143      | -75.6946     |
 
-**Tabla 1.** Ciudades principales de Colombia junto con su latencia y longitud.
+**Tabla 2.** Ciudades principales de Colombia junto con su latencia y longitud.
 
 El objetivo de este problema es optimizar con respecto a los costos y no a las distancias entre ciudades, por lo que se tienen que considerar los costos de combustible, de peajes y cuánto cobra el vendedor por hora de trabajo. Sin embargo, la distancia afectará al valor de todos estos costos, y por lo tanto hay que considerarla. Adicionalmente, todos estos costos están en función de la distancia en metros, por lo que es necesario realizar la conversión de latitud-longitud a coordenadas en metros. Para esto se usó la librería "sf" para realizar la conversión al sistema de coordenadas planas UTM, el cual representa los puntos del globo en metros.
 
@@ -1411,21 +1433,45 @@ print(sum(costos))
 mapa
 ```
 
-## 2.3 Conclusiones
-
-# Conclusiones finales
-
 # Reporte de contribución individual
 
 ## Leonardo Federico Corona Torres
 
+-   Apoyo en redacción y realización de implementaciones de sección "Método de algoritmos evolutivos".
+
+-   Apoyo en redacción de implementaciones de graficación en Parte 2 del reporte.
+
+-   Búsqueda e investigación de funciones de prueba a utilizar.
+
+-   Apoyo en redacción y realización de implementaciones de sección "Selección e implementación de las funciones de prueba".
+
 ## David Escobar Ruiz
+
+-   Definición y escritura de estructura del reporte.
+
+-   Apoyo en redacción y realización de implementaciones de sección "Selección e implementación de las funciones de prueba".
+
+-   Apoyo en redaccióny realización de implementaciones de sección "Método de optimización de partículas".
+
+-   Apoyo en redacción y realización de implementaciones de métodos, planteamiento y preprocesamiento de datos Parte 2 del reporte.
 
 ## Johan Sebastián Robles Rincón
 
+-   Implementación y prueba del método de evolución diferencial en R para funciones de Rosenbrock y Rastrigin en 2D y 3D.
+
+-   Análisis de resultados numéricos y gráficos.
+
+-   Apoyo en redacción de sección del contenido técnico relacionado con este método de evolucion diferencial en el informe.
+
 ## Sebastian Soto Arcila
 
+-   Apoyo en redacción y realización de implementaciones de sección "Método de optimización por descenso de gradiente"
+
+-   Apoyo en redacción de sección "Selección e implementación de las funciones de prueba".
+
 # Repositorio de GitHub del proyecto
+
+[https://github.com/druiz35/RNABI2025-1-Equipo3/](https://github.com/druiz35/RNABI2025-1-Equipo3/tree/main){.uri}
 
 # Bibliografía
 

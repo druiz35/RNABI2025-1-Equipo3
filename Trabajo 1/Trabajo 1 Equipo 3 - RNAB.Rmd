@@ -28,7 +28,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 <p><strong>Presentado por:</strong></p>
 
-<p>Leonardo Federico Corona Torres<br> David Escobar Ruiz<br> `Johan Sebastian Robles Rincón<br> `{=html}Sebastián Soto Arcila</p>
+<p>Leonardo Federico Corona Torres<br> David Escobar Ruiz<br> `Johan Sebastian Robles Rincón<br>`{=html}Sebastián Soto Arcila</p>
 
 <br><br>
 
@@ -45,33 +45,16 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Introducción
 
-La optimización numérica es esencial en diversas áreas científicas e ingenieriles para encontrar los valores óptimos de funciones objetivo dadas ciertas restricciones.
-
-# Marco Teórico
-
-Los algoritmos genéticos (AG) son técnicas de búsqueda heurística basadas en procesos de evolución natural​ . En un AG típico se define una función FITNESS que evalúa la calidad de cada solución candidata (individuo). A partir de una población inicial aleatoria, se iteran ciclos donde se seleccionan individuos más aptos, se combinan sus “genes” mediante cruces (crossover) y se introducen modificaciones aleatorias (mutaciones). Estos operadores evolucionan la población hacia regiones con mejor fitness. Según Scrucca (2013), los GAs han sido exitosos en optimizar funciones continuas (diferenciables o no) y discretas. Entre los operadores genéticos clave se destacan: Selección: elige individuos con mayor fitness para reproducirse, imitando la supervivencia del más apto. Cruce (crossover): combina partes de dos soluciones parentales para generar descendencia, explorando nuevas regiones del espacio de búsqueda. Mutación: altera aleatoriamente parte de un individuo (por ejemplo, cambiando un valor de su vector de variables) para introducir diversidad genética y evitar estancamiento en óptimos locales.
-
-Visualización previa (gráficos 3D): Antes de la optimización se grafica cada función para apreciar su superficie. Por ejemplo, para Rosenbrock 2D se genera una malla de valores y se usa persp:
-
-```{r}
-# Gráfico 3D de Rosenbrock 2D usando persp}
-x <- seq(-2, 2, length = 100) 
-y <- seq(-1, 3, length = 100) 
-Z <- outer(x, y, function(xx, yy) (1 - xx)^2 + 100*(yy - xx^2)^2) 
-persp(x, y, Z, theta = 30, phi = 30, expand = 0.5,       
-      col = "lightblue", xlab="x", ylab="y", zlab="f(x,y)",       
-      main="Función Rosenbrock (2D)")
-```
-
-Para los casos 3D (tres variables) es difícil visualizar directamente la función de 3 dimensiones (espacio de 4 variables), por lo que típicamente se muestran proyecciones o cortes.
+El presente trabajo trata algunos de los métodos más relevantes de optimización numérica basada en manipulaciones del gradiente de una función objetivo (función a optimizar) y también algoritmos heurísticos basados en el comportamiento de la naturaleza, como lo son los algoritmos evolutivos. Todos estos métodos pueden llegar a ser útiles en distintos contextos en los que se busca optimizar una función para algún fin, como encontrar la mejor ruta entre ciudades o optimizar una función de pérdida en un contexto de aprendizaje de máquina. Cada método tiene particularidades interesantes que se van a explorar de manera general por medio de una breve implementación y ejecución con dos funciones muy utiilizadas para probar algoritmos de optimización: la función de Rosenbrock y la función de Rastrigin.
 
 # Metodología
 
-Para implementar y documentar la optimización se emplea R Markdown, combinando código R y texto explicativo. Se utilizan las siguientes librerías de R: GA (para el algoritmo genético) y knitr (para formateo de tablas).
+Para implementar y documentar la optimización se emplea R Markdown, combinando código R y texto explicativo. Se utilizan librerías para renderizar gráficos y animaciones, librerías para implementar los métodos heurísticos y librerías para manipular los datos.
 
 ```{r instalacion de librerias}
 # DESCOMENTAR PARA INSTALAR PAQUETES FALTANTES
-#install.packages("GA")
+#install.packages("GA") Genetic Algorithm
+#install.packages("pso") Particle Swarm Optimization
 #install.packages("tidyverse")
 #install.packages("viridis")
 #install.packages("ggplot2")
@@ -80,7 +63,6 @@ Para implementar y documentar la optimización se emplea R Markdown, combinando 
 #install.packages("dplyr")
 #install.packages("tidyr")
 #install.packages("purrr")
-#install.packages("pso")
 #install.packages("leaflet")
 #install.packages("osrm")
 #install.packages("sf")
@@ -89,31 +71,32 @@ Para implementar y documentar la optimización se emplea R Markdown, combinando 
 ```
 
 ```{r librerias}
+# ALGORITMOS GENÉTICOS
 library(GA)
+library(pso)
+
+# MANIPULACIÓN Y VISUALIZACIÓN DE DATOS
 library(tidyverse)
-library(viridis)
-library(ggplot2)
-library(gganimate)
-library(gifski)
 library(dplyr)
 library(tidyr)
 library(purrr)
-library(pso)
+library(ggplot2)
+library(viridis)
+library(gganimate)
+library(gifski)
+
+# GEOLOCALIZACIÓN Y VISUALIZACIÓN ESPACIAL
 library(leaflet)
 library(osrm)
 library(sf)
+
+# COLONIA DE HORMIGAS
 library(gor)
 ```
 
+Para los casos 3D (tres variables) es difícil visualizar directamente la función de 3 dimensiones (espacio de 4 variables), por lo que se mostrarán únicamente los puntos óptimos alcanzados.
+
 # Parte 1. Optimización numérica
-
-[Contextualización de la parte 1 del trabajo]
-
-[Statement presentando lo que se va a realizar en la parte 1 a manera general]
-
-[Statement explicando brevemente lo realizado con optimización de descenso de gradiente, lo esperado antes de la ejecución y lo obtenido post-ejecución]
-
-[Statement explicando brevemente lo realizado con métodos heurísticos, lo esperado antes de la ejecución y lo obtenido post-ejecución]
 
 ## 1.1 Selección e implementación de las funciones de prueba
 
@@ -156,64 +139,9 @@ Como ejemplo, en la Figura 1 se presentan algunas funciones de prueba que no se 
 
 -   Función de Ackley (Clase 4).
 
-### 1.1.2 Función de Rosenbrock
+### 1.1.2 Implementación de funciones de graficación
 
-Función Rosenbrock (valle de Rosenbrock): Es una función no convexa introducida por Rosenbrock en 1960​en.wikipedia.org. En 2D se define como f(x,y)=(1−x)2+100(y−x2)2,f(x,y) = (1 - x)\^2 + 100(y - x^2)^2,f(x,y)=(1−x)2+100(y−x2)2, donde el parámetro a=1a=1a=1, b=100b=100b=100. Tiene un único mínimo global en (x,y)=(1,1)(x,y)=(1,1)(x,y)=(1,1) con f=0f=0f=0. Su paisaje forma un valle curvo estrecho que dificulta la convergencia hacia el mínimo​cran.r-project.org. La extensión multidimensional generalizada (para nnn variables) es: f(x)=∑i=1n−1[100(xi+1−xi2)2+(1−xi)2].f(\mathbf{x}) = \sum\_{i=1}\^{n-1} \left[100(x_{i+1} - x_i^2)^2 + (1-x_i)^2\right].f(x)=∑i=1n−1​[100(xi+1​−xi2​)2+(1−xi​)2]. El dominio típico usado es −30≤xi≤30-30 \le x_i \le 30−30≤xi​≤30​cran.r-project.org.
-
-Definición en n dimensiones:
-
-$f(X) = \sum_{i=1}^{n-1}100(X_{i+1}-X_i^2)^2 + (1-X_i)^2$
-
-Definición en 2D:
-
-$f(x,y)= 100(y-x^2)^2 + (1-x)^2$
-
-Definición en 3D:
-
-$f(x,y,z)=100[(y-x^2)^2+(z-y^2)^2] + (1-x)^2 + (1-y)^2$
-
-Algunas características y propiedades importantes  son las siguientes:
-
--   Mínimo global:
-
-    $x_1,...,x_n =1, f(x_1,...,x_n) = 0$
-
--   Dominio de búsqueda: 
-
-    $-\infty \leq X_i \leq \infty$
-
-    $1 \leq i \leq n$
-
--   Conocida también como la función banana de Rosenbrock.
-
--   Tiene forma de valle, el cual es trivial encontrarlo. Sin embargo, la convergencia al mínimo global es difícil(Wikipedia, s.f., Rosenbrock function).
-
-Estas son algunas hipótesis y expectativas que se tuvieron para el rendimiento de cada método implementado con esta función:
-
--   **Método de descenso de gradiente:**
-
-    -   Si se ubica el punto inicial sobre las rectas tangentes con mayor gradiente a la función entonces el método llegará más rápido a un mínimo.
-    -   Por el contrario, si la recta tangente tiene una gradiente más cercana a cero, el método llegará más lentamente, es decir, requerirá de más iteraciones para llegar al punto mínimo.
-
-
--   **Método de algoritmos evolutivos:**
-
-    -   Los criterios para seleccionar los individuos a reproducir va a ser muy importante para el rendimiento del método.
-
-
--   **Método de optimización de partículas:**
-    
-    -   Este método no va a tener muchas dificultades para encontrar el punto óptimo es la función de Rosenbrock.
-    -   El criterio para parar las iteraciones no va a cambiar mucho los resultados en este caso.
-
-
-
--   **Método de evolución diferencial:**
-
-    -   Se comporta similar a los métodos evolutivos en 2 dimensiones.
-    
-
-Se definen las funciones a usar para generar los gráficos de cada función:
+Se definen las funciones a usar para generar los gráficos de cada función de esta sección:
 
 ```{r}
 generate_function_graph <- function(func_2d, low_bound, upper_bound) {
@@ -287,6 +215,58 @@ generate_countour <- function(func_2d, low_bound, upper_bound) {
 }
 ```
 
+### 1.1.3 Función de Rosenbrock
+
+Es una función no convexa introducida por Rosenbrock en 1960​ (Wikipedia, s.f., Rosenbrock function). Su paisaje forma un valle curvo estrecho que dificulta la convergencia hacia el mínimo.
+
+Definición en n dimensiones:
+
+$f(X) = \sum_{i=1}^{n-1}100(X_{i+1}-X_i^2)^2 + (1-X_i)^2$
+
+Definición en 2D:
+
+$f(x,y)= 100(y-x^2)^2 + (1-x)^2$
+
+Definición en 3D:
+
+$f(x,y,z)=100[(y-x^2)^2+(z-y^2)^2] + (1-x)^2 + (1-y)^2$
+
+Algunas características y propiedades importantes  son las siguientes:
+
+-   Mínimo global:
+
+    $x_1,...,x_n =1, f(x_1,...,x_n) = 0$
+
+-   Dominio de búsqueda: 
+
+    $-\infty \leq X_i \leq \infty$
+
+    $1 \leq i \leq n$
+
+-   Conocida también como la función banana de Rosenbrock.
+
+-   Tiene forma de valle, el cual es trivial encontrarlo. Sin embargo, la convergencia al mínimo global es difícil.
+
+Estas son algunas hipótesis y expectativas que se tuvieron para el rendimiento de cada método implementado con esta función:
+
+-   **Método de descenso de gradiente:**
+
+    -   Si se ubica el punto inicial sobre las rectas tangentes con mayor gradiente a la función entonces el método llegará más rápido a un mínimo.
+    -   Por el contrario, si la recta tangente tiene una gradiente más cercana a cero, el método llegará más lentamente, es decir, requerirá de más iteraciones para llegar al punto mínimo.
+
+-   **Método de algoritmos evolutivos:**
+
+    -   Los criterios para seleccionar los individuos a reproducir va a ser muy importante para el rendimiento del método.
+
+-   **Método de optimización de partículas:**
+
+    -   Este método no va a tener muchas dificultades para encontrar el punto óptimo es la función de Rosenbrock.
+    -   El criterio para parar las iteraciones no va a cambiar mucho los resultados en este caso.
+
+-   **Método de evolución diferencial:**
+
+    -   Se comporta similar a los métodos evolutivos en 2 dimensiones.
+
 La implementación de la función de Rosenbrock en 2, 3 y N dimensiones se muestra a continuación:
 
 ```{r}
@@ -325,33 +305,35 @@ generate_level_curves(f_rosenbrock_2d, -5, 5)
 generate_function_graph(f_rosenbrock_2d, -5, 5)
 ```
 
-### 1.1.3 Función de Rastrigin
+### 1.1.4 Función de Rastrigin
 
-Función Rastrigin: Es una función no convexa multimodal, propuesta por Rastrigin en 1974​en.wikipedia.org. Su fórmula en nnn dimensiones es: f(x)=10n+∑i=1n[xi2−10cos⁡(2πxi)],f(\mathbf{x}) = 10n + \sum\_{i=1}\^{n}\left[x_i^2 - 10\cos(2\pi x_i)\right],f(x)=10n+∑i=1n​[xi2​−10cos(2πxi​)], con xi∈[−5.12,5.12]x_i \in [-5.12,5.12]xi​∈[−5.12,5.12]. En 2D específico: f(x1,x2)=20+x12+x22−10(cos⁡(2πx1)+cos⁡(2πx2)),f(x_1,x_2) = 20 + x_1\^2 + x_2\^2 - 10(\cos(2\pi x_1) + \cos(2\pi x_2)),f(x1​,x2​)=20+x12​+x22​−10(cos(2πx1​)+cos(2πx2​)), que posee un mínimo global en (0,0)(0,0)(0,0) con f=0f=0f=0​luca-scr.github.io. Presenta múltiples mínimos locales dispuestos de forma regular​cran.r-project.org​luca-scr.github.io, lo que lo convierte en un desafío típico para algoritmos de optimización.
+La función Rastrigin (1974) es una función no convexa y altamente multimodal, con numerosos mínimos locales, lo que la hace difícil de optimizar​ (Wikipedia, s.f., Rastrigin function).
+
+Presenta múltiples mínimos locales dispuestos de forma regular​, lo que lo convierte en un desafío típico para algoritmos de optimización.
 
 Definición en n dimensiones:
 
-f(x)=An+i=1nxi2-A(2xi) , A=10
+$f(X)=An + \sum_{i=1}^n[X_i^2 -A\cos(2\pi X_i)], A=10$
 
 Definición en 2D:
 
-f(x,y)=x2+y2+A2-(2x)-(2y), A=10
+$f(x,y)=x^2+y^2+A[2-\cos(2\pi x) - \cos(2\pi y)], A=10$
 
 Definición en 3D:
 
-f(x,y,z)=x2+y2+z2+A3-(2x)-(2y)-(2z), A=10
+$f(x,y)=x^2+y^2+z^2+A[3-\cos(2\pi x) - \cos(2\pi y)-\cos(2\pi z)], A=10$
 
 Algunas características y propiedades importantes son las siguientes:
 
 -   Mínimo global:
 
-    -   f(0,...,0)=0
+    -   $f(0,...0)=0$
 
 -   Dominio de búsqueda:
 
-    -   -5.12xi5.12
+    -   $-5.12 \leq X_i \leq 5.12$
 
--   Particularmente, hallar el mínimo de esta función es un problema difícil debido a la larga cantidad de mínimos locales (Wikipedia, s.f., Rastrigin function).
+-   Particularmente, hallar el mínimo de esta función es un problema difícil debido a la larga cantidad de mínimos locales.
 
 Estas son algunas hipótesis y expectativas que se tuvieron para el rendimiento de cada método implementado con esta función:
 
@@ -359,25 +341,19 @@ Estas son algunas hipótesis y expectativas que se tuvieron para el rendimiento 
 
     -   El éxito del método en alcanzar un mínimo dependerá enormemente del punto inicial elegido debido a los múltiples mínimos locales que tiene esta función.
 
-
 -   **Método de algoritmos evolutivos:**
 
     -   Es importante hacer una buena representación de los individuos, ya que el rendimiento puede variar dependiendo de la selección.
-    -   La población inicial debe ser representativa, diferentes entre ellos y que no sean demasiados.
-Para esta función en particular encontrar la solución óptima va a depender mucho de la probabilidad de mutación
-
-
+    -   La población inicial debe ser representativa, diferentes entre ellos y que no sean demasiados. Para esta función en particular encontrar la solución óptima va a depender mucho de la probabilidad de mutación
 
 -   **Método de optimización de partículas:**
-    
-    -   La ubicación de la nube de partículas va a afectar el rendimiento en esta función, ya que el algoritmo puede quedarse estancado en un mínimo local si la ubicación no es la mejor.
-    -   El criterio para detener el algoritmo debe estar bien ajustado, para evitar estancamientos. 
 
+    -   La ubicación de la nube de partículas va a afectar el rendimiento en esta función, ya que el algoritmo puede quedarse estancado en un mínimo local si la ubicación no es la mejor.
+    -   El criterio para detener el algoritmo debe estar bien ajustado, para evitar estancamientos.
 
 -   **Método de evolución diferencial:**
 
     -   Es más eficiente que los otros métodos evolutivos ya que su fuerte son las múltiples dimensiones.
-
 
 La implementación de la función de Rastrigin en 2, 3 y N dimensiones se muestra a continuación:
 
@@ -422,8 +398,6 @@ generate_level_curves_2(f_rastrigin_2d, -10, 10)
 ```{r}
 generate_function_graph(f_rastrigin_2d, -10, 10)
 ```
-
-## 1.2 Implementación en R de métodos de optimización a utilizar
 
 ## 1.3 Método de descenso de gradiente
 
@@ -623,7 +597,6 @@ contour(
 lines(sol_ras, type="b",cex=1.5,col="red")
 ```
 
-
 Animación de la optimización
 
 ```{r}
@@ -654,7 +627,6 @@ p <- ggplot() +
 
 animate(p, fps = 10, duration = 5, width = 600, height = 500, renderer = gifski_renderer("rastrigin_opt.gif"))
 ```
-
 
 ### 1.3.5 Optimización de la función de Rastrigin en 3 dimensiones
 
@@ -687,8 +659,6 @@ contour(
 lines(sol_rosen, type="b",cex=1.5,col="red")
 
 ```
-
-### 1.3.6 Conclusiones método de descenso por gradiente
 
 ## 1.4 Método de evolución diferencial
 
@@ -771,8 +741,6 @@ z <- outer(x1, x2, Vectorize(function(x, y) f_rosenbrock(c(x, y))))
 contour(x1, x2, z, nlevels = 50,
         main = "Rosenbrock 2D - Trayectoria", xlab = "x", ylab = "y")
 lines(res_rosen$trayectoria[,1], res_rosen$trayectoria[,2], col = "red", type = "b")
-
-# Graficación del proceso de optimización
 ```
 
 En este gráfico se muestran las curvas de nivel de la función de Rosenbrock en dos dimensiones. Estas curvas representan líneas donde la función tiene igual valor, y el valle curvado al centro es donde está el mínimo global (en el punto (1,1)(1,1)).
@@ -788,9 +756,6 @@ El resultado final obtenido fue: [1] 1.000000 1.000001 Valor mínimo encontrado:
 res_rosen_3d <- evolucion_diferencial(f_rosenbrock, dim = 3)
 res_rosen_3d$mejor
 res_rosen_3d$valor
-
-
-# Graficación del proceso de optimización
 ```
 
 En esta parte del informe se muestran los resultados numéricos para la optimización de las funciones en 3D. Dado que no se puede visualizar fácilmente en una gráfica 3D de trayectoria, se reportan las mejores posiciones y valores obtenido.
@@ -813,9 +778,6 @@ z <- outer(x1, x2, Vectorize(function(x, y) f_rastrigin(c(x, y))))
 contour(x1, x2, z, nlevels = 50,
         main = "Rastrigin 2D - Trayectoria", xlab = "x", ylab = "y")
 lines(res_ras$trayectoria[,1], res_ras$trayectoria[,2], col = "blue", type = "b")
-
-
-# Graficación del proceso de optimización
 ```
 
 Aquí se grafican las curvas de nivel de la función de Rastrigin, que es multimodal, es decir, tiene muchos mínimos locales (patrón ondulado). La búsqueda es mucho más compleja que en Rosenbrock.
@@ -836,6 +798,18 @@ res_ras_3d$valor
 En este caso, el algoritmo encontró una solución cercana al mínimo global, aunque no exacta. Esto es esperable, ya que Rastrigin es mucho más difícil en 3D debido a la gran cantidad de mínimos locales.
 
 ### 1.4.6 Conclusiones método de evolución diferencial
+
+El algoritmo logró encontrar soluciones muy cercanas al mínimo global en las funciones de Rosenbrock y Rastrigin, tanto en 2D como en 3D.
+
+En la función de Rosenbrock, se observó una convergencia estable y precisa, especialmente en dos dimensiones.
+
+En la función de Rastrigin, que presenta muchos mínimos locales, el método evitó caer en estos y alcanzó buenos resultados.
+
+El rendimiento se mantuvo sólido en tres dimensiones, aunque con una ligera pérdida de precisión en Rastrigin 3D debido a su complejidad.
+
+Fue más robusto que el descenso por gradiente en funciones multimodales, ya que no necesita derivadas ni depende del punto inicial.
+
+La evolución diferencial demostró ser un método confiable y efectivo para resolver problemas de optimización continua.
 
 ## 1.5 Método de optimización de partículas
 
@@ -898,9 +872,6 @@ animate_pso <- function(particles_positions, func, gif_name) {
   animate(p, fps = 5, renderer=gifski_renderer())
   anim_save(gif_name,p)
 }
-
-
-
 ```
 
 ### 1.5.2 Optimización de la función de Rosenbrock en 2 dimensiones
@@ -986,19 +957,19 @@ o_pso <- particle_swarm_optimization(n,f_rastrigin,lower_bounds,upper_bounds)
 
 ### 1.5.6 Conclusiones método de optimización de partículas
 
-[Pulir luego]
-
--   El método suele llegar al mínimo global, pero depende mucho del punto inicial.
-
 ## 1.6 Método de algoritmos evolutivos
 
-Los algoritmos genéticos (AG) son metaheurísticas inspiradas en procesos evolutivos biológicos, que han demostrado eficacia en la búsqueda global de óptimos en funciones complejas​jstatsoft.org Los AG simulan la selección natural, la recombinación (cruce) y la mutación para iterativamente mejorar un conjunto de soluciones candidatas (población). Estas técnicas estocásticas son adecuadas para funciones no lineales, discontinuas o con múltiples óptimos locales donde los métodos basados en derivadas pueden fallar. Como casos de estudio se usan funciones clásicas de prueba en optimización: Rosenbrock y Rastrigin, en dimensiones 2D y 3D. La función Rosenbrock, introducida en 1960 por H. H. Rosenbrock, es no convexa y conocida por su característico “valle en forma de banana”​
+Los algoritmos genéticos (AG) son técnicas de búsqueda heurística basadas en procesos de evolución natural​ . En un AG típico se define una función FITNESS que evalúa la calidad de cada solución candidata (individuo). A partir de una población inicial aleatoria, se iteran ciclos donde se seleccionan individuos más aptos, se combinan sus “genes” mediante cruces (crossover) y se introducen modificaciones aleatorias (mutaciones). Estos operadores evolucionan la población hacia regiones con mejor fitness.
 
-La función Rastrigin (1974) es también no convexa y altamente multimodal, con numerosos mínimos locales, lo que la hace difícil de optimizar​en.wikipedia.org - luca-scr.github.io. Analizaremos cada función en 2 y 3 dimensiones, graficando su paisaje antes de la optimización y luego aplicando un AG con múltiples corridas para evaluar la robustez de los resultados. Se calcularán estadísticas (media y desviación estándar) del mejor valor de fitness obtenido en 30 ejecuciones independientes de cada caso y se resumirán en una tabla.
+Según (Scrucca, 2013), los GAs han sido exitosos en optimizar funciones continuas (diferenciables o no) y discretas. Entre los operadores genéticos clave se destacan:
 
-Para evaluar la robustez de los GA, se realizarán múltiples ejecuciones independientes y se analizará la dispersión del fitness resultante.
+-   Selección: elige individuos con mayor fitness para reproducirse, imitando la supervivencia del más apto.
 
-Se utilizan las siguientes librerías de R: GA (para el algoritmo genético) y knitr (para formateo de tablas).
+-   Cruce (crossover): combina partes de dos soluciones parentales para generar descendencia, explorando nuevas regiones del espacio de búsqueda.
+
+-   Mutación: altera aleatoriamente parte de un individuo (por ejemplo, cambiando un valor de su vector de variables) para introducir diversidad genética y evitar estancamiento en óptimos locales.
+
+Los algoritmos genéticos (AG) son metaheurísticas inspiradas en procesos evolutivos biológicos, que han demostrado eficacia en la búsqueda global de óptimos en funciones complejas​jstatsoft.org Los AG simulan la selección natural, la recombinación (cruce) y la mutación para iterativamente mejorar un conjunto de soluciones candidatas (población). Estas técnicas estocásticas son adecuadas para funciones no lineales, discontinuas o con múltiples óptimos locales donde los métodos basados en derivadas pueden fallar. Para evaluar la robustez de los GA, se realizarán múltiples ejecuciones independientes y se analizará la dispersión del fitness resultante.
 
 Adicionalmente, se definen algunas funciones para poder mostrar por medio de una animación el proceso de optimización para las funciones de Rosenbrock y de Rastrigin.
 
@@ -1047,13 +1018,13 @@ animate_ga_optimization <- function(func) {
 
 ```
 
-El resumen reporta el mejor fitness encontrado (negativo) y la solución óptima en cada ejecución.
-
-Múltiples corridas (robustez): Para evaluar la variabilidad del método estocástico, se repite cada caso al menos 30 veces con semillas distintas. Se registra el mejor valor de fitness (valorizado positivamente) obtenido en cada corrida
+Analizaremos cada función en 2 y 3 dimensiones, graficando su paisaje antes de la optimización y luego aplicando un AG con múltiples corridas para evaluar la robustez de los resultados.
 
 ### 1.6.1 Implementación en R de algoritmos evolutivos
 
-Se utiliza la función ga() del paquete GA. Para problemas de minimización se define la función de fitness como el negativo del valor objetivo, ya que ga() maximiza por defecto. Se especifican los límites de búsqueda. Por ejemplo, para Rosenbrock 2D:
+Se utiliza la función ga() del paquete GA. Para problemas de minimización se define la función de fitness como el negativo del valor objetivo, ya que ga() maximiza por defecto. Se especifican los límites de búsqueda.
+
+Los resúmenes en cada ejecución reportan el mejor fitness encontrado (negativo) y la solución óptima en cada ejecución.
 
 ### 1.6.2 Optimización de la función de Rosenbrock en 2 dimensiones
 
@@ -1168,6 +1139,8 @@ sd_ras3d   <- sd(best_vals_ras3d)
 
 ### 1.6.6 Cálculo de estadísticas y análisis
 
+Para evaluar la variabilidad del método estocástico, se repite cada caso al menos 30 veces con semillas distintas. Se registra el mejor valor de fitness (valorizado positivamente) obtenido en cada corrida. Se calcularán estadísticas (media y desviación estándar) del mejor valor de fitness obtenido en 30 ejecuciones independientes de cada caso y se resumirán en una tabla.
+
 Con los vectores de mejores valores (best_vals_ros, etc.), se calculan la media y desviación estándar de cada conjunto de 30 resultados. Por ejemplo, mean_ros y sd_ros arriba y las demas, Para asi presentar los resultados.
 
 ```{r}
@@ -1277,7 +1250,7 @@ print(distancias)
 
 Ahora, hay que considerar los costos para poder crear una matriz de costos para resolver el problema de optimización.
 
-Con respecto al costo del combustible, este dependerá del vehículo que el vendedor utilizará para realizar las entregas. Para este problema, se utilizará un furgón DFSK C35, el cual tiene un consumo de combustible de 7.6 litros aproximado por cada 100 Km de recorrido, que se puede traducir en 0.000076 litros por cada 1 metro (). Adicionalmente, se considera el precio promedio de la gasolina en Colombia que, segun (), tiene un valor de \$15.827 pesos colombianos por galón, que se puede traducir en \$4.022 pesos colombianos por litro aproximadamente.
+Con respecto al costo del combustible, este dependerá del vehículo que el vendedor utilizará para realizar las entregas. Para este problema, se utilizará un furgón DFSK C35, el cual tiene un consumo de combustible de 7.6 litros aproximado por cada 100 Km de recorrido, que se puede traducir en 0.000076 litros por cada 1 metro (DFSK, s.f., Especificaciones Furgon C35). Adicionalmente, se considera el precio promedio de la gasolina en Colombia que, segun (La República, 2025), tiene un valor de \$15.827 pesos colombianos por galón, que se puede traducir en \$4.022 pesos colombianos por litro aproximadamente.
 
 ```{r}
 gasto_litro_por_metro <- 0.000076
@@ -1288,7 +1261,7 @@ colnames(costos_combustible) <- nombre_ciudades
 print(costos_combustible)
 ```
 
-Considerando el costo de los peajes, se usarán los datos de (autofact, ...) para calcular el valor promedio de cada peaje de las ciudades consideradas y se asumirá que el vendedor pagará el valor promedio del peaje de la ciudad de origen y de la ciudad de destino exactamente 1 vez cada que las recorra.
+Considerando el costo de los peajes, se usarán los datos de (Autofact, 2024) para calcular el valor promedio de cada peaje de las ciudades consideradas y se asumirá que el vendedor pagará el valor promedio del peaje de la ciudad de origen y de la ciudad de destino exactamente 1 vez cada que las recorra.
 
 ```{r}
 peajes = c(
@@ -1327,7 +1300,7 @@ diag(costos_peajes) <- rep(0, 13)
 print(costos_peajes)
 ```
 
-Por último, se debe de considerar el salario por horas promedio de un vendedor que haga dichos recorridos para entregar los pedidos. Adicional a ser vendedor, esta persona realizará las entregas y la conducción de la mercancía, por lo que también hay que considerar su pago como transportista. Dicho esto, se promediaron salarios de un transportista y un vendedor para poder determinar el salario final de la persona. Según (talent.com, ...), un transportista gana en promedio \$9.341 pesos colombianos la hora y un vendedor hace \$7.144 la hora; por lo tanto, el salario a utilizar será el \$8.242 pesos la hora.
+Por último, se debe de considerar el salario por horas promedio de un vendedor que haga dichos recorridos para entregar los pedidos. Adicional a ser vendedor, esta persona realizará las entregas y la conducción de la mercancía, por lo que también hay que considerar su pago como transportista. Dicho esto, se promediaron salarios de un transportista y un vendedor para poder determinar el salario final de la persona. Según (Talent.com, s.f., *Salario medio para Transporte De Carga en Colombia 2025*) y (Talent.com, s.f., *Salario medio para Vendedor en Colombia 2025*), un transportista gana en promedio \$9.341 pesos colombianos la hora y un vendedor hace \$7.144 la hora; por lo tanto, el salario a utilizar será el \$8.242 pesos la hora.
 
 Asumiendo que el vendedor conducirá a una velocidad media de 50 km/h al día, que se podrían traducir en 50000 m/h para facilitar cálculos, se procede a calcular el tiempo de viaje y, junto con esto, cuánto se le pagará al vendedor por cada viaje.
 
@@ -1376,7 +1349,6 @@ print(recorrido_optimizado$tour)
 
 ```{r}
 # Tour más óptimo: 1 10  7  3  8 13 12  2  5  4 11  6  9
-# Bogotá->Villavicencio->Pasto->Cali->Ibagué->Pereira->Manizales->Medellín->Cartagena->Barranquilla->Santa Marta->Cúcuta->Bucaramanga
 
 # Rutas seleccionadas entre algunas ciudades
 print("RUTA IDEAL: ")
@@ -1449,30 +1421,30 @@ mapa
 
 ## David Escobar Ruiz
 
+## Johan Sebastián Robles Rincón
+
 ## Sebastian Soto Arcila
+
+# Repositorio de GitHub del proyecto
 
 # Bibliografía
 
-<https://www.researchgate.net/publication/45932888_Test_Problems_in_Optimization>
+Autofact. (2024). *Peajes en Colombia: Conoce sus ubicaciones y precios 2024.* <https://www.autofact.com.co/blog/mi-carro/peajes/peajes-colombia-precios>
 
-<https://robertmarks.org/Classes/ENGR5358/Papers/functions.pdf>
+DFSK. (s.f.). *Especificaciones Furgon C35.* Recuperado el 2 de mayo de 2025, de <http://static.multiaviso.com/vehicle/specs/22-VRZC564XLBE6-dfsk-otros-modelos-2017-furgon-c35.pdf>
 
-<https://en.wikipedia.org/wiki/Test_functions_for_optimization>
+La República. (2025). *PRECIO DE LA GASOLINA.* Recuperado el 2 de mayo de 2025, de <https://www.larepublica.co/precio-de-la-gasolina>
 
-<https://en.wikipedia.org/wiki/Rosenbrock_function>
+Molga, Smutnicki. (2005). *Test functions for optimization needs.* <https://robertmarks.org/Classes/ENGR5358/Papers/functions.pdf>
 
-<https://en.wikipedia.org/wiki/Rastrigin_function>
+Talent.com. (s.f.). *Salario medio para Transporte De Carga en Colombia 2025*. Recuperado el 2 de mayo de 2025, de <https://co.talent.com/salary?job=transporte+de+carga>
 
-PARTE 2
+Talent.com. (s.f.). *Salario medio para Vendedor en Colombia 2025*. Recuperado el 2 de mayo de 2025, de <https://co.talent.com/salary?job=vendedor>
 
-<http://static.multiaviso.com/vehicle/specs/22-VRZC564XLBE6-dfsk-otros-modelos-2017-furgon-c35.pdf>
+Wikipedia. (s.f.). *Test functions for optimization*. Wikipedia. Recuperado el 2 de mayo de 2025, de <https://en.wikipedia.org/wiki/Test_functions_for_optimization>
 
-<https://www.autofact.com.co/blog/mi-carro/peajes/peajes-colombia-precios>
+Wikipedia. (s.f.). *Rosenbrock function*. Wikipedia. Recuperado el 2 de mayo de 2025, de [https://en.wikipedia.org/wiki/Rosenbrock\_](https://en.wikipedia.org/wiki/Rosenbrock_function){.uri}
 
-<https://co.talent.com/salary?job=transporte+de+carga>
+Wikipedia. (s.f.). *Rastrigin function*. Wikipedia. Recuperado el 2 de mayo de 2025, de <https://en.wikipedia.org/wiki/Rastrigin_function>
 
-<https://co.talent.com/salary?job=vendedor>
-
-<https://www.larepublica.co/precio-de-la-gasolina>
-
-<https://creg.gov.co/publicaciones/15565/precios-de-combustibles-liquidos/>
+X.-S. Yang, Test problems in optimization, in: Engineering Optimization: An Introduction with Metaheuristic Applications (Eds Xin-She Yang), John Wiley & Sons, (2010)

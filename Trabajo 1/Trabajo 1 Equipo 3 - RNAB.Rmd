@@ -43,60 +43,79 @@ knitr::opts_chunk$set(echo = TRUE)
 <p><strong>`r format(Sys.Date(), "%d de %B de %Y")`</strong></p>
 :::
 
+<!--
+  NOTE: Los tipos de selectores son:
+    - Comenzados en "iu" para items de listas no ordenadas
+    - Comenzados en "io" para items de listas ordenadas
+-->
+
+# Contenidos
+- [Introducción](#iu1.)
+- [Metodología](#iu2.)
+- [1. Optimización numérica](#io1.)
+- [1.1. Selección e implementación de las funciones de prueba](#io1.1.)
+- [1.1.1. Breve explicación de las funciones de prueba para problemas de optimización](#io1.1.1.)
+- [1.1.2. Implementación de funciones de graficación](#io1.1.2)
+- [1.1.3. Función de Rosenbrock](#io1.1.3.)
+- [1.1.4. Función de Rastrigin](#io1.1.4.)
+- [1.2. Método de descenso de gradiente](#io1.2.) 
+- [1.2.1. Implementación en R de descenso por gradiente](#io1.2.1.) 
+- [1.2.2. Optimización de la función de Rosenbrock en 2 dimensiones](#io1.2.2.) 
+- [1.2.3. Optimización de la función de Rosenbrock en 3 dimensiones](#io1.2.3.) 
+- [1.2.4. Optimización de la función de Rastrigin en 2 dimensiones](#io1.2.4.) 
+- [1.2.5. Optimización de la función de Rastrigin en 3 dimensiones](#io1.2.5.)
+- [1.2.6. Conclusiones método de desenso del gradiente](#io1.2.6.)
+- [1.3. Método de evolución diferencial](#io1.3.) 
+- [1.3.1. Implementación en R de evolución diferencial](#io1.3.1.) 
+- [1.3.2. Optimización de la función de Rosenbrock en 2 dimensiones](#io1.3.2.)
+- [1.3.3. Optimización de la función de Rosenbrock en 3 dimensiones](#io1.3.3.) 
+- [1.3.4. Optimización de la función de Rastrigin en 2 dimensiones](#io1.3.4.) 
+- [1.3.5. Optimización de la función de Rastrigin en 3 dimensiones](#io1.3.5.) 
+- [1.3.6. Conclusiones método de evolución diferencial](#io1.3.6.) 
+- [1.4. Método de optimización de partículas](#io1.4.) 
+- [1.4.1. Implementación en R de optimización de partículas](#io1.4.1.) 
+- [1.4.2. Optimización de la función de Rosenbrock en 2 dimensiones](#io1.4.2.) 
+- [1.4.3. Optimización de la función de Rosenbrock en 3 dimensiones](#io1.4.3.) 
+- [1.4.4. Optimización de la función de Rastrigin en 2 dimensiones](#io1.4.4.) 
+- [1.4.5. Optimización de la función de Rastrigin en 3 dimensiones](#io1.4.5.) 
+- [1.4.6. Conclusiones método de evolución diferencial](#io1.4.6.)
+- [1.5. Método de algoritmos evolutivos](#io1.5.) 
+- [1.5.1. Implementación en R de algoritmos evolutivos](#io1.5.1.) 
+- [1.5.2. Optimización de la función de Rosenbrock en 2 dimensiones](#io1.5.2.) 
+- [1.5.3. Optimización de la función de Rosenbrock en 3 dimensiones](#io1.5.3.) 
+- [1.5.4. Optimización de la función de Rastrigin en 2 dimensiones](#io1.5.4.) 
+- [1.5.5. Optimización de la función de Rastrigin en 3 dimensiones](#io1.5.5.) 
+- [1.5.6. Cálculo de estadísticas y análisis](#io1.5.6.)
+- [1.5.7. Conclusiones método de algoritmos evolutivos](#io1.5.7.)
+- [2. Optimización combinatoria](#io2.)
+- [2.1. Planteamiento del problema](#io2.1.)
+- [2.2. Implementación Método de Colonia de hormigas](#io2.2.)
+- [Reporte de contribución individual](#iu3.)
+- [Repositorio de GitHub del proyecto](#iu4.)
+- [Bibliografía](#iu5.) 
+
+
+<a name="iu1."></a>
+
 # Introducción
 
-El presente trabajo trata algunos de los métodos más relevantes de optimización numérica basada en manipulaciones del gradiente de una función objetivo (función a optimizar) y también algoritmos heurísticos basados en el comportamiento de la naturaleza, como lo son los algoritmos evolutivos. Todos estos métodos pueden llegar a ser útiles en distintos contextos en los que se busca optimizar una función para algún fin, como encontrar la mejor ruta entre ciudades o optimizar una función de pérdida en un contexto de aprendizaje de máquina. Cada método tiene particularidades interesantes que se van a explorar de manera general por medio de una breve implementación y ejecución con dos funciones muy utiilizadas para probar algoritmos de optimización: la función de Rosenbrock y la función de Rastrigin.
+El presente trabajo trata algunos de los métodos más relevantes de optimización numérica basada en manipulaciones del gradiente de una función objetivo (función a optimizar) y también algoritmos heurísticos basados en el comportamiento de la naturaleza, como lo son los algoritmos evolutivos. Todos estos métodos pueden llegar a ser útiles en distintos contextos en los que se busca optimizar una función para algún fin, como encontrar la mejor ruta entre ciudades o optimizar una función de pérdida en un contexto de aprendizaje de máquina. Cada método tiene particularidades interesantes que se van a explorar de manera general por medio de una breve implementación y ejecución con dos funciones muy utilizadas para probar algoritmos de optimización: la función de Rosenbrock y la función de Rastrigin.
+
+
+<a name="iu2."></a>
 
 # Metodología
 
 Para implementar y documentar la optimización se emplea R Markdown, combinando código R y texto explicativo. Se utilizan librerías para renderizar gráficos y animaciones, librerías para implementar los métodos heurísticos y librerías para manipular los datos.
-
-```{r instalacion de librerias}
-# DESCOMENTAR PARA INSTALAR PAQUETES FALTANTES
-#install.packages("GA") Genetic Algorithm
-#install.packages("pso") Particle Swarm Optimization
-#install.packages("tidyverse")
-#install.packages("viridis")
-#install.packages("ggplot2")
-#install.packages("gganimate")
-#install.packages("gifski")
-#install.packages("dplyr")
-#install.packages("tidyr")
-#install.packages("purrr")
-#install.packages("leaflet")
-#install.packages("osrm")
-#install.packages("sf")
-#install.packages("gor")
-
-```
-
-```{r librerias}
-# ALGORITMOS GENÉTICOS
-library(GA)
-library(pso)
-
-# MANIPULACIÓN Y VISUALIZACIÓN DE DATOS
-library(tidyverse)
-library(dplyr)
-library(tidyr)
-library(purrr)
-library(ggplot2)
-library(viridis)
-library(gganimate)
-library(gifski)
-
-# GEOLOCALIZACIÓN Y VISUALIZACIÓN ESPACIAL
-library(leaflet)
-library(osrm)
-library(sf)
-
-# COLONIA DE HORMIGAS
-library(gor)
-```
-
 Para los casos 3D (tres variables) es difícil visualizar directamente la función de 3 dimensiones (espacio de 4 variables), por lo que se mostrarán únicamente los puntos óptimos alcanzados.
 
+
+<a name="io1."></a>
+
 # Parte 1. Optimización numérica
+
+
+<a name="io1.1."></a>
 
 ## 1.1 Selección e implementación de las funciones de prueba
 
@@ -113,6 +132,8 @@ Previo a la implementación de los algoritmos en el lenguaje R y previo a la rec
 -   ¿Cuáles son algunas de las funciones de prueba más utilizadas?
 
 A continuación se presenta dicha sección para luego continuar con el estudio más detallado de las funciones escogidas.
+
+<a name="io1.1.1."></a>
 
 ### 1.1.1 Breve explicación de las funciones de prueba para problemas de optimización
 
@@ -139,83 +160,9 @@ Como ejemplo, en la Figura 1 se presentan algunas funciones de prueba que no se 
 
 -   Función de Ackley (Clase 4).
 
-### 1.1.2 Implementación de funciones de graficación
+<a name="io1.1.2."></a>
 
-Se definen las funciones a usar para generar los gráficos de cada función de esta sección:
-
-```{r}
-generate_function_graph <- function(func_2d, low_bound, upper_bound) {
-  x1 <- seq(low_bound, upper_bound, length.out = 50)
-  x2 <- seq(low_bound, upper_bound, length.out = 50)
-  f_x <- outer(x1,x2, FUN = func_2d)
-  
-  colores        <- viridis::magma(n = 100, alpha = 0.7)
-  z.facet.center <- (f_x[-1, -1] + f_x[-1, -ncol(f_x)] +
-                       f_x[-nrow(f_x), -1] +
-                       f_x[-nrow(f_x), -ncol(f_x)])/4
-  z.facet.range  <- cut(z.facet.center, 100)
-  
-  par(mai = c(0,0,0,0))
-  persp(x = x1, y = x2, z = f_x,
-        shade = 0.8,
-        phi = 30,
-        theta = 30,
-        col = colores[z.facet.range],
-        axes = FALSE)
-}
-
-generate_level_curves <- function(func_2d, low_bound, upper_bound) {
-  n_length <- 100
-  x1 <- seq(low_bound, upper_bound, length.out = n_length)
-  x2 <- seq(low_bound, upper_bound, length.out = n_length)
-  X <- expand.grid(x1, x2)
-  z <- func_2d(X[,1], X[,2])
-  Z <- matrix(z, ncol = n_length, nrow = n_length)
-  contour(
-    x = x1,
-    y = x2,
-    z = Z,
-    nlevels = 100,
-    las = 1,
-    xlab = expression(x[1]),
-    ylab = expression(x[2]),
-    main = expression(paste(
-      "Función de Rosenbrock: ",
-      f(x[1],x[2])==100*(x[2]-x[1]^2)^2+(1-x[1])^2
-    )),
-    sub = "Curvas de nivel de la función"
-  )
-}
-
-generate_level_curves_2 <- function(func_2d, low_bound, upper_bound) {
-  x1 <- seq(low_bound, upper_bound, length.out = 50)
-  x2 <- seq(low_bound, upper_bound, length.out = 50)
-  
-  datos <- expand.grid(x1 = x1, x2 = x2)
-  datos <- datos %>%
-           mutate(f_x = map2_dbl(x1, x2, .f = func_2d))
-  
-  f_level_curves <- ggplot(data = datos, aes(x = x1, y = x2, z = f_x)) +
-    geom_contour(aes(colour = stat(level)), bins = 30) +
-    labs(title = "f(x1,x2) = x1^2 + x2^2") +
-    theme_bw() +
-    theme(legend.position = "none")
-  return(f_level_curves)
-}
-
-generate_countour <- function(func_2d, low_bound, upper_bound) {
-  n_length <- 100
-  x1 <- seq(low_bound, upper_bound, length.out = n_length)
-  x2 <- seq(low_bound, upper_bound, length.out = n_length)
-  expand.grid(X1 = x1, X2 = x2) %>%
-    mutate(Z = func_2d(X1, X2)) %>%
-    ggplot(aes(X1, X2, z = Z)) +
-    geom_contour() +
-    geom_contour_filled()
-}
-```
-
-### 1.1.3 Función de Rosenbrock
+### 1.1.2 Función de Rosenbrock
 
 Es una función no convexa introducida por Rosenbrock en 1960​ (Wikipedia, s.f., Rosenbrock function). Su paisaje forma un valle curvo estrecho que dificulta la convergencia hacia el mínimo.
 
@@ -293,19 +240,11 @@ f_rosenbrock <- function(x){
 
 Las gráficas de la función de Rosenbrock en 2 y 3 dimensiones se muestran a continuación:
 
-```{r}
-generate_countour(f_rosenbrock_2d, -5, 5)
-```
+<!-- TODO: Faltan Graficas de la Función -->
 
-```{r}
-generate_level_curves(f_rosenbrock_2d, -5, 5)
-```
+<a name="io1.1.3."></a>
 
-```{r}
-generate_function_graph(f_rosenbrock_2d, -5, 5)
-```
-
-### 1.1.4 Función de Rastrigin
+### 1.1.3 Función de Rastrigin
 
 La función Rastrigin (1974) es una función no convexa y altamente multimodal, con numerosos mínimos locales, lo que la hace difícil de optimizar​ (Wikipedia, s.f., Rastrigin function).
 
@@ -383,80 +322,18 @@ f_rastrigin <-function(x){
 
 Las gráficas de la función de Rastrigin en 2 y 3 dimensiones se muestran a continuación:
 
-```{r}
-generate_countour(f_rastrigin_2d, -10, 10)
-```
+<!-- TODO: Faltan Graficas de la Función -->
+
+<a name="io1.2."></a>
+
+## 1.2 Método de descenso de gradiente
+
+<a name="io1.2.1."></a>
+
+### 1.2.1 Implementación en R de descenso de gradiente
 
 ```{r}
-generate_level_curves(f_rastrigin_2d, -10, 10)
-```
-
-```{r}
-generate_level_curves_2(f_rastrigin_2d, -10, 10)
-```
-
-```{r}
-generate_function_graph(f_rastrigin_2d, -10, 10)
-```
-
-## 1.3 Método de descenso de gradiente
-
-### 1.3.1 Implementación en R de descenso por gradiente
-
-#### Implementación de derivada parcial
-
-```{r}
-partial_dev <- function(x,i,fun,h=0.01){
-    e <- x*0 # crea un vector de ceros de la misma longitud de x
-    e[i] <- h
-    y <- (fun(x+e)-fun(x-e))/(2*h)
-  return(y)
-}
-```
-
-#### Implementación del gradiente
-
-```{r}
-num_grad <- function(x,fun,h=0.01){
-  # x: punto del espacio donde se debe evaluar el gradiente
-  # fun: función para la que se desea calcular el gradiente en x
-  # h: es el tamaño de ventana para el cálculo de la derivada numérica
-  d <- length(x)
-  y <- mapply(FUN=partial_dev,i=1:d,MoreArgs=list(x=x,h=h,fun=fun))
-  return(y)
-}
-```
-
-#### Implementación de derivada del gradiente
-
-```{r}
-deriv_grad <- function(x,fun,i=1,h=0.01){
-  # x: punto en el que se evalúa el gradiente
-  # fun: función para la cual se calcula la derivada del gradiente respecto a la íesima componente
-  # i: i-ésima componente del vector x con respecto a la que se deriva
-    e <- x*0 # crea un vector de ceros de la misma longitud de x
-    e[i] <- h
-    y <- (num_grad(x+e,fun=fun,h=h)-num_grad(x-e,fun=fun,h=h))/(2*h)
-    return(y)
-}
-```
-
-#### Implementación de matriz Hessiana
-
-```{r}
-matriz_hessiana <- function(x,fun,h=0.01){
-  # x: punto en el que se evalúa la matriz hessiana
-  # fun: función a la que se le calcula la matriz hessiana en x
-  # h: es el tamaño de ventana para el cálculo de la derivada numérica
-  d <- length(x)
-  y <- mapply(FUN=deriv_grad,i=1:d,MoreArgs=list(x=x,h=h,fun=fun),SIMPLIFY = TRUE)
-  return(y)
-}
-```
-
-#### Implementación completa de optimizador multivariado por descenso de gradiente
-
-```{r}
+# Implementación completa de optimizador multivariado por descenso de gradiente
 optimizador_mult_numdev <- function(x0,fun,max_eval=100,h=0.01,eta=0.01){
   x <- matrix(NA,ncol =length(x0), nrow = max_eval)
   x[1,] <- x0
@@ -474,195 +351,47 @@ optimizador_mult_numdev <- function(x0,fun,max_eval=100,h=0.01,eta=0.01){
 }
 ```
 
-### 1.3.2 Optimización de la función de Rosenbrock en 2 dimensiones
+<a name="io1.2.2."></a>
 
-```{r}
-# Ejecución del método
-sol_rosen <- optimizador_mult_numdev(f_rosenbrock,x0=c(-4,-4),eta=1)
-
-# Graficación del proceso de optimización
-n_length <- 100
-x1 <- seq(-5, 5, length.out = n_length)
-x2 <- seq(-5, 5, length.out = n_length)
-X <- expand.grid(x1, x2)
-z <- f_rosenbrock_2d(X[,1], X[,2])
-Z <- matrix(z, ncol = n_length, nrow = n_length)
-contour(
-  x = x1,
-  y = x2,
-  z = Z,
-  nlevels = 100,
-  las = 1,
-  xlab = expression(x[1]),
-  ylab = expression(x[2]),
-  main = expression(paste(
-    "Función de Rosenbrock: ",
-    f(x[1],x[2])==100*(x[2]-x[1]^2)^2+(1-x[1])^2)
-  ),
-  sub = "Curvas de nivel de la función"
-)
-lines(sol_rosen, type="b",cex=1.5,col="red")
-
-```
+### 1.2.2 Optimización de la función de Rosenbrock en 2 dimensiones
 
 Animación de la optimización
 
-```{r}
-# Transforma la solución en un data.frame
-sol <- as.data.frame(sol_rosen)
-colnames(sol) <- c("x1", "x2")
-sol$step <- 1:nrow(sol)
+<!-- TODO: Faltan Animación de la Función -->
 
-# Prepara los datos de fondo
-x1 <- seq(-5, 5, length.out = 100)
-x2 <- seq(-5, 5, length.out = 100)
-X <- expand.grid(x1 = x1, x2 = x2)
+<a name="io1.2.3."></a>
 
-X$z <- f_rosenbrock_2d(X$x1, X$x2)
-
-# Crea la animación
-p <- ggplot() +
-  geom_contour(data = X, aes(x = x1, y = x2, z = z), bins = 20, color = "gray70") +
-  geom_point(data = sol, aes(x = x1, y = x2), color = "red", size = 3) +
-  geom_path(data = sol, aes(x = x1, y = x2), color = "red", linewidth = 1) +
-  transition_reveal(step) +
-  labs(
-    title = "Optimización sobre la función de Rosenbrock con descenso del gradiente",
-    x = expression(x[1]),
-    y = expression(x[2])
-  ) +
-  theme_minimal()
-
-animate(p, fps = 10, duration = 5, width = 600, height = 500, renderer = gifski_renderer("rosenbrock_opt.gif"))
-```
-
-![](images/rosenbrock_opt.gif)
-
-### 1.3.3 Optimización de la función de Rosenbrock en 3 dimensiones
-
-```{r}
-# Ejecución del método
-sol_rosen <- optimizador_mult_numdev(f_rosenbrock,x0=c(-4,-4,-4),eta=1)
-
-# Graficación del proceso de optimización
-n_length <- 100
-x1 <- seq(-5, 5, length.out = n_length)
-x2 <- seq(-5, 5, length.out = n_length)
-x3 <- seq(-5, 5, length.out = n_length)
-X <- expand.grid(x1, x2, x3)
-z <- f_rosenbrock_3d(X[,1], X[,2], X[,3])
-Z <- matrix(z, ncol = n_length, nrow = n_length)
-contour(
-  x = x1,
-  y = x2,
-  z = Z,
-  nlevels = 100,
-  las = 1,
-  xlab = expression(x[1]),
-  ylab = expression(x[2]),
-  main = expression(paste(
-    "Función de Rosenbrock: ",
-    f(x[1],x[2])==100*(x[2]-x[1]^2)^2+(1-x[1])^2)
-  ),
-  sub = "Curvas de nivel de la función"
-)
-lines(sol_rosen, type="b",cex=1.5,col="red")
-```
-
-### 1.3.4 Optimización de la función de Rastrigin en 2 dimensiones
-
-```{r}
-sol_ras2d <- optimizador_mult_numdev(f_rastrigin,x0=c(4.5,4.5),eta=2)
-
-n_length <- 100
-x1 <- seq(-5.12, 5.12, length.out = n_length)
-x2 <- seq(-5.12, 5.12, length.out = n_length)
-X <- expand.grid(x1, x2)
-z <- f_rastrigin_2d(X[,1], X[,2])
-Z <- matrix(z, ncol = n_length, nrow = n_length)
-contour(
-  x = x1,
-  y = x2,
-  z = Z,
-  nlevels = 10,
-  las = 1,
-  xlab = expression(x[1]),
-  ylab = expression(x[2]),
-  main = expression(paste(
-    "Función de Rastrigin: ",
-    f(x[1],x[2])==20 + x[1]^2 - 10*cos(2*pi*x[1]) + x[2]^2 - 10*cos(2*pi*x[2])
-  )),
-  sub = "Curvas de nivel de la función"
-)
-lines(sol_ras2d, type="b",cex=1.5,col="red")
-```
+### 1.2.3 Optimización de la función de Rosenbrock en 3 dimensiones
 
 Animación de la optimización
 
-```{r}
-# Transforma la solución en un data.frame
-sol <- as.data.frame(sol_ras2d)
-colnames(sol) <- c("x1", "x2")
-sol$step <- 1:nrow(sol)
+<!-- TODO: Faltan Animación de la Función -->
 
-#Prepara los datos de fondo
-x1 <- seq(-5.12, 5.12, length.out = 100)
-x2 <- seq(-5.12, 5.12, length.out = 100)
-X <- expand.grid(x1 = x1, x2 = x2)
+<a name="io1.2.4."></a>
 
-X$z <- f_rastrigin_2d(X$x1, X$x2)
+### 1.2.4 Optimización de la función de Rastrigin en 2 dimensiones
 
-# Crea la animación
-p <- ggplot() +
-  geom_contour(data = X, aes(x = x1, y = x2, z = z), bins = 20, color = "gray70") +
-  geom_point(data = sol, aes(x = x1, y = x2), color = "red", size = 3) +
-  geom_path(data = sol, aes(x = x1, y = x2), color = "red", linewidth = 1) +
-  transition_reveal(step) +
-  labs(
-    title = "Optimización sobre la función de Rastrigin con descenso del gradiente",
-    x = expression(x[1]),
-    y = expression(x[2])
-  ) +
-  theme_minimal()
+Animación de la optimización
 
-animate(p, fps = 10, duration = 5, width = 600, height = 500, renderer = gifski_renderer("rastrigin_opt.gif"))
-```
+<!-- TODO: Faltan Animación de la Función -->
 
-![](images/rastrigin_opt.gif)
+<a name="io1.2.5."></a>
 
-### 1.3.5 Optimización de la función de Rastrigin en 3 dimensiones
+### 1.2.5 Optimización de la función de Rastrigin en 3 dimensiones
 
-```{r}
-# Ejecución del método
-sol_ras3d <- optimizador_mult_numdev(f_rastrigin,x0=c(-4,-4,-4),eta=3)
+Animación de la optimización
 
-# Graficación del proceso de optimización
-n_length <- 100
-x1 <- seq(-5.12, 5.12, length.out = n_length)
-x2 <- seq(-5.12, 5.12, length.out = n_length)
-x3 <- seq(-5.12, 5.12, length.out = n_length)
-X <- expand.grid(x1, x2, x3)
-z <- f_rastrigin_3d(X[,1], X[,2], X[,3])
-Z <- matrix(z, ncol = n_length, nrow = n_length)
-contour(
-  x = x1,
-  y = x2,
-  z = Z,
-  nlevels = 10,
-  las = 1,
-  xlab = expression(x[1]),
-  ylab = expression(x[2]),
-  main = expression(paste(
-    "Función de Rastrigin: ",
-    f(x[1],x[2])==20 + x[1]^2 - 10*cos(2*pi*x[1]) + x[2]^2 - 10*cos(2*pi*x[2])
-  )),
-  sub = "Curvas de nivel de la función"
-)
-lines(sol_ras3d, type="b",cex=1.5,col="red")
+<!-- TODO: Faltan Animación de la Función -->
 
-```
+<a name="io1.2.6."></a>
 
-## 1.4 Método de evolución diferencial
+### 1.2.6 Conclusiones método de desenso del gradiente
+
+<!-- TODO: Faltan Concluciones -->
+
+<a name="io1.3."></a>
+
+## 1.3 Método de evolución diferencial
 
 La evolución diferencial es un algoritmo de optimización inspirado en la evolución biológica. Funciona manteniendo una población de soluciones, y mejorándolas generación tras generación mediante operaciones de mutación, recombinación y selección.
 
@@ -672,7 +401,9 @@ La evolución diferencial es un algoritmo de optimización inspirado en la evolu
 
 Este proceso se repite varias veces hasta encontrar una solución óptima.
 
-### 1.4.1 Implementación en R de evolución diferencial
+<a name="io1.3.1."></a>
+
+### 1.3.1 Implementación en R de evolución diferencial
 
 ```{r}
 evolucion_diferencial <- function(fun_obj, dim = 2, NP = 30, F = 0.8, CR = 0.9,
@@ -725,25 +456,9 @@ evolucion_diferencial <- function(fun_obj, dim = 2, NP = 30, F = 0.8, CR = 0.9,
 }
 ```
 
-### 1.4.2 Optimización de la función de Rosenbrock en 2 dimensiones
+<a name="io1.3.2."></a>
 
-```{r}
-# Ejecución del método
-set.seed(123)
-res_rosen <- evolucion_diferencial(f_rosenbrock, dim = 2)
-
-# Mostrar mejor solución
-res_rosen$mejor
-res_rosen$valor
-
-# Graficar trayectoria
-x1 <- seq(-3, 3, length.out = 100)
-x2 <- seq(-3, 3, length.out = 100)
-z <- outer(x1, x2, Vectorize(function(x, y) f_rosenbrock(c(x, y))))
-contour(x1, x2, z, nlevels = 50,
-        main = "Rosenbrock 2D - Trayectoria", xlab = "x", ylab = "y")
-lines(res_rosen$trayectoria[,1], res_rosen$trayectoria[,2], col = "red", type = "b")
-```
+### 1.3.2 Optimización de la función de Rosenbrock en 2 dimensiones
 
 En este gráfico se muestran las curvas de nivel de la función de Rosenbrock en dos dimensiones. Estas curvas representan líneas donde la función tiene igual valor, y el valle curvado al centro es donde está el mínimo global (en el punto (1,1)(1,1)).
 
@@ -751,36 +466,15 @@ La línea roja representa la trayectoria que siguió el algoritmo de evolución 
 
 El resultado final obtenido fue: [1] 1.000000 1.000001 Valor mínimo encontrado: 1.91e-12
 
-### 1.4.3 Optimización de la función de Rosenbrock en 3 dimensiones
+<a name="io1.3.3."></a>
 
-```{r}
-# Ejecución del método
-res_rosen_3d <- evolucion_diferencial(f_rosenbrock, dim = 3)
-res_rosen_3d$mejor
-res_rosen_3d$valor
-```
+### 1.3.3 Optimización de la función de Rosenbrock en 3 dimensiones
 
 En esta parte del informe se muestran los resultados numéricos para la optimización de las funciones en 3D. Dado que no se puede visualizar fácilmente en una gráfica 3D de trayectoria, se reportan las mejores posiciones y valores obtenido.
 
-### 1.4.4 Optimización de la función de Rastrigin en 2 dimensiones
+<a name="io1.3.4."></a>
 
-```{r}
-# Ejecución del método
-set.seed(456)
-res_ras <- evolucion_diferencial(f_rastrigin, dim = 2)
-
-# Mostrar mejor solución
-res_ras$mejor
-res_ras$valor
-
-# Graficar trayectoria
-x1 <- seq(-5.12, 5.12, length.out = 100)
-x2 <- seq(-5.12, 5.12, length.out = 100)
-z <- outer(x1, x2, Vectorize(function(x, y) f_rastrigin(c(x, y))))
-contour(x1, x2, z, nlevels = 50,
-        main = "Rastrigin 2D - Trayectoria", xlab = "x", ylab = "y")
-lines(res_ras$trayectoria[,1], res_ras$trayectoria[,2], col = "blue", type = "b")
-```
+### 1.3.4 Optimización de la función de Rastrigin en 2 dimensiones
 
 Aquí se grafican las curvas de nivel de la función de Rastrigin, que es multimodal, es decir, tiene muchos mínimos locales (patrón ondulado). La búsqueda es mucho más compleja que en Rosenbrock.
 
@@ -788,18 +482,15 @@ La línea azul muestra cómo la evolución diferencial se mueve por el espacio d
 
 Resultado obtenido: [1] 2.176697e-06 -2.015785e-07 Valor mínimo: 9.48e-10
 
-### 1.4.5 Optimización de la función de Rastrigin en 3 dimensiones
+<a name="io1.3.5."></a>
 
-```{r}
-# Ejecución del método
-res_ras_3d <- evolucion_diferencial(f_rastrigin, dim = 3)
-res_ras_3d$mejor
-res_ras_3d$valor
-```
+### 1.3.5 Optimización de la función de Rastrigin en 3 dimensiones
 
 En este caso, el algoritmo encontró una solución cercana al mínimo global, aunque no exacta. Esto es esperable, ya que Rastrigin es mucho más difícil en 3D debido a la gran cantidad de mínimos locales.
 
-### 1.4.6 Conclusiones método de evolución diferencial
+<a name="io1.3.6."></a>
+
+### 1.3.6 Conclusiones método de evolución diferencial
 
 El algoritmo logró encontrar soluciones muy cercanas al mínimo global en las funciones de Rosenbrock y Rastrigin, tanto en 2D como en 3D.
 
@@ -813,74 +504,21 @@ Fue más robusto que el descenso por gradiente en funciones multimodales, ya que
 
 La evolución diferencial demostró ser un método confiable y efectivo para resolver problemas de optimización continua.
 
-## 1.5 Método de optimización de partículas
+<a name="io1.4."></a>
+
+## 1.4 Método de optimización de partículas
 
 El método de optimización por enjambre de partículas (PSO, por sus siglas en inglés) es un algoritmo inspirado en el comportamiento colectivo de animales como bandadas de aves o bancos de peces. Funciona mediante un conjunto de partículas (soluciones potenciales) que exploran el espacio de búsqueda moviéndose en función de su propia experiencia y la de sus vecinas. Cada partícula ajusta su posición y velocidad iterativamente para acercarse a la mejor solución conocida, guiada por su mejor posición histórica y la mejor posición global encontrada por el enjambre. Con el tiempo, las partículas tienden a converger hacia una solución óptima o cercana al óptimo.
 
-### 1.5.1 Implementación en R de optimización de partículas
+<a name="io1.4.1."></a>
+
+### 1.4.1 Implementación en R de optimización de partículas
 
 Se utiliza el paquete pos para implementar el método de la optimización de partículas. Adicionalmente, se implementa una función adicional para crear las animaciones del método de optimización.
 
-```{r}
-list_to_matrix <- function(data) {
-  for (i in 1:length(data)) {
-    data[[i]] <- matrix(data[[i]], nrow=2, ncol=12)
-  }
-  return(data)
-}
+<a name="io1.4.2."></a>
 
-particle_swarm_optimization <- function(n,func,lower_bounds,upper_bounds) {
-  set.seed(2001)
-  o_min <- psoptim(rep(NA,n), func, lower=lower_bounds,upper=upper_bounds,control=list(fnscale=1e-8,trace=1,trace.stats=TRUE))
-  o_max <- psoptim(rep(NA,n), func, lower=lower_bounds,upper=upper_bounds,control=list(fnscale=-1*(1e-8),trace=1,trace.stats=TRUE,s=30))
-  print("=====================SUMMARY=====================")
-  print("MINIMIZATION:")
-  print("Point:")
-  show(o_min$par)
-  print("Value:")
-  show(func(o_min$par))
-  print("MAXIMIZATION")
-  print("Point:")
-  show(o_max$par)
-  print("Value:")
-  show(func(o_max$par))
-  return(list("o_min"=o_min, "o_max"=o_max))
-}
-
-animate_pso <- function(particles_positions, func, gif_name) {
-  positions_per_iteration <- list_to_matrix(particles_positions)
-  df <- map2_dfr(
-    positions_per_iteration,
-    .y = seq_along(positions_per_iteration),
-    .f = function(mat, iter) {
-      tibble(
-        particle_id = 1:ncol(mat),
-        x = mat[1, ],
-        y = mat[2, ],
-        iter = iter
-      )
-    }
-  )
-  x_seq <- seq(-10, 10, length.out = 100)
-  y_seq <- seq(-10, 10, length.out = 100)
-  grid <- expand.grid(x = x_seq, y = y_seq)
-  grid$z <- with(grid, func(x, y))
-  
-  p <- ggplot() +
-    geom_contour(data = grid, aes(x=x, y=y, z=z),
-                 bins = 30, color = "gray") +
-    geom_point(data=df, aes(x = x, y = y), color="red", size=2) +
-    xlim(-10, 10) + ylim(-10, 10) +  # Adjust limits to your data range
-    theme_minimal() +
-    transition_manual(frames = iter) +
-    labs(title = "Iteration: {current_frame}")
-  #p + transition_reveal(agno)
-  animate(p, fps = 5, renderer=gifski_renderer())
-  anim_save(gif_name,p)
-}
-```
-
-### 1.5.2 Optimización de la función de Rosenbrock en 2 dimensiones
+### 1.4.2 Optimización de la función de Rosenbrock en 2 dimensiones
 
 ```{r}
 # Parámetros a utilizar
@@ -893,72 +531,23 @@ o_pso <- particle_swarm_optimization(n,f_rosenbrock,lower_bounds,upper_bounds)
 
 ```
 
-```{r}
-# Graficación del proceso de optimización (minimización)
-o_min <- o_pso$o_min
-o_min_particles_positions <- o_min$stats$x
-gif_name <- "pso_rosenbrock_min.gif"
-animate_pso(o_min_particles_positions, f_rosenbrock_2d, gif_name)
-```
+<!-- TODO: Faltan Animación de la Función -->
 
-![](images/pso_rosenbrock_min-01.gif)
+<a name="io1.4.3."></a>
 
-```{r}
-# Graficación del proceso de optimización (maximización)
-o_max <- o_pso$o_max
-o_max_particles_positions <- o_max$stats$x
-gif_name <- "pso_rosenbrock_max.gif"
-animate_pso(o_max_particles_positions, f_rosenbrock_2d, gif_name)
-```
+### 1.4.3 Optimización de la función de Rosenbrock en 3 dimensiones
 
-![](images/pso_rosenbrock_max-01.gif)
+<!-- TODO: Faltan Animación de la Función -->
 
-### 1.5.3 Optimización de la función de Rosenbrock en 3 dimensiones
+<a name="io1.4.4."></a>
 
-```{r}
-# Parámetros a utilizar
-n <- 3
-lower_bounds <- -5
-upped_bounds <- 5
+### 1.4.4 Optimización de la función de Rastrigin en 2 dimensiones
 
-# Ejecución del método
-o_pso <- particle_swarm_optimization(n,f_rosenbrock,lower_bounds,upper_bounds)
-# Graficación del proceso de optimización
-```
+<!-- TODO: Faltan Animación de la Función -->
 
-### 1.5.4 Optimización de la función de Rastrigin en 2 dimensiones
+<a name="io1.4.5."></a>
 
-```{r}
-# Parámetros a utilizar
-n <- 2
-lower_bounds <- -5
-upped_bounds <- 5
-
-# Ejecución del método
-o_pso <- particle_swarm_optimization(n,f_rastrigin,lower_bounds,upper_bounds)
-```
-
-```{r}
-# Graficación del proceso de optimización (minimización)
-o_min <- o_pso$o_min
-o_min_particles_positions <- o_min$stats$x
-gif_name <- "pso_rastrigin_min.gif"
-animate_pso(o_min_particles_positions, f_rastrigin_2d, gif_name)
-```
-
-![](images/pso_rastrigin_min.gif)
-
-```{r}
-# Graficación del proceso de optimización (maximización)
-o_max <- o_pso$o_max
-o_max_particles_positions <- o_max$stats$x
-gif_name <- "pso_rastrigin_max.gif"
-animate_pso(o_max_particles_positions, f_rastrigin_2d, gif_name)
-```
-
-![](images/pso_rastrigin_max.gif)
-
-### 1.5.5 Optimización de la función de Rastrigin en 3 dimensiones
+### 1.4.5 Optimización de la función de Rastrigin en 3 dimensiones
 
 ```{r}
 # Parámetros a utilizar
@@ -969,13 +558,17 @@ upped_bounds <- 5
 o_pso <- particle_swarm_optimization(n,f_rastrigin,lower_bounds,upper_bounds)
 ```
 
-### 1.5.6 Conclusiones método de optimización de partículas
+<a name="io1.4.6."></a>
+
+### 1.4.6 Conclusiones método de optimización de partículas
 
 En el caso de la optimización maximizando las funciones, llegan muy rápido a una solución óptima (dentro de 10 iteraciones). Por otro lado, la optimización minimizando las funciones tardaba un poco más en llegar al óptimo, pero se acercaba mucho al mínimo global.
 
 Estos resultados pueden deberse a la distribución de las partículas por el espacio de búsqueda, permitiendo una optimización más "abierta" a comparación con el método de descenso de gradiente.
 
-## 1.6 Método de algoritmos evolutivos
+<a name="io1.5."></a>
+
+## 1.5 Método de algoritmos evolutivos
 
 Los algoritmos genéticos (AG) son técnicas de búsqueda heurística basadas en procesos de evolución natural​ . En un AG típico se define una función FITNESS que evalúa la calidad de cada solución candidata (individuo). A partir de una población inicial aleatoria, se iteran ciclos donde se seleccionan individuos más aptos, se combinan sus “genes” mediante cruces (crossover) y se introducen modificaciones aleatorias (mutaciones). Estos operadores evolucionan la población hacia regiones con mejor fitness.
 
@@ -991,214 +584,67 @@ Los algoritmos genéticos (AG) son metaheurísticas inspiradas en procesos evolu
 
 Adicionalmente, se definen algunas funciones para poder mostrar por medio de una animación el proceso de optimización para las funciones de Rosenbrock y de Rastrigin.
 
-```{r}
-animate_ga_optimization <- function(func) {
-  # 1. Crear el entorno para almacenar la evolución de la población
-  pop_data <- data.frame()
-  
-  # 2. Ejecutar el algoritmo genético, capturando las poblaciones
-  ga_rastrigin <- ga(
-    type = "real-valued",
-    fitness = function(x) -func(x),
-    lower = c(-5.12, -5.12), upper = c(5.12, 5.12),
-    popSize = 50, maxiter = 50, run = 50,
-    monitor = function(obj) {
-      gen <- obj@iter
-      pop <- obj@population
-      df <- data.frame(
-        X1 = pop[, 1],
-        X2 = pop[, 2],
-        Generacion = gen
-      )
-      pop_data <<- rbind(pop_data, df)
-    }
-  )
-  
-  # 3. Crear grilla para visualizar la función Rastrigin
-  x <- seq(-5.12, 5.12, length.out = 100)
-  y <- seq(-5.12, 5.12, length.out = 100)
-  grid <- expand.grid(X1 = x, X2 = y)
-  grid$Z <- apply(grid, 1, func)
-  
-  # 4. Graficar y animar
-  base_plot <- ggplot() +
-    geom_raster(data = grid, aes(x = X1, y = X2, fill = Z), interpolate = TRUE) +
-    scale_fill_viridis_c() +
-    geom_point(data = pop_data, aes(x = X1, y = X2), color = "red", size = 1, alpha = 0.6) +
-    labs(title = "Optimización de Rastrigin usando GA", subtitle = "Generación: {closest_state}",
-         x = "x1", y = "x2") +
-    transition_states(Generacion, transition_length = 2, state_length = 1) +
-    theme_minimal()
-  
-  # 5. Exportar como GIF
-  anim_save("optim_rastrigin_ga.gif", animation = animate(base_plot, renderer = gifski_renderer(), fps = 5, width = 600, height = 500))
-}
-
-```
-
 Analizaremos cada función en 2 y 3 dimensiones, graficando su paisaje antes de la optimización y luego aplicando un AG con múltiples corridas para evaluar la robustez de los resultados.
 
-### 1.6.1 Implementación en R de algoritmos evolutivos
+<a name="io1.5.1."></a>
+
+### 1.5.1 Implementación en R de algoritmos evolutivos
 
 Se utiliza la función ga() del paquete GA. Para problemas de minimización se define la función de fitness como el negativo del valor objetivo, ya que ga() maximiza por defecto. Se especifican los límites de búsqueda.
 
 Los resúmenes en cada ejecución reportan el mejor fitness encontrado (negativo) y la solución óptima en cada ejecución.
 
-### 1.6.2 Optimización de la función de Rosenbrock en 2 dimensiones
+<a name="io1.5.2."></a>
 
-```{r}
-# Ejecución del método
-ga_ros2d <- ga(type = "real-valued",
-               fitness = function(x) -f_rosenbrock(x),
-               lower = c(-5, -5), upper = c(5, 5),
-               popSize = 50, maxiter = 100, run = 50)
-summary(ga_ros2d)
-```
+### 1.5.2 Optimización de la función de Rosenbrock en 2 dimensiones
 
-```{r}
-# Graficación del proceso de optimización
-gif_name <- "optim_rosenbrock_ga.gif"
-animate_ga_optimization(f_rosenbrock)
-```
+<!-- TODO: Faltan Animación de la Función -->
 
-![](images/optim_rastrigin_ga.gif)
+<a name="io1.5.3."></a>
 
-```{r}
-set.seed(123)  # semilla reproducible
-best_vals_ros <- replicate(30, {
-  GA <- ga(type = "real-valued",
-           fitness = function(x) -f_rosenbrock(x),
-           lower = c(-5, -5), upper = c(5, 5),
-           popSize = 50, maxiter = 100, run = 50)
-  -GA@fitnessValue  # convertir a valor positivo
-})
-mean_ros <- mean(best_vals_ros)
-sd_ros   <- sd(best_vals_ros)
-```
+### 1.5.3 Optimización de la función de Rosenbrock en 3 dimensiones
 
-### 1.6.3 Optimización de la función de Rosenbrock en 3 dimensiones
+<!-- TODO: Faltan Animación de la Función -->
 
-```{r}
-# Ejecución del método
-ga_ros3d <- ga(type = "real-valued",
-               fitness = function(x) -f_rosenbrock(x),
-               lower = c(-5, -5, 3), upper = c(5, 5, 3),
-               popSize = 50, maxiter = 100, run = 50)
-summary(ga_ros3d)
-```
+<a name="io1.5.4."></a>
 
-```{r}
-# Realizar 30 ejecuciones independientes para Rosenbrock 3D
-set.seed(123)  # semilla reproducible
-best_vals_ros3d <- replicate(30, {
-  GA <- ga(type = "real-valued",
-           fitness = function(x) -f_rosenbrock(x),
-           lower = c(-5, -5, 3), upper = c(5, 5, 3),
-           popSize = 50, maxiter = 100, run = 50)
-  -GA@fitnessValue  # convertir a valor positivo
-})
-mean_ros3d <- mean(best_vals_ros3d)
-sd_ros3d   <- sd(best_vals_ros3d)
-#  Rosenbrock 3D, Rastrigin 3D.
-```
+### 1.5.4 Optimización de la función de Rastrigin en 2 dimensiones
 
-### 1.6.4 Optimización de la función de Rastrigin en 2 dimensiones
+<!-- TODO: Faltan Animación de la Función -->
 
-```{r}
-# Ejecución del método
-ga_ras2d <- ga(type = "real-valued",
-               fitness = function(x) -f_rastrigin(x),
-               lower = c(-5, -12), upper = c(5, 12),
-               popSize = 50, maxiter = 100, run = 50)
-summary(ga_ras2d)
+<a name="io1.5.5."></a>
 
-```
+### 1.5.5 Optimización de la función de Rastrigin en 3 dimensiones
 
-```{r}
-# Graficación del proceso de optimización
-gif_name <- "optim_rastrigin_ga.gif"
-animate_ga_optimization(f_rastrigin)
-```
+<!-- TODO: Faltan Animación de la Función -->
 
-![](images/optim_rastrigin_ga-01.gif)
+<a name="io1.5.6."></a>
 
-```{r}
-set.seed(123)  # semilla reproducible
-best_vals_ras2d <- replicate(30, {
-  GA <- ga(type = "real-valued",
-           fitness = function(x) -f_rastrigin(x),
-           lower = c(-5, -5), upper = c(5, 5),
-           popSize = 50, maxiter = 100, run = 50)
-  -GA@fitnessValue  # convertir a valor positivo
-})
-mean_ras2d <- mean(best_vals_ras2d)
-sd_ras2d   <- sd(best_vals_ras2d)
-```
-
-### 1.6.5 Optimización de la función de Rastrigin en 3 dimensiones
-
-```{r}
-# Ejecución del método
-ga_ras3d <- ga(type = "real-valued",
-               fitness = function(x) -f_rastrigin(x),
-               lower = c(-5, -12,3), upper = c(5, 12,3 ),
-               popSize = 50, maxiter = 100, run = 50)
-summary(ga_ras3d)
-```
-
-```{r}
-set.seed(123)  # semilla reproducible
-best_vals_ras3d <- replicate(30, {
-  GA <- ga(type = "real-valued",
-           fitness = function(x) -f_rastrigin(x),
-           lower = c(-5, -5, 3), upper = c(5, 5, 3),
-           popSize = 50, maxiter = 100, run = 50)
-  -GA@fitnessValue  # convertir a valor positivo
-})
-mean_ras3d <- mean(best_vals_ras3d)
-sd_ras3d   <- sd(best_vals_ras3d)
-```
-
-### 1.6.6 Cálculo de estadísticas y análisis
+### 1.5.6 Cálculo de estadísticas y análisis
 
 Para evaluar la variabilidad del método estocástico, se repite cada caso al menos 30 veces con semillas distintas. Se registra el mejor valor de fitness (valorizado positivamente) obtenido en cada corrida. Se calcularán estadísticas (media y desviación estándar) del mejor valor de fitness obtenido en 30 ejecuciones independientes de cada caso y se resumirán en una tabla.
 
 Con los vectores de mejores valores (best_vals_ros, etc.), se calculan la media y desviación estándar de cada conjunto de 30 resultados. Por ejemplo, mean_ros y sd_ros arriba y las demas, Para asi presentar los resultados.
 
-```{r}
-library(knitr)
-resultados <- data.frame(
-  Función   = c("Rosenbrock", "Rastrigin", "Rosenbrock", "Rastrigin"),
-  Dimensión = c("2D", "2D", "3D", "3D"),
-  Media     = c(mean_ros, mean_ras2d, mean_ros3d, mean_ras3d),
-  SD        = c(sd_ros, sd_ras2d, sd_ros3d, sd_ras3d)
-)
-kable(resultados, caption = "Resumen estadístico (media y desviación estándar) del mejor fitness obtenido tras 30 ejecuciones independientes de cada caso.")
-
-```
+<!-- TODO: Faltan Table de la Función -->
 
 Los resultados de las múltiples ejecuciones se resumen en la Tabla 1. Esta tabla muestra la media y desviación estándar del mejor valor de fitness (recordado que es el valor de la función objetivo en su mínimo global, típicamente cercano a 0) para cada combinación de función y dimensión. Se observa que para Rosenbrock 2D, la media del fitness mínimo es cercana a 0 con baja dispersión, reflejando que el GA normalmente encuentra el mínimo global (0) o cercano. Para Rastrigin 2D, la media también puede acercarse a 0, pero con mayor desviación estándar debido a los múltiples mínimos locales. En 3D ambos problemas suelen mostrar valores medios mayores (más alejados de 0) y mayor variabilidad, lo cual indica una mayor dificultad de búsqueda al aumentar la dimensionalidad.
 
-```{r}
-# tabla de los valores calculados)
-library(knitr)
-res_df <- data.frame(
-  Función   = c("Rosenbrock", "Rastrigin", "Rosenbrock", "Rastrigin"),
-  Dimensión = c("2D", "2D", "3D", "3D"),
-  Media     = c(mean_ros, mean_ras2d, mean_ros3d, mean_ras3d),
-  SD        = c(sd_ros, sd_ras2d, sd_ros3d, sd_ras3d)
-)
-kable(res_df, caption = "Tabla 1. Estadísticas (media y desviación estándar) del fitness mínimo alcanzado en 30 corridas independientes para cada función y dimensión.")
-
-```
+<!-- TODO: Faltan Animación de la Función -->
 
 **Tabla 1.** Estadísticas (media y desviación estándar) del fitness mínimo alcanzado en 30 corridas independientes para cada función y dimensión.
 
-### 1.6.7 Conclusiones método de algoritmos evolutivos
+<a name="io1.5.7."></a>
+
+### 1.5.7 Conclusiones método de algoritmos evolutivos
 
 Los resultados confirman que el algoritmo genético es capaz de aproximarse a los mínimos globales de ambos problemas en múltiples dimensiones. Como era de esperar, Rastrigin mostró mayor variabilidad en los valores de fitness debido a sus muchos mínimos locales, lo que implica que algunas ejecuciones del GA pueden quedarse atrapadas en óptimos locales alejados del global. En contraste, Rosenbrock (aunque es no convexa) tiende a un único valle principal; por ello, la mayoría de las corridas alcanzaron valores cercanos al mínimo global con menor dispersión. En general se observa que al aumentar la dimensión (de 2D a 3D) la tarea se complica y la media del fitness aumenta (peor óptimo encontrado), reflejando la maldición de la dimensionalidad. El uso de múltiples ejecuciones independientes es esencial para evaluar la robustez de los AG. Debido a su naturaleza estocástica, cada ejecución puede converger a soluciones distintas. Al analizar la media y desviación estándar de los fitness finales se obtiene una medida de fiabilidad del algoritmo: una baja desviación indica resultados consistentes. En la literatura sobre algoritmos genéticos se reconoce que en muchos casos una sola ejecución puede no ser representativa​jstatsoft.org. Aunque un análisis comparativo profundo (p.ej., usando poblaciones más grandes o múltiples corridas en paralelo) queda fuera del alcance de este documento, nuestros resultados ilustran este fenómeno. Este estudio es reproducible: todo el código R necesario está incluido, permitiendo a otros investigadores replicar los experimentos, variar parámetros del GA (tasa de cruce, mutación, tamaño de población, etc.) y comparar con otros algoritmos de optimización.:Conclusiones Se ha presentado una documentación completa de la optimización de las funciones de Rosenbrock y Rastrigin en 2D y 3D empleando algoritmos genéticos en R. Mediante visualizaciones 3D iniciales se ilustraron las características de cada función de prueba. Se implementó el paquete GA para resolver cada caso y se realizaron 30 ejecuciones independientes para evaluar la robustez. Los resultados muestran que el GA puede encontrar aproximaciones al mínimo global en ambos problemas, aunque la función Rastrigin (múltiples mínimos locales) presenta más variabilidad y dificultad, especialmente en 3D.
 
+<a name="io2."></a>
+
 # Parte 2. Optimización combinatoria
+
+<a name="io2.1."></a>
 
 ## 2.1 Planteamiento del problema
 
@@ -1225,50 +671,7 @@ El problema se puede plantear como una instancia particular del problema del via
 
 El objetivo de este problema es optimizar con respecto a los costos y no a las distancias entre ciudades, por lo que se tienen que considerar los costos de combustible, de peajes y cuánto cobra el vendedor por hora de trabajo. Sin embargo, la distancia afectará al valor de todos estos costos, y por lo tanto hay que considerarla. Adicionalmente, todos estos costos están en función de la distancia en metros, por lo que es necesario realizar la conversión de latitud-longitud a coordenadas en metros. Para esto se usó la librería "sf" para realizar la conversión al sistema de coordenadas planas UTM, el cual representa los puntos del globo en metros.
 
-La tabla de coordenadas en metros utilizando la información de la Tabla 1 se implementa a continuación:
-
-```{r}
-nombre_ciudades <- c("Bogotá", "Medellín", "Cali", "Barranquilla", "Cartagena", 
-             "Cúcuta", "Pasto", "Ibagué", "Bucaramanga", "Villavicencio", 
-             "Santa Marta", "Manizales", "Pereira")
-
-# Definición de ciudades, latitud y longitud de cada ciudad.
-ciudades <- tibble::tibble(
-  Ciudad = nombre_ciudades,
-  Latitud = c(4.7110, 6.2442, 3.4516, 10.9685, 10.3910, 
-              7.8941, 1.2136, 4.4389, 7.1193, 4.1420, 
-              11.2408, 5.0703, 4.8143),
-  Longitud = c(-74.0721, -75.5812, -76.5320, -74.7813, -75.4794, 
-               -72.5078, -77.2811, -75.2322, -73.1227, -73.6298, 
-               -74.1990, -75.5138, -75.6946)
-)
-
-# Time zone value
-# Por simplicidad, se elige el mismo punto común para calcular el timezone.
-# Se utiliza la longitud de Bogotá como punto común para calcular el utm_zone.
-utm_zone <- floor((-74.0721 + 180)/6) + 1 + 32700
-
-# Convertimos a objeto espacial
-puntos <- st_as_sf(ciudades, coords = c("Longitud", "Latitud"), crs = 4326)
-
-puntos_en_utm <- st_transform(puntos, crs=utm_zone)
-ciudades_en_metros <- st_coordinates(puntos_en_utm)
-tabla_coordenadas_ciudades <- data.frame(
-  ciudad = nombre_ciudades,
-  coord_x_en_metros = ciudades_en_metros[,1],
-  coord_y_en_metros = ciudades_en_metros[,2]
-)
-tabla_coordenadas_ciudades
-
-```
-
 Luego, se crea la matriz de distancias en metros entre cada ciudad.
-
-```{r}
-coordenadas_ciudades <- data.matrix(tabla_coordenadas_ciudades[,c(2,3)])
-distancias <- compute_distance_matrix(coordenadas_ciudades)
-print(distancias)
-```
 
 Ahora, hay que considerar los costos para poder crear una matriz de costos para resolver el problema de optimización.
 
@@ -1284,43 +687,6 @@ print(costos_combustible)
 ```
 
 Considerando el costo de los peajes, se usarán los datos de (Autofact, 2024) para calcular el valor promedio de cada peaje de las ciudades consideradas y se asumirá que el vendedor pagará el valor promedio del peaje de la ciudad de origen y de la ciudad de destino exactamente 1 vez cada que las recorra.
-
-```{r}
-peajes = c(
-  # Cundinamarca (Bogotá)
-  mean(c(12800,13800,16500,16500,14100,11200,11200,10300,10300,6400,12800,12800,11100,11100,13300,13300,12300,12300,12300,16900)),
-  # Antioquia (Medellín)
-  mean(c(16800,12200,12100,22900,15800,10500,16200,10500,10900,20600,18000,16700,16700,14600,15900)),
-  # Valle del Cauca (Cali)
-  mean(c(14600,11100,11100,11000,11000,11000,11000,11000,10300)),
-  # Atlántico (Barranquilla)
-  mean(c(3000,17200,8300,8300,11900,11900)),
-  # Bolívar (Cartagena)
-  mean(c(18400,16300,11100,11200,11200,5100,11400)),
-  # Norte de Santander (Cúcuta)
-  mean(c(7900,19700)),
-  # Nariño (Pasto)
-  mean(c(14200)),
-  # Tolima (Ibagué)
-  mean(c(13800,12700,14200,13700,13700,13700,15700)),
-  # Santander (Bucaramanga)
-  mean(c(16700,10900,13500,13500,13500)),
-  # Meta (Villavicencio)
-  mean(c(23000,13100,13100,6900,6900,16900,8600,4800)),
-  # Magdalena (Santa Marta)
-  mean(c(12300,10900,11700,11700)),
-  # Caldas (Manizales)
-  mean(c(16100,14000,14600,14600,14600,14600,21000,10500)),
-  # Risaralda (Pereira)
-  mean(c(16100))
-)
-
-costos_peajes <- outer(peajes, peajes, "+")
-rownames(costos_peajes) <- nombre_ciudades
-colnames(costos_peajes) <- nombre_ciudades
-diag(costos_peajes) <- rep(0, 13)
-print(costos_peajes)
-```
 
 Por último, se debe de considerar el salario por horas promedio de un vendedor que haga dichos recorridos para entregar los pedidos. Adicional a ser vendedor, esta persona realizará las entregas y la conducción de la mercancía, por lo que también hay que considerar su pago como transportista. Dicho esto, se promediaron salarios de un transportista y un vendedor para poder determinar el salario final de la persona. Según (Talent.com, s.f., *Salario medio para Transporte De Carga en Colombia 2025*) y (Talent.com, s.f., *Salario medio para Vendedor en Colombia 2025*), un transportista gana en promedio \$9.341 pesos colombianos la hora y un vendedor hace \$7.144 la hora; por lo tanto, el salario a utilizar será el \$8.242 pesos la hora.
 
@@ -1340,10 +706,7 @@ costos_vendedor
 
 Concluyendo, la matriz de costos simplemente sería el resultado de la suma de las anteriores matrices previamente definidas, y esta será la matriz que se utilizarán en los distintos algoritmos para encontrar la mejor ruta.
 
-```{r}
-matriz_costos <- costos_vendedor + costos_peajes + costos_combustible
-print(matriz_costos)
-```
+<a name="io2.2."></a>
 
 ## 2.2 Implementación Método de Colonia de hormigas
 
@@ -1369,109 +732,53 @@ print("MEJOR RECORRIDO: ")
 print(recorrido_optimizado$tour)
 ```
 
-```{r}
-# Tour más óptimo: 1 10  7  3  8 13 12  2  5  4 11  6  9
+<!-- TODO: Falta Mapa de la Rutas -->
 
-# Rutas seleccionadas entre algunas ciudades
-print("RUTA IDEAL: ")
-print("Bogotá->Villavicencio->Pasto->Cali->Ibagué->Pereira->Manizales->Medellín->Cartagena->Barranquilla->Santa Marta->Cúcuta->Bucaramanga")
-pares_rutas <- list(
-  c("Bogotá", "Villavicencio"),
-  c("Villavicencio", "Pasto"),
-  c("Pasto", "Cali"),
-  c("Cali", "Ibagué"),
-  c("Ibagué", "Pereira"),
-  c("Pereira", "Manizales"),
-  c("Manizales", "Medellín"),
-  c("Medellín", "Cartagena"),
-  c("Cartagena", "Barranquilla"),
-  c("Barranquilla", "Santa Marta"),
-  c("Santa Marta", "Cúcuta"),
-  c("Cúcuta", "Bucaramanga")
-)
-
-# Convertimos a objeto espacial
-puntos <- st_as_sf(ciudades, coords = c("Longitud", "Latitud"), crs = 4326)
-
-# Obtener rutas con osrm
-rutas <- list()
-for (par in pares_rutas) {
-  origen <- puntos[ciudades$Ciudad == par[1], ]
-  destino <- puntos[ciudades$Ciudad == par[2], ]
-  ruta <- try(osrmRoute(src = origen, dst = destino, ), silent = TRUE)
-  if (!inherits(ruta, "try-error")) {
-    rutas <- append(rutas, list(ruta))
-  }
-}
-
-# Crear el mapa
-mapa <- leaflet() %>%
-  addTiles() %>%
-  addCircleMarkers(data = puntos, label = ~Ciudad, radius = 6, color = "blue", fillOpacity = 0.8)
-
-# Añadir las rutas en rojo
-for (ruta in rutas) {
-  mapa <- mapa %>% addPolylines(data = ruta, color = "red", weight = 3)
-}
-
-print("COSTO FINAL DEL RECORRIDO: ")
-costos <- c(
-  matriz_costos[1,10], #"Bogotá" -> "Villavicencio"
-  matriz_costos[10,7], #"Villavicencio" -> "Pasto"
-  matriz_costos[7,3], #"Pasto" -> "Cali"
-  matriz_costos[3,8], #"Cali" -> "Ibagué"
-  matriz_costos[8,13], #"Ibagué" -> "Pereira"
-  matriz_costos[13,12], #"Pereira" -> "Manizales"
-  matriz_costos[12,2], #"Manizales" -> "Medellín"
-  matriz_costos[2,5], #"Medellín" -> "Cartagena"
-  matriz_costos[5,4], #"Cartagena" -> "Barranquilla"
-  matriz_costos[4,11], #"Barranquilla" -> "Santa Marta"
-  matriz_costos[11,6], #"Santa Marta" -> "Cúcuta"
-  matriz_costos[6,9] #"Cúcuta" -> "Bucaramanga"
-)
-print(sum(costos))
-mapa
-```
+<a name="iu3."></a>
 
 # Reporte de contribución individual
 
-## Leonardo Federico Corona Torres
+## - Leonardo Federico Corona Torres
 
--   Apoyo en redacción y realización de implementaciones de sección "Método de algoritmos evolutivos".
+  -   Apoyo en redacción y realización de implementaciones de sección "Método de algoritmos evolutivos".
+  
+  -   Apoyo en redacción de implementaciones de graficación en Parte 2 del reporte.
+  
+  -   Búsqueda e investigación de funciones de prueba a utilizar.
+  
+  -   Apoyo en redacción y realización de implementaciones de sección "Selección e implementación de las funciones de prueba".
 
--   Apoyo en redacción de implementaciones de graficación en Parte 2 del reporte.
+## - David Escobar Ruiz
+  
+  -   Definición y escritura de estructura del reporte.
+  
+  -   Apoyo en redacción y realización de implementaciones de sección "Selección e implementación de las funciones de prueba".
+  
+  -   Apoyo en redaccióny realización de implementaciones de sección "Método de optimización de partículas".
+  
+  -   Apoyo en redacción y realización de implementaciones de métodos, planteamiento y preprocesamiento de datos Parte 2 del reporte.
 
--   Búsqueda e investigación de funciones de prueba a utilizar.
+## - Johan Sebastián Robles Rincón
 
--   Apoyo en redacción y realización de implementaciones de sección "Selección e implementación de las funciones de prueba".
+  -   Implementación y prueba del método de evolución diferencial en R para funciones de Rosenbrock y Rastrigin en 2D y 3D.
+  
+  -   Análisis de resultados numéricos y gráficos.
+  
+  -   Apoyo en redacción de sección del contenido técnico relacionado con este método de evolucion diferencial en el informe.
 
-## David Escobar Ruiz
+## - Sebastian Soto Arcila
 
--   Definición y escritura de estructura del reporte.
-
--   Apoyo en redacción y realización de implementaciones de sección "Selección e implementación de las funciones de prueba".
-
--   Apoyo en redaccióny realización de implementaciones de sección "Método de optimización de partículas".
-
--   Apoyo en redacción y realización de implementaciones de métodos, planteamiento y preprocesamiento de datos Parte 2 del reporte.
-
-## Johan Sebastián Robles Rincón
-
--   Implementación y prueba del método de evolución diferencial en R para funciones de Rosenbrock y Rastrigin en 2D y 3D.
-
--   Análisis de resultados numéricos y gráficos.
-
--   Apoyo en redacción de sección del contenido técnico relacionado con este método de evolucion diferencial en el informe.
-
-## Sebastian Soto Arcila
-
--   Apoyo en redacción y realización de implementaciones de sección "Método de optimización por descenso de gradiente"
-
--   Apoyo en redacción de sección "Selección e implementación de las funciones de prueba".
+  -   Apoyo en redacción y realización de implementaciones de sección "Método de optimización por descenso de gradiente"
+  
+  -   Apoyo en redacción de sección "Selección e implementación de las funciones de prueba".
+  
+  <a name="iu4."></a>
 
 # Repositorio de GitHub del proyecto
 
 [https://github.com/druiz35/RNABI2025-1-Equipo3/](https://github.com/druiz35/RNABI2025-1-Equipo3/tree/main){.uri}
+
+<a name="iu5."></a>
 
 # Bibliografía
 

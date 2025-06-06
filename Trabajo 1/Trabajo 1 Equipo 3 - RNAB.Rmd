@@ -90,9 +90,11 @@ knitr::opts_chunk$set(echo = TRUE)
 - [2. Optimización combinatoria](#io2.)
 - [2.1. Planteamiento del problema](#io2.1.)
 - [2.2. Implementación Método de Colonia de hormigas](#io2.2.)
+- [Conclusión General](#io5.)
 - [Reporte de contribución individual](#iu3.)
 - [Repositorio de GitHub del proyecto](#iu4.)
 - [Bibliografía](#iu5.) 
+
 
 
 <a name="iu1."></a>
@@ -240,7 +242,15 @@ f_rosenbrock <- function(x){
 
 Las gráficas de la función de Rosenbrock en 2 y 3 dimensiones se muestran a continuación:
 
-<!-- TODO: Faltan Graficas de la Función -->
+<div style="text-align: center;">
+  <img src="rosenbrock_opt.gif" alt="Animación de la optimización de Rosenbrock 2D" style="width:350px; max-width:90%; display:block; margin:auto;">
+  <div style="font-weight:bold; margin-top:8px; font-size:1.05em;">Animación de la optimización de Rosenbrock 2D</div>
+</div>
+
+<div style="text-align: center;">
+  <img src="pso_rosenbrock_max.gif" alt="Animación de la optimización de Rosenbrock 3D" style="width:350px; max-width:90%; display:block; margin:auto;">
+  <div style="font-weight:bold; margin-top:8px; font-size:1.05em;">Animación de la optimización de Rosenbrock 3D</div>
+</div>
 
 <a name="io1.1.3."></a>
 
@@ -322,7 +332,15 @@ f_rastrigin <-function(x){
 
 Las gráficas de la función de Rastrigin en 2 y 3 dimensiones se muestran a continuación:
 
-<!-- TODO: Faltan Graficas de la Función -->
+<div style="text-align: center;">
+  <img src="rastrigin_opt.gif" alt="Animación de la optimización de Rastrigin 2D" style="width:350px; max-width:90%; display:block; margin:auto;">
+  <div style="font-weight:bold; margin-top:8px; font-size:1.05em;">Animación de la optimización de Rastrigin 2D</div>
+</div>
+
+<div style="text-align: center;">
+  <img src="pso_rastrigin_max.gif" alt="Animación de la optimización de Rastrigin 3D" style="width:350px; max-width:90%; display:block; margin:auto;">
+  <div style="font-weight:bold; margin-top:8px; font-size:1.05em;">Animación de la optimización de Rastrigin 3D</div>
+</div>
 
 <a name="io1.2."></a>
 
@@ -355,33 +373,37 @@ optimizador_mult_numdev <- function(x0,fun,max_eval=100,h=0.01,eta=0.01){
 
 ### 1.2.2 Optimización de la función de Rosenbrock en 2 dimensiones
 
-Animación de la optimización
-
-<!-- TODO: Faltan Animación de la Función -->
+<div style="text-align: center;">
+  <img src="rosenbrock_opt.gif" alt="Animación de la optimización de Rosenbrock 2D" style="width:350px; max-width:90%; display:block; margin:auto;">
+  <div style="font-weight:bold; margin-top:8px; font-size:1.05em;">Animación de la optimización de Rosenbrock 2D</div>
+</div>
 
 <a name="io1.2.3."></a>
 
 ### 1.2.3 Optimización de la función de Rosenbrock en 3 dimensiones
 
-Animación de la optimización
-
-<!-- TODO: Faltan Animación de la Función -->
+<div style="text-align: center;">
+  <img src="pso_rosenbrock_max.gif" alt="Animación de la optimización de Rosenbrock 3D" style="width:350px; max-width:90%; display:block; margin:auto;">
+  <div style="font-weight:bold; margin-top:8px; font-size:1.05em;">Animación de la optimización de Rosenbrock 3D</div>
+</div>
 
 <a name="io1.2.4."></a>
 
 ### 1.2.4 Optimización de la función de Rastrigin en 2 dimensiones
 
-Animación de la optimización
-
-<!-- TODO: Faltan Animación de la Función -->
+<div style="text-align: center;">
+  <img src="rastrigin_opt.gif" alt="Animación de la optimización de Rastrigin 2D" style="width:350px; max-width:90%; display:block; margin:auto;">
+  <div style="font-weight:bold; margin-top:8px; font-size:1.05em;">Animación de la optimización de Rastrigin 2D</div>
+</div>
 
 <a name="io1.2.5."></a>
 
 ### 1.2.5 Optimización de la función de Rastrigin en 3 dimensiones
 
-Animación de la optimización
-
-<!-- TODO: Faltan Animación de la Función -->
+<div style="text-align: center;">
+  <img src="pso_rastrigin_max.gif" alt="Animación de la optimización de Rastrigin 3D" style="width:350px; max-width:90%; display:block; margin:auto;">
+  <div style="font-weight:bold; margin-top:8px; font-size:1.05em;">Animación de la optimización de Rastrigin 3D</div>
+</div>
 
 <a name="io1.2.6."></a>
 
@@ -520,18 +542,10 @@ Se utiliza el paquete pos para implementar el método de la optimización de par
 
 ### 1.4.2 Optimización de la función de Rosenbrock en 2 dimensiones
 
-```{r}
-# Parámetros a utilizar
-n <- 2
-lower_bounds <- -20
-upper_bounds <- 20
-
-# Ejecución del método
-o_pso <- particle_swarm_optimization(n,f_rosenbrock,lower_bounds,upper_bounds)
-
-```
-
-<!-- TODO: Faltan Animación de la Función -->
+<div style="text-align: center;">
+  <img src="pso_rosenbrock_min.gif" alt="Animación de la optimización de Rosenbrock 2D con PSO" style="width:350px; max-width:90%; display:block; margin:auto;">
+  <div style="font-weight:bold; margin-top:8px; font-size:1.05em;">Animación de la optimización de Rosenbrock 2D con PSO</div>
+</div>
 
 <a name="io1.4.3."></a>
 
@@ -543,7 +557,10 @@ o_pso <- particle_swarm_optimization(n,f_rosenbrock,lower_bounds,upper_bounds)
 
 ### 1.4.4 Optimización de la función de Rastrigin en 2 dimensiones
 
-<!-- TODO: Faltan Animación de la Función -->
+<div style="text-align: center;">
+  <img src="pso_rastrigin_min.gif" alt="Animación de la optimización de Rastrigin 2D con PSO" style="width:350px; max-width:90%; display:block; margin:auto;">
+  <div style="font-weight:bold; margin-top:8px; font-size:1.05em;">Animación de la optimización de Rastrigin 2D con PSO</div>
+</div>
 
 <a name="io1.4.5."></a>
 
@@ -570,7 +587,7 @@ Estos resultados pueden deberse a la distribución de las partículas por el esp
 
 ## 1.5 Método de algoritmos evolutivos
 
-Los algoritmos genéticos (AG) son técnicas de búsqueda heurística basadas en procesos de evolución natural​ . En un AG típico se define una función FITNESS que evalúa la calidad de cada solución candidata (individuo). A partir de una población inicial aleatoria, se iteran ciclos donde se seleccionan individuos más aptos, se combinan sus “genes” mediante cruces (crossover) y se introducen modificaciones aleatorias (mutaciones). Estos operadores evolucionan la población hacia regiones con mejor fitness.
+Los algoritmos genéticos (AG) son técnicas de búsqueda heurística basadas en procesos de evolución natural​ . En un AG típico se define una función FITNESS que evalúa la calidad de cada solución candidata (individuo). A partir de una población inicial aleatoria, se iteran ciclos donde se seleccionan individuos más aptos, se combinan sus "genes" mediante cruces (crossover) y se introducen modificaciones aleatorias (mutaciones). Estos operadores evolucionan la población hacia regiones con mejor fitness.
 
 Según (Scrucca, 2013), los GAs han sido exitosos en optimizar funciones continuas (diferenciables o no) y discretas. Entre los operadores genéticos clave se destacan:
 
@@ -598,7 +615,10 @@ Los resúmenes en cada ejecución reportan el mejor fitness encontrado (negativo
 
 ### 1.5.2 Optimización de la función de Rosenbrock en 2 dimensiones
 
-<!-- TODO: Faltan Animación de la Función -->
+<div style="text-align: center;">
+  <img src="optim_rastrigin_ga.gif" alt="Animación de optimización de Rastrigin 2D con Algoritmo Genético" style="width:350px; max-width:90%; display:block; margin:auto;">
+  <div style="font-weight:bold; margin-top:8px; font-size:1.05em;">Animación de la optimización de Rastrigin 2D con Algoritmo Genético</div>
+</div>
 
 <a name="io1.5.3."></a>
 
@@ -639,6 +659,14 @@ Los resultados de las múltiples ejecuciones se resumen en la Tabla 1. Esta tabl
 ### 1.5.7 Conclusiones método de algoritmos evolutivos
 
 Los resultados confirman que el algoritmo genético es capaz de aproximarse a los mínimos globales de ambos problemas en múltiples dimensiones. Como era de esperar, Rastrigin mostró mayor variabilidad en los valores de fitness debido a sus muchos mínimos locales, lo que implica que algunas ejecuciones del GA pueden quedarse atrapadas en óptimos locales alejados del global. En contraste, Rosenbrock (aunque es no convexa) tiende a un único valle principal; por ello, la mayoría de las corridas alcanzaron valores cercanos al mínimo global con menor dispersión. En general se observa que al aumentar la dimensión (de 2D a 3D) la tarea se complica y la media del fitness aumenta (peor óptimo encontrado), reflejando la maldición de la dimensionalidad. El uso de múltiples ejecuciones independientes es esencial para evaluar la robustez de los AG. Debido a su naturaleza estocástica, cada ejecución puede converger a soluciones distintas. Al analizar la media y desviación estándar de los fitness finales se obtiene una medida de fiabilidad del algoritmo: una baja desviación indica resultados consistentes. En la literatura sobre algoritmos genéticos se reconoce que en muchos casos una sola ejecución puede no ser representativa​jstatsoft.org. Aunque un análisis comparativo profundo (p.ej., usando poblaciones más grandes o múltiples corridas en paralelo) queda fuera del alcance de este documento, nuestros resultados ilustran este fenómeno. Este estudio es reproducible: todo el código R necesario está incluido, permitiendo a otros investigadores replicar los experimentos, variar parámetros del GA (tasa de cruce, mutación, tamaño de población, etc.) y comparar con otros algoritmos de optimización.:Conclusiones Se ha presentado una documentación completa de la optimización de las funciones de Rosenbrock y Rastrigin en 2D y 3D empleando algoritmos genéticos en R. Mediante visualizaciones 3D iniciales se ilustraron las características de cada función de prueba. Se implementó el paquete GA para resolver cada caso y se realizaron 30 ejecuciones independientes para evaluar la robustez. Los resultados muestran que el GA puede encontrar aproximaciones al mínimo global en ambos problemas, aunque la función Rastrigin (múltiples mínimos locales) presenta más variabilidad y dificultad, especialmente en 3D.
+<a name="io1.5.7."></a>
+# Conclusión General
+
+Al terminar este trabajo, la verdad es que uno se da cuenta de lo poderosos y flexibles que pueden ser los algoritmos bioinspirados cuando se trata de resolver problemas de optimización, tanto numéricos como combinatorios. En la primera parte, experimentamos con funciones clásicas como Rosenbrock y Rastrigin usando métodos como el descenso de gradiente, PSO y algoritmos genéticos. Lo interesante fue ver cómo los métodos bioinspirados, inspirados en la naturaleza y el comportamiento colectivo, logran escapar de los mínimos locales y explorar el espacio de soluciones de una forma mucho más creativa y robusta que los métodos tradicionales. No solo es cuestión de encontrar el mínimo, sino de cómo se llega a él: la diversidad, la colaboración y la adaptación constante hacen la diferencia.
+
+Pero la cosa no se quedó ahí. En la segunda parte, nos metimos de lleno en la optimización combinatoria, enfrentándonos al clásico problema del viajante usando colonia de hormigas. Aquí, la inspiración en el comportamiento de las hormigas para encontrar rutas óptimas en la naturaleza se tradujo en un algoritmo capaz de encontrar soluciones eficientes en problemas donde la cantidad de combinaciones posibles es abrumadora. Es impresionante ver cómo, a través de la cooperación y la comunicación indirecta (como las feromonas en el caso de las hormigas), el sistema encuentra caminos cada vez mejores, incluso cuando el espacio de búsqueda es gigantesco.
+
+En resumen, este trabajo no solo nos permitió comparar y entender diferentes algoritmos, sino que también nos mostró la importancia de pensar "fuera de la caja" y de inspirarnos en la naturaleza para resolver problemas complejos. Los algoritmos bioinspirados no son una receta mágica, pero sí una herramienta poderosa y adaptable, capaz de enfrentar desafíos tanto en el mundo continuo como en el discreto. Además, trabajar con estos métodos fomenta la creatividad, el trabajo en equipo y una visión interdisciplinaria que, sin duda, es clave en la ciencia y la ingeniería de hoy.
 
 <a name="io2."></a>
 
@@ -733,6 +761,17 @@ print(recorrido_optimizado$tour)
 ```
 
 <!-- TODO: Falta Mapa de la Rutas -->
+
+<a name="io5."></a>
+
+# Conclusión General
+
+Al terminar este trabajo, la verdad es que uno se da cuenta de lo poderosos y flexibles que pueden ser los algoritmos bioinspirados cuando se trata de resolver problemas de optimización, tanto numéricos como combinatorios. En la primera parte, experimentamos con funciones clásicas como Rosenbrock y Rastrigin usando métodos como el descenso de gradiente, PSO y algoritmos genéticos. Lo interesante fue ver cómo los métodos bioinspirados, inspirados en la naturaleza y el comportamiento colectivo, logran escapar de los mínimos locales y explorar el espacio de soluciones de una forma mucho más creativa y robusta que los métodos tradicionales. No solo es cuestión de encontrar el mínimo, sino de cómo se llega a él: la diversidad, la colaboración y la adaptación constante hacen la diferencia.
+
+Pero la cosa no se quedó ahí. En la segunda parte, nos metimos de lleno en la optimización combinatoria, enfrentándonos al clásico problema del viajante usando colonia de hormigas. Aquí, la inspiración en el comportamiento de las hormigas para encontrar rutas óptimas en la naturaleza se tradujo en un algoritmo capaz de encontrar soluciones eficientes en problemas donde la cantidad de combinaciones posibles es abrumadora. Es impresionante ver cómo, a través de la cooperación y la comunicación indirecta (como las feromonas en el caso de las hormigas), el sistema encuentra caminos cada vez mejores, incluso cuando el espacio de búsqueda es gigantesco.
+
+En resumen, este trabajo no solo nos permitió comparar y entender diferentes algoritmos, sino que también nos mostró la importancia de pensar "fuera de la caja" y de inspirarnos en la naturaleza para resolver problemas complejos. Los algoritmos bioinspirados no son una receta mágica, pero sí una herramienta poderosa y adaptable, capaz de enfrentar desafíos tanto en el mundo continuo como en el discreto. Además, trabajar con estos métodos fomenta la creatividad, el trabajo en equipo y una visión interdisciplinaria que, sin duda, es clave en la ciencia y la ingeniería de hoy.
+
 
 <a name="iu3."></a>
 

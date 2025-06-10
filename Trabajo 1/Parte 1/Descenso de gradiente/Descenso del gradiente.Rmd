@@ -33,21 +33,28 @@ library(pso)
 generate_function_graph <- function(func_2d, low_bound, upper_bound) {
   x1 <- seq(low_bound, upper_bound, length.out = 50)
   x2 <- seq(low_bound, upper_bound, length.out = 50)
-  f_x <- outer(x1,x2, FUN = func_2d)
-  
+  f_x <- outer(x1, x2, FUN = func_2d)
+
   colores        <- viridis::magma(n = 100, alpha = 0.7)
   z.facet.center <- (f_x[-1, -1] + f_x[-1, -ncol(f_x)] +
                        f_x[-nrow(f_x), -1] +
-                       f_x[-nrow(f_x), -ncol(f_x)])/4
+                       f_x[-nrow(f_x), -ncol(f_x)]) / 4
   z.facet.range  <- cut(z.facet.center, 100)
-  
-  par(mai = c(0,0,0,0))
-  persp(x = x1, y = x2, z = f_x,
-        shade = 0.8,
-        phi = 30,
-        theta = 30,
-        col = colores[z.facet.range],
-        axes = FALSE)
+
+  par(mai = c(0.5, 0.5, 0.5, 0.5))  # Márgenes más amplios para las etiquetas
+  persp(
+    x = x1,
+    y = x2,
+    z = f_x,
+    shade = 0.8,
+    phi = 30,
+    theta = 30,
+    col = colores[z.facet.range],
+    xlab = "Eje X",
+    ylab = "Eje Y",
+    zlab = "Eje Z",
+    axes = TRUE  # Habilitar los ejes con etiquetas
+  )
 }
 
 #Fúnción nueva
@@ -91,11 +98,28 @@ generate_countour <- function(func_2d, low_bound, upper_bound) {
   n_length <- 100
   x1 <- seq(low_bound, upper_bound, length.out = n_length)
   x2 <- seq(low_bound, upper_bound, length.out = n_length)
-  expand.grid(X1 = x1, X2 = x2) %>%
-    mutate(Z = func_2d(X1, X2)) %>%
-    ggplot(aes(X1, X2, z = Z)) +
-    geom_contour() +
-    geom_contour_filled()
+  
+  # Crear la grilla y evaluar la función
+  grid_data <- expand.grid(X1 = x1, X2 = x2) %>%
+    mutate(Z = func_2d(X1, X2))
+  
+  # Crear el gráfico
+  ggplot(grid_data, aes(x = X1, y = X2, z = Z)) +
+    geom_contour(color = "black", linewidth = 0.3) +
+    geom_contour_filled() +
+    labs(
+      x = "Eje X",
+      y = "Eje Y",
+      fill = "Nivel de Z"
+    ) +
+    scale_fill_viridis_d(option = "magma", direction = -1, alpha = 0.8) +
+    theme_minimal(base_size = 14) +
+    theme(
+      legend.position = "right",
+      legend.title = element_text(size = 12),
+      legend.text = element_text(size = 10),
+      plot.title = element_text(face = "bold", hjust = 0.5)
+    )
 }
 ```
 

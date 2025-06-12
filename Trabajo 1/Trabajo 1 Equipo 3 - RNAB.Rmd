@@ -346,6 +346,10 @@ Las gráficas de la función de Rastrigin en 2 y 3 dimensiones se muestran a con
 
 ## 1.2 Método de descenso de gradiente
 
+El método de optimización por descenso de gradiente es una técnica iterativa utilizada para encontrar el mínimo de una función. Consiste en actualizar sucesivamente los valores de las variables en la dirección opuesta al gradiente de la función, con el objetivo de reducir su valor en cada paso.
+
+En nuestro caso, se utilizaron las siguientes variables para implementar el método: X₀, que representa la condición inicial del algoritmo; H, que define el tamaño de la ventana para el cálculo de la derivada numérica; y ETA, que corresponde a la tasa de aprendizaje, es decir, el tamaño del paso que se da en cada iteración hacia el mínimo.
+
 <a name="io1.2.1."></a>
 
 ### 1.2.1 Implementación en R de descenso de gradiente
@@ -373,6 +377,10 @@ optimizador_mult_numdev <- function(x0,fun,max_eval=100,h=0.01,eta=0.01){
 
 ### 1.2.2 Optimización de la función de Rosenbrock en 2 dimensiones
 
+```{r}
+sol_rosen2d <- optimizador_mult_numdev(f_rosenbrock, x0=c(-4,-4), h=0.005, eta=0.5)
+```
+
 <div style="text-align: center;">
   <img src="rosenbrock_opt_grad_2d.gif" alt="Animación de la optimización de Rosenbrock 2D" style="width:350px; max-width:90%; display:block; margin:auto;">
   <div style="font-weight:bold; margin-top:8px; font-size:1.05em;">Animación de la optimización de Rosenbrock 2D</div>
@@ -382,14 +390,27 @@ optimizador_mult_numdev <- function(x0,fun,max_eval=100,h=0.01,eta=0.01){
 
 ### 1.2.3 Optimización de la función de Rosenbrock en 3 dimensiones
 
-<div style="text-align: center;">
-  <img src="pso_rosenbrock_max.gif" alt="Animación de la optimización de Rosenbrock 3D" style="width:350px; max-width:90%; display:block; margin:auto;">
-  <div style="font-weight:bold; margin-top:8px; font-size:1.05em;">Animación de la optimización de Rosenbrock 3D</div>
-</div>
+```{r}
+sol_rosen3d <- optimizador_mult_numdev(f_rosenbrock, x0=c(-4,-4,-4), h=0.005, eta=0.5)
+```
+
+| Iteración |     X        |     Y       |     Z        |   f       |
+|-----------|--------------|--------------|--------------|-----------|
+|    1      | -4.000000     | -4.000000     | -4.000000     | 48.000000 |
+|   11      | -0.3872184    | -0.6605544    |  0.1646661    | 38.426304 |
+|   21      |  0.2847338    |  0.0607084    | -0.0001942    | 12.968584 |
+|   31      |  0.8916011    |  0.7922555    |  0.6208702    | 28.667475 |
+|   41      |  0.9960646    |  0.9921280    |  0.9842283    |  3.009515 |
+|   50      |  0.9970042    |  0.9940273    |  0.9880900    |  2.995228 |
+
 
 <a name="io1.2.4."></a>
 
 ### 1.2.4 Optimización de la función de Rastrigin en 2 dimensiones
+
+```{r}
+sol_ras2d <- optimizador_mult_numdev(f_rastrigin, x0=c(4.5,4.5), h=0.005, eta=2)
+```
 
 <div style="text-align: center;">
   <img src="rastrigin_opt_grad_2d.gif" alt="Animación de la optimización de Rastrigin 2D" style="width:350px; max-width:90%; display:block; margin:auto;">
@@ -400,16 +421,30 @@ optimizador_mult_numdev <- function(x0,fun,max_eval=100,h=0.01,eta=0.01){
 
 ### 1.2.5 Optimización de la función de Rastrigin en 3 dimensiones
 
-<div style="text-align: center;">
-  <img src="pso_rastrigin_max.gif" alt="Animación de la optimización de Rastrigin 3D" style="width:350px; max-width:90%; display:block; margin:auto;">
-  <div style="font-weight:bold; margin-top:8px; font-size:1.05em;">Animación de la optimización de Rastrigin 3D</div>
-</div>
+```{r}
+sol_ras3d <- optimizador_mult_numdev(f_rastrigin, x0=c(-4,-4,-4),  h=0.005, eta=2)
+```
+
+| Iteración |     X        |     Y        |     Z       |   f      |
+|-----------|--------------|--------------|--------------|----------|
+|    1      | -4.000000     | -4.000000     | -4.000000     | 48.00000 |
+|   11      | -4.002614     | -4.002614     | -4.002614     | 48.06681 |
+|   21      | -4.006548     | -4.006548     | -4.006548     | 48.18267 |
+|   31      | -4.013471     | -4.013471     | -4.013471     | 48.43125 |
+|   41      | -4.031075     | -4.031075     | -4.031075     | 49.31872 |
+|   51      | -3.676394     | -3.676394     | -3.676394     | 83.93268 |
+|   61      | -4.965219     | -4.965219     | -4.964477     | 74.67566 |
+|   71      | -4.964956     | -4.964956     | -4.964150     | 74.67986 |
+|   81      | -4.964671     | -4.964671     | -4.963793     | 74.68354 |
+|   91      | -4.964362     | -4.964362     | -4.963399     | 74.68769 |
+|  100      | -4.985429     | -4.985429     | -4.986505     | 74.69392 |
+
 
 <a name="io1.2.6."></a>
 
 ### 1.2.6 Conclusiones método de desenso del gradiente
 
-<!-- TODO: Faltan Concluciones -->
+El método de optimización por descenso de gradiente se caracteriza por su simplicidad y facilidad de implementación, lo que lo convierte en una herramienta útil para funciones con superficies suaves y relativamente simples. Sin embargo, al aplicarse a funciones altamente no convexas como la función de Rastrigin, este método presenta limitaciones significativas, ya que tiende a quedar atrapado en mínimos locales, dificultando la convergencia hacia una solución global óptima.
 
 <a name="io1.3."></a>
 

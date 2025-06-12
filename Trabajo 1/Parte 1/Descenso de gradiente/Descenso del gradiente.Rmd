@@ -378,6 +378,29 @@ sol_rosen3d <- optimizador_mult_numdev(f_rosenbrock,x0=c(-4,-4,-4), h=0.005, eta
 ```
 
 ```{r}
+# Evaluar la función objetivo en cada iteración
+valores <- apply(sol_rosen3d, 1, f_rastrigin)
+
+# Combinar iteraciones y valores en un dataframe
+df_resultados <- data.frame(
+  Iteracion = 1:nrow(sol_rosen3d),
+  X1 = sol_rosen3d[,1],
+  X2 = sol_rosen3d[,2],
+  X3 = sol_rosen3d[,3],
+  f_x = valores
+)
+
+
+
+tabla_cada_10 <- df_resultados[df_resultados$Iteracion %% 10 == 1 | 
+                                 df_resultados$Iteracion == max(df_resultados$Iteracion), ] 
+
+# Mostrar las primeras 10 iteraciones
+knitr::kable(tabla_cada_10, caption = "Iteraciones")
+
+```
+
+```{r}
 # Graficación del proceso de optimización
 ## TODO: Revisar y corregir
 n_length <- 100
@@ -464,39 +487,6 @@ lines(sol_ras2d, type="b",cex=1.5,col="red")
 ```
 
 ```{r}
-# Ejecución del método
-sol_ras3d <- optimizador_mult_numdev(f_rastrigin,x0=c(-4,-4,-4),  h=0.005, eta=2)
-
-# Graficación del proceso de optimización
-## TODO: Revisar y corregir
-n_length <- 100
-x1 <- seq(-10, 10, length.out = n_length)
-x2 <- seq(-10, 10, length.out = n_length)
-x3 <- seq(-10, 10, length.out = n_length)
-X <- expand.grid(x1, x2, x3)
-z <- f_rastrigin_3d(X[,1], X[,2], X[,3])
-Z <- matrix(z, ncol = n_length, nrow = n_length)
-contour(
-  x = x1,
-  y = x2,
-  z = Z,
-  nlevels = 10,
-  las = 1,
-  xlab = expression(x[1]),
-  ylab = expression(x[2]),
-  main = expression(paste(
-    "Función de Rastrigin: ",
-    f(x[1],x[2])==20 + x[1]^2 - 10*cos(2*pi*x[1]) + x[2]^2 - 10*cos(2*pi*x[2])
-  )),
-  sub = "Curvas de nivel de la función"
-)
-lines(sol_ras3d, type="b",cex=1.5,col="red")
-
-```
-
-Animación de la optimización
-
-```{r}
 sol <- as.data.frame(sol_ras2d)
 colnames(sol) <- c("x1", "x2")
 sol$step <- 1:nrow(sol)
@@ -521,3 +511,35 @@ p <- ggplot() +
 
 animate(p, fps = 10, duration = 5, width = 600, height = 500, renderer = gifski_renderer("rastrigin_opt_grad_2d.gif"))
 ```
+
+
+```{r}
+# Ejecución del método
+sol_ras3d <- optimizador_mult_numdev(f_rastrigin,x0=c(-4,-4,-4),  h=0.005, eta=2)
+
+```
+
+```{r}
+# Evaluar la función objetivo en cada iteración
+valores <- apply(sol_ras3d, 1, f_rastrigin)
+
+# Combinar iteraciones y valores en un dataframe
+df_resultados <- data.frame(
+  Iteracion = 1:nrow(sol_ras3d),
+  X1 = sol_ras3d[,1],
+  X2 = sol_ras3d[,2],
+  X3 = sol_ras3d[,3],
+  f_x = valores
+)
+
+
+
+tabla_cada_10 <- df_resultados[df_resultados$Iteracion %% 10 == 1 | 
+                                 df_resultados$Iteracion == max(df_resultados$Iteracion), ] 
+
+# Mostrar las primeras 10 iteraciones
+knitr::kable(tabla_cada_10, caption = "Iteraciones")
+
+```
+
+

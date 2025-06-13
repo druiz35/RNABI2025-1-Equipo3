@@ -42,6 +42,6 @@ Estudiante de Estadística con una fuerte pasión por la consultoria, el anális
 <h3>David Escobar Ruiz</h3>
 Estudiante de ingeniería de sistemas con aspiraciones de desarrollar una carrera profesional en el área de la ingeniería de machine learning y ganar experticia en Agentic AI y NLP.
 <h3>Johan Sebastian Robles Rincón</h3>
-Estudiante de ingeniería en sistemas con enfoque en el desarrollo full stack y apacionado por el tema de toma de decisiones basadas en datos.
+Estudiante de sistemas e informática con enfoque en aplicar soluciones robustas por el desarrollo Backend e infraestructura.
 <h3>Sebastián Soto Arcila</h3>
-Estudiante de sistemas e informática con enfoque en aplicar soluciones robustas por el desarrollo Backend e infraestructura
+Estudiante de ingeniería en sistemas con enfoque en el desarrollo full stack y apacionado por el tema de toma de decisiones basadas en datos.

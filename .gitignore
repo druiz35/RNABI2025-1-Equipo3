@@ -9,4 +9,27 @@ venv/
 
 .zip
 .zip
-zip
+zipjohanrobles@fedora:~/Documentos/RNA/Trabajo1/RNABI2025-1-Equipo3$    git add .gitignore
+   git commit -m "Remove large CSV files from repo and update .gitignore"
+[appWeb-Trabajo2 44fd118] Remove large CSV files from repo and update .gitignore
+ 2 files changed, 536588 deletions(-)
+ delete mode 100644 Trabajo2/detector_fraude/modelo/Notebooks/cleaned_data.csv
+ delete mode 100644 Trabajo2/detector_fraude/modelo/Notebooks/feature_engineered_data.csv
+johanrobles@fedora:~/Documentos/RNA/Trabajo1/RNABI2025-1-Equipo3$    git push origin appWeb-Trabajo2
+Enumerando objetos: 111, listo.
+Contando objetos: 100% (103/103), listo.
+Compresión delta usando hasta 12 hilos
+Comprimiendo objetos: 100% (88/88), listo.
+Escribiendo objetos: 100% (93/93), 89.83 MiB | 2.19 MiB/s, listo.
+Total 93 (delta 23), reused 0 (delta 0), pack-reused 0 (from 0)
+remote: Resolving deltas: 100% (23/23), completed with 4 local objects.
+remote: warning: File Trabajo2/detector_fraude/modelo/Notebooks/cleaned_data.csv is 61.75 MB; this is larger than GitHub's recommended maximum file size of 50.00 MB
+remote: error: Trace: 276b056fac112a068c61d0dec3a06ee8cd81bf7cf6f73c250dc50811af691a28
+remote: error: See https://gh.io/lfs for more information.
+remote: error: File Trabajo2/detector_fraude/modelo/Notebooks/feature_engineered_data.csv is 139.04 MB; this exceeds GitHub's file size limit of 100.00 MB
+remote: error: File Trabajo2/detector_fraude/modelo/Notebooks/feature_engineered_data.csv is 110.43 MB; this exceeds GitHub's file size limit of 100.00 MB
+remote: error: GH001: Large files detected. You may want to try Git Large File Storage - https://git-lfs.github.com.
+To https://github.com/druiz35/RNABI2025-1-Equipo3
+ ! [remote rejected] appWeb-Trabajo2 -> appWeb-Trabajo2 (pre-receive hook declined)
+error: falló el empuje de algunas referencias a 'https://github.com/druiz35/RNABI2025-1-Equipo3'
+johanrobles@fedora:~/Documentos/RNA/Trabajo1/RNABI2025-1-Equipo3$ 

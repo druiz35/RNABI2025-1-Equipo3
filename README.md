@@ -23,7 +23,14 @@
 <li>Comparar los resultados de cada método de optimización sobre la evaluación de dos funciones de prueba elegidas para entender cómo se comportan bajo distintos escenarios de optimización.</li>
 </ul>
 <h3>Trabajo 2: Aplicaciones de redes neuronales a datos tabulares</h3>
-<aside>⚠️Pendiente</aside>
+<ul>
+  <li>Aprender a identificar y analizar las variables más significativas en el contexto del modelo de redes neuronales.</li>
+  <li>Mejorar las habilidades de storytelling para comunicar de forma efectiva los hallazgos obtenidos a partir del análisis de datos.</li>
+  <li>Plantear metodologías de trabajo adecuadas que favorezcan el desarrollo estructurado y colaborativo del proyecto.</li>
+  <li>Establecer una definición clara y precisa de la variable objetivo del modelo.</li>
+  <li>Adquirir conocimientos prácticos sobre modelos de clasificación aplicados a redes neuronales.</li>
+  <li>Desarrollar contenido publicitario creativo y efectivo para promocionar la aplicación resultante del proyecto.</li>
+</ul>
 <h3>Trabajo 3: Aplicaciones en sistemas de recomendación e imágenes</h3>
 <aside>⚠️Pendiente</aside>
 <h3>Trabajo 4: Aplicaciones de grandes modelos de lenguaje</h3>

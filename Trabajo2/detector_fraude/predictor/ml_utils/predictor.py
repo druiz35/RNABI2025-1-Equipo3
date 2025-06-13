@@ -58,9 +58,7 @@ def prepare_input_data(data):
         'loan_amnt', 'funded_amnt', 'funded_amnt_inv', 'int_rate', 'installment',
         'sub_grade', 'emp_length', 'annual_inc', 'loan_status', 'dti', 'delinq_2yrs',
         'inq_last_6mths', 'mths_since_last_delinq', 'open_acc', 'pub_rec', 'revol_bal', 'revol_util',
-        'total_acc', 'out_prncp', 'out_prncp_inv', 'total_pymnt', 'total_pymnt_inv',
-        'total_rec_prncp', 'total_rec_int', 'total_rec_late_fee', 'recoveries',
-        'collection_recovery_fee', 'last_pymnt_amnt', 'collections_12_mths_ex_med',
+        'total_acc', 'out_prncp', 'out_prncp_inv', 'collections_12_mths_ex_med',
         'mths_since_last_major_derog', 'acc_now_delinq', 'tot_coll_amt', 'tot_cur_bal', 'total_rev_hi_lim',
         # Categóricas one-hot:
         'term_ 36 months', 'term_ 60 months',
@@ -82,9 +80,7 @@ def prepare_input_data(data):
         'loan_amnt', 'funded_amnt', 'funded_amnt_inv', 'int_rate', 'installment',
         'annual_inc', 'loan_status', 'dti', 'delinq_2yrs', 'inq_last_6mths',
         'mths_since_last_delinq', 'open_acc', 'pub_rec', 'revol_bal', 'revol_util',
-        'total_acc', 'out_prncp', 'out_prncp_inv', 'total_pymnt', 'total_pymnt_inv',
-        'total_rec_prncp', 'total_rec_int', 'total_rec_late_fee', 'recoveries',
-        'collection_recovery_fee', 'last_pymnt_amnt', 'collections_12_mths_ex_med',
+        'total_acc', 'out_prncp', 'out_prncp_inv', 'collections_12_mths_ex_med',
         'mths_since_last_major_derog', 'acc_now_delinq', 'tot_coll_amt', 'tot_cur_bal', 'total_rev_hi_lim']:
         input_data.at[0, col] = float(data.get(col, 0))
 

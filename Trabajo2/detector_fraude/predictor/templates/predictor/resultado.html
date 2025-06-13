@@ -1,0 +1,162 @@
+{% extends 'predictor/base.html' %}
+
+{% block title %}Resultado de la Predicción{% endblock %}
+
+{% block extra_css %}
+<style>
+    .score-circle {
+        width: 200px;
+        height: 200px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto;
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: white;
+        position: relative;
+    }
+    
+    .score-circle::before {
+        content: '';
+        position: absolute;
+        top: -10px;
+        left: -10px;
+        right: -10px;
+        bottom: -10px;
+        border-radius: 50%;
+        border: 2px solid rgba(0,0,0,0.1);
+    }
+    
+    .score-high {
+        background: linear-gradient(135deg, #2ecc71, #27ae60);
+    }
+    
+    .score-medium {
+        background: linear-gradient(135deg, #f1c40f, #f39c12);
+    }
+    
+    .score-low {
+        background: linear-gradient(135deg, #e74c3c, #c0392b);
+    }
+    
+    .probability-bar {
+        height: 30px;
+        border-radius: 15px;
+        background: #eee;
+        overflow: hidden;
+        position: relative;
+    }
+    
+    .probability-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #2ecc71, #e74c3c);
+        transition: width 1s ease-in-out;
+    }
+    
+    .probability-label {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: white;
+        font-weight: bold;
+        text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-body text-center">
+                <h2 class="card-title mb-4">
+                    <i class="fas fa-chart-pie me-2"></i>
+                    Resultado de la Predicción
+                </h2>
+                
+                {% with score=prediccion.score %}
+                <div class="score-circle {% if score >= 700 %}score-high{% elif score >= 500 %}score-medium{% else %}score-low{% endif %} mb-4">
+                    {{ score }}
+                </div>
+                {% endwith %}
+                
+                <h3 class="mb-3">Probabilidad de Incumplimiento</h3>
+                <div class="probability-bar mb-2">
+                    <div class="probability-fill" style="width: {{ prediccion.probabilidad_incumplimiento|floatformat:1 }}%"></div>
+                    <div class="probability-label">
+                        {{ prediccion.probabilidad_incumplimiento|floatformat:1 }}%
+                    </div>
+                </div>
+                
+                <div class="alert {% if prediccion.probabilidad_incumplimiento < 30 %}alert-success{% elif prediccion.probabilidad_incumplimiento < 60 %}alert-warning{% else %}alert-danger{% endif %} mt-3">
+                    {% if prediccion.probabilidad_incumplimiento < 30 %}
+                        <i class="fas fa-check-circle me-2"></i>
+                        Bajo riesgo de incumplimiento
+                    {% elif prediccion.probabilidad_incumplimiento < 60 %}
+                        <i class="fas fa-exclamation-circle me-2"></i>
+                        Riesgo moderado de incumplimiento
+                    {% else %}
+                        <i class="fas fa-times-circle me-2"></i>
+                        Alto riesgo de incumplimiento
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-body">
+                <h3 class="card-title mb-4">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Detalles de la Solicitud
+                </h3>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Estado:</strong> {{ prediccion.estado }}</p>
+                        <p><strong>Motivo del Préstamo:</strong> {{ prediccion.motivo_prestamo }}</p>
+                        <p><strong>Ocupación:</strong> {{ prediccion.ocupacion }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        {% if prediccion.ingresos_anuales %}
+                            <p><strong>Ingresos Anuales:</strong> ${{ prediccion.ingresos_anuales|floatformat:2 }}</p>
+                        {% endif %}
+                        {% if prediccion.deuda_total %}
+                            <p><strong>Deuda Total:</strong> ${{ prediccion.deuda_total|floatformat:2 }}</p>
+                        {% endif %}
+                        {% if prediccion.historial_credito %}
+                            <p><strong>Años de Historial Crediticio:</strong> {{ prediccion.historial_credito }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="text-center mt-4">
+                    <a href="{% url 'predictor:home' %}" class="btn btn-primary me-2">
+                        <i class="fas fa-calculator me-2"></i>
+                        Nueva Predicción
+                    </a>
+                    <a href="{% url 'predictor:historial' %}" class="btn btn-outline-primary">
+                        <i class="fas fa-history me-2"></i>
+                        Ver Historial
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Animación de la barra de probabilidad
+    const fill = document.querySelector('.probability-fill');
+    fill.style.width = '0%';
+    setTimeout(() => {
+        fill.style.width = '{{ prediccion.probabilidad_incumplimiento|floatformat:1 }}%';
+    }, 100);
+});
+</script>
+{% endblock %} 

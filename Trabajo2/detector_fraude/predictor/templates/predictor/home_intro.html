@@ -1,0 +1,47 @@
+{% extends 'predictor/base.html' %}
+
+{% block title %}Inicio - Predictor de Riesgo Crediticio{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-body text-center">
+                <h2 class="card-title mb-4">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Bienvenido al Predictor de Riesgo Crediticio
+                </h2>
+                <p class="lead mb-4">
+                    Este proyecto es una aplicación web desarrollada en Django que permite predecir el riesgo de incumplimiento crediticio de un solicitante utilizando un modelo de red neuronal entrenado con PyTorch. El sistema toma en cuenta variables financieras y personales para calcular la probabilidad de incumplimiento y asignar un score crediticio.
+                </p>
+                <h4 class="mb-3">¿Cómo funciona?</h4>
+                <ul class="text-start mb-4">
+                    <li>El usuario ingresa los datos requeridos en la calculadora.</li>
+                    <li>El sistema preprocesa los datos y los envía al modelo de PyTorch.</li>
+                    <li>Se muestra el resultado: score y probabilidad de incumplimiento.</li>
+                    <li>Las predicciones quedan guardadas en el historial para consulta futura.</li>
+                </ul>
+                <h4 class="mb-3">Sobre el modelo</h4>
+                <p class="mb-4">
+                    El modelo es una red neuronal multicapa (MLP) entrenada sobre un dataset real de préstamos, utilizando variables numéricas y categóricas relevantes. El preprocesamiento y la codificación de variables siguen exactamente el pipeline del notebook original del equipo.
+                </p>
+                <h4 class="mb-3">Integrantes</h4>
+                <ul class="list-unstyled mb-4">
+                    <li><strong>Johan Sebastian Robles Rincon</strong> - joroblesr@unal.edu.co</li>
+                    <li><strong>Leonardo Federico Corona Torres</strong></li>
+                    <li><strong>David Escobar Ruiz</strong></li>
+                    <li><strong>Sebastian Soto Arcila</strong></li>
+                </ul>
+                <div class="d-flex justify-content-center gap-3 mt-4">
+                    <a href="{% url 'predictor:home' %}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-calculator me-2"></i> Ir a la Calculadora
+                    </a>
+                    <a href="{% url 'predictor:historial' %}" class="btn btn-outline-primary btn-lg">
+                        <i class="fas fa-history me-2"></i> Ver Historial
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

@@ -1,0 +1,13 @@
+version: '3.9'
+
+services:
+  web:
+    build: .
+    container_name: predictor_web
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+    environment:
+      - DJANGO_SETTINGS_MODULE=detector_fraude.settings
+    command: ["gunicorn", "detector_fraude.wsgi:application", "--bind", "0.0.0.0:8000"] 

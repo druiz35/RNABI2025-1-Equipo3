@@ -1,0 +1,123 @@
+{% extends 'predictor/base.html' %}
+
+{% block title %}Historial de Predicciones{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        <div class="card">
+            <div class="card-body">
+                <h2 class="card-title mb-4">
+                    <i class="fas fa-history me-2"></i>
+                    Historial de Predicciones
+                </h2>
+                
+                {% if predicciones %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Estado</th>
+                                    <th>Motivo</th>
+                                    <th>Score</th>
+                                    <th>Probabilidad</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for prediccion in predicciones %}
+                                <tr>
+                                    <td>{{ prediccion.fecha_prediccion|date:"d/m/Y H:i" }}</td>
+                                    <td>{{ prediccion.estado }}</td>
+                                    <td>{{ prediccion.motivo_prestamo }}</td>
+                                    <td>
+                                        <span class="badge {% if prediccion.score >= 700 %}bg-success{% elif prediccion.score >= 500 %}bg-warning{% else %}bg-danger{% endif %}">
+                                            {{ prediccion.score }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="progress" style="height: 20px;">
+                                            <div class="progress-bar {% if prediccion.probabilidad_incumplimiento < 30 %}bg-success{% elif prediccion.probabilidad_incumplimiento < 60 %}bg-warning{% else %}bg-danger{% endif %}"
+                                                 role="progressbar"
+                                                 style="width: {{ prediccion.probabilidad_incumplimiento }}%"
+                                                 aria-valuenow="{{ prediccion.probabilidad_incumplimiento }}"
+                                                 aria-valuemin="0"
+                                                 aria-valuemax="100">
+                                                {{ prediccion.probabilidad_incumplimiento|floatformat:1 }}%
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'predictor:resultado' prediccion.id %}" class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    {% if is_paginated %}
+                    <nav aria-label="Navegación de páginas" class="mt-4">
+                        <ul class="pagination justify-content-center">
+                            {% if page_obj.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=1" aria-label="Primera">
+                                        <span aria-hidden="true">&laquo;&laquo;</span>
+                                    </a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}" aria-label="Anterior">
+                                        <span aria-hidden="true">&laquo;</span>
+                                    </a>
+                                </li>
+                            {% endif %}
+                            
+                            {% for num in page_obj.paginator.page_range %}
+                                {% if page_obj.number == num %}
+                                    <li class="page-item active">
+                                        <span class="page-link">{{ num }}</span>
+                                    </li>
+                                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+                            
+                            {% if page_obj.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.next_page_number }}" aria-label="Siguiente">
+                                        <span aria-hidden="true">&raquo;</span>
+                                    </a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}" aria-label="Última">
+                                        <span aria-hidden="true">&raquo;&raquo;</span>
+                                    </a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                    {% endif %}
+                    
+                {% else %}
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        No hay predicciones registradas aún.
+                    </div>
+                {% endif %}
+                
+                <div class="text-center mt-4">
+                    <a href="{% url 'predictor:home' %}" class="btn btn-primary">
+                        <i class="fas fa-calculator me-2"></i>
+                        Nueva Predicción
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

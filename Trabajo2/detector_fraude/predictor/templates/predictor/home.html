@@ -1,0 +1,79 @@
+{% extends 'predictor/base.html' %}
+
+{% block title %}Predictor de Riesgo Crediticio - Inicio{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        <div class="card">
+            <div class="card-body">
+                <h2 class="card-title text-center mb-4">
+                    <i class="fas fa-calculator me-2"></i>
+                    Calculadora de Riesgo Crediticio
+                </h2>
+                <p class="text-muted text-center mb-4">
+                    Ingrese todos los datos requeridos para calcular la probabilidad de incumplimiento
+                </p>
+                <form method="post" class="needs-validation" novalidate>
+                    {% csrf_token %}
+                    <div class="row">
+                        {% for field in form %}
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                                {{ field }}
+                                {% if field.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ field.errors }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <div class="text-center mt-4">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-calculator me-2"></i>
+                            Calcular Riesgo
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="card mt-4">
+            <div class="card-body">
+                <h3 class="card-title">
+                    <i class="fas fa-info-circle me-2"></i>
+                    ¿Cómo funciona?
+                </h3>
+                <p class="card-text">
+                    Nuestro predictor utiliza un modelo de redes neuronales avanzado para calcular la probabilidad
+                    de incumplimiento de un préstamo basándose en diversos factores financieros y personales.
+                </p>
+                <ul class="list-unstyled">
+                    <li><i class="fas fa-check-circle text-success me-2"></i> Análisis de riesgo en tiempo real</li>
+                    <li><i class="fas fa-check-circle text-success me-2"></i> Modelo entrenado con datos históricos</li>
+                    <li><i class="fas fa-check-circle text-success me-2"></i> Resultados precisos y confiables</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Validación del formulario
+(function () {
+    'use strict'
+    var forms = document.querySelectorAll('.needs-validation')
+    Array.prototype.slice.call(forms).forEach(function (form) {
+        form.addEventListener('submit', function (event) {
+            if (!form.checkValidity()) {
+                event.preventDefault()
+                event.stopPropagation()
+            }
+            form.classList.add('was-validated')
+        }, false)
+    })
+})()
+</script>
+{% endblock %} 

@@ -1,0 +1,96 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
+.env
+.venv
+env/
+venv/
+ENV/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Git
+.git
+.gitignore
+
+# Docker
+Dockerfile
+.dockerignore
+
+# Jupyter Notebook
+.ipynb_checkpoints
+*.ipynb
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Logs
+*.log
+
+# Local development
+*.sqlite3
+media/
+staticfiles/
+
+# Model files (if they're large and not needed in the image)
+*.pt
+*.pth
+*.h5
+*.pkl
+*.joblib
+
+# Documentation
+docs/
+*.md
+!README.md
+
+venv/
+*.pyc
+*.pyo
+*.pyd
+*.sqlite3
+*.db
+*.csv
+*.zip
+*.ipynb
+Notebooks/
+notebooks/
+*.png
+*.jpg
+*.jpeg
+*.pdf
+*.xls
+*.xlsx
+*.parquet
+*.h5
+*.hdf5
+*.tar
+*.gz
+*.tar.gz
+*.egg-info/ 

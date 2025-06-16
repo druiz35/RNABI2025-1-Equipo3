@@ -103,14 +103,49 @@ res_rosen$mejor
 res_rosen$valor
 
 # Graficar trayectoria
-x1 <- seq(-3, 3, length.out = 100)
-x2 <- seq(-3, 3, length.out = 100)
+x1 <- seq(-5, 5, length.out = 100)
+x2 <- seq(-5, 5, length.out = 100)
 z <- outer(x1, x2, Vectorize(function(x, y) f_rosenbrock(c(x, y))))
 contour(x1, x2, z, nlevels = 50,
         main = "Rosenbrock 2D - Trayectoria", xlab = "x", ylab = "y")
 lines(res_rosen$trayectoria[,1], res_rosen$trayectoria[,2], col = "red", type = "b")
 
 ```
+
+```{r}
+f_rosenbrock_2d <- function(x, y) {   
+  f_value <- 100*(y-(x^2))^2 + ((1-x)^2)   
+  return(f_value) 
+}  
+```
+
+```{r}
+library("ggplot2")
+sol <- as.data.frame(res_rosen$trayectoria)
+colnames(sol) <- c("x1", "x2")
+sol$step <- 1:nrow(sol)
+
+x1 <- seq(-5, 5, length.out = 100)
+x2 <- seq(-5, 5, length.out = 100)
+X <- expand.grid(x1 = x1, x2 = x2)
+
+X$z <- f_rosenbrock_2d(X$x1, X$x2)
+
+p <- ggplot() +
+  geom_contour(data = X, aes(x = x1, y = x2, z = z), bins = 20, color = "gray70") +
+  geom_point(data = sol, aes(x = x1, y = x2), color = "red", size = 3) +
+  geom_path(data = sol, aes(x = x1, y = x2), color = "red", linewidth = 1) +
+  transition_reveal(step) +
+  labs(
+    title = "Iteración {frame}",
+    x = "Eje X",
+    y = "Eje Y"
+  ) +
+  theme_minimal()
+
+animate(p, fps = 10, duration = 5, width = 600, height = 500, renderer = gifski_renderer("rosenbrock_opt_evd_2d.gif"))
+```
+
 
 En este gráfico se muestran las curvas de nivel de la función de Rosenbrock en dos dimensiones. Estas curvas representan líneas donde la función tiene igual valor, y el valle curvado al centro es donde está el mínimo global (en el punto (1,1)(1,1)).
 
@@ -138,6 +173,41 @@ lines(res_ras$trayectoria[,1], res_ras$trayectoria[,2], col = "blue", type = "b"
 
 ```
 
+```{r}
+f_rastrigin_2d <- function(x, y) {
+  A = 10   
+  f_value <- x^2 + y^2 + A*(2 - cos(2*pi*x) - cos(2*pi*y))   
+  return(f_value) 
+}  
+```
+
+```{r}
+library("ggplot2")
+sol <- as.data.frame(res_ras$trayectoria)
+colnames(sol) <- c("x1", "x2")
+sol$step <- 1:nrow(sol)
+
+x1 <- seq(-5, 5, length.out = 100)
+x2 <- seq(-5, 5, length.out = 100)
+X <- expand.grid(x1 = x1, x2 = x2)
+
+X$z <- f_rastrigin_2d(X$x1, X$x2)
+
+p <- ggplot() +
+  geom_contour(data = X, aes(x = x1, y = x2, z = z), bins = 20, color = "gray70") +
+  geom_point(data = sol, aes(x = x1, y = x2), color = "red", size = 3) +
+  geom_path(data = sol, aes(x = x1, y = x2), color = "red", linewidth = 1) +
+  transition_reveal(step) +
+  labs(
+    title = "Iteración {frame}",
+    x = "Eje X",
+    y = "Eje Y"
+  ) +
+  theme_minimal()
+
+animate(p, fps = 10, duration = 5, width = 600, height = 500, renderer = gifski_renderer("rastrigin_opt_evd_2d.gif"))
+```
+
 Aquí se grafican las curvas de nivel de la función de Rastrigin, que es multimodal, es decir, tiene muchos mínimos locales (patrón ondulado). La búsqueda es mucho más compleja que en Rosenbrock.
 
 La línea azul muestra cómo la evolución diferencial se mueve por el espacio de búsqueda y logra escapar de los mínimos locales hasta acercarse al óptimo global, que se encuentra en (0,0)(0,0).
@@ -160,3 +230,42 @@ res_ras_3d$valor
 En esta parte del informe se muestran los resultados numéricos para la optimización de las funciones en 3D. Dado que no se puede visualizar fácilmente en una gráfica 3D de trayectoria, se reportan las mejores posiciones y valores obtenido
 
 En este caso, el algoritmo encontró una solución cercana al mínimo global, aunque no exacta. Esto es esperable, ya que Rastrigin es mucho más difícil en 3D debido a la gran cantidad de mínimos locales.
+
+```{r}
+sol_rosen3d <- res_rosen_3d$trayectoria
+# Evaluar la función objetivo en cada iteración
+valores <- apply(sol_rosen3d, 1, f_rosenbrock)
+
+# Combinar iteraciones y valores en un dataframe
+df_resultados <- data.frame(
+  Iteracion = 1:nrow(sol_rosen3d),
+  X1 = sol_rosen3d[,1],
+  X2 = sol_rosen3d[,2],
+  X3 = sol_rosen3d[,3],
+  f_x = valores
+)
+```
+
+```{r}
+write.csv(df_resultados, "rosenbrock_iter_evd.csv", row.names = FALSE)
+```
+
+```{r}
+sol_ras3d <- res_ras_3d$trayectoria
+# Evaluar la función objetivo en cada iteración
+valores <- apply(sol_ras3d, 1, f_rastrigin)
+
+# Combinar iteraciones y valores en un dataframe
+df_resultados <- data.frame(
+  Iteracion = 1:nrow(sol_ras3d),
+  X1 = sol_ras3d[,1],
+  X2 = sol_ras3d[,2],
+  X3 = sol_ras3d[,3],
+  f_x = valores
+)
+```
+
+```{r}
+write.csv(df_resultados, "rastrigin_iter_evd.csv", row.names = FALSE)
+```
+

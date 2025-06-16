@@ -19,6 +19,23 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+<!--
+  NOTE: Este código se ejecuta, pero no se muestra ni el código ni la salida
+-->
+```{r, include=FALSE}
+# Esta función muestra la table guadada en un CSV
+#   ruta: dirección del csv
+show_table <- function(ruta) {
+  # Leer el CSV
+  tabla_completa <- read.csv(ruta)
+  
+  # Seleccionar cada 10 filas (1, 11, 21, ...)
+  filas_cada_10 <- seq(0, nrow(tabla_completa), by = 10)
+  tabla_cada_10 <- tabla_completa[filas_cada_10, ]
+  print(tabla_cada_10)
+}
+```
+
 ::: {style="text-align: center; color: black; margin-top: 60px;"}
 <h1>REPORTE TRABAJO 1: SOLUCIÓN DE PROBLEMAS DE OPTIMIZACIÓN CON MÉTODOS HEURÍSTICOS</h1>
 
@@ -243,12 +260,12 @@ f_rosenbrock <- function(x){
 Las gráficas de la función de Rosenbrock en 2 y 3 dimensiones se muestran a continuación:
 
 <div style="text-align: center;">
-  <img src="rosenbrock_2d_grafica.png" alt="Gráfica de la función de Rosenbrock 2D" style="width:350px; max-width:90%; display:block; margin:auto;">
+  <img src="images\graphics\rosenbrock_2d_grafica.png" alt="Gráfica de la función de Rosenbrock 2D" style="width:350px; max-width:90%; display:block; margin:auto;">
   <div style="font-weight:bold; margin-top:8px; font-size:1.05em;">Gráfica de la función de Rosenbrock 2D</div>
 </div>
 
 <div style="text-align: center;">
-  <img src="rosenbrock_3d_grafica.png" alt="Gráfica de la función de Rosenbrock 3D" style="width:350px; max-width:90%; display:block; margin:auto;">
+  <img src="images\graphics\rosenbrock_3d_grafica.png" alt="Gráfica de la función de Rosenbrock 3D" style="width:350px; max-width:90%; display:block; margin:auto;">
   <div style="font-weight:bold; margin-top:8px; font-size:1.05em;">Gráfica de la función de Rosenbrock 3D</div>
 </div>
 
@@ -333,12 +350,12 @@ f_rastrigin <-function(x){
 Las gráficas de la función de Rastrigin en 2 y 3 dimensiones se muestran a continuación:
 
 <div style="text-align: center;">
-  <img src="rastrigin_2d_grafica.png" alt="Gráfica de la función de Rastrigin 2D" style="width:350px; max-width:90%; display:block; margin:auto;">
+  <img src="images\graphics\rastrigin_2d_grafica.png" alt="Gráfica de la función de Rastrigin 2D" style="width:350px; max-width:90%; display:block; margin:auto;">
   <div style="font-weight:bold; margin-top:8px; font-size:1.05em;">Gráfica de la función de Rastrigin 2D</div>
 </div>
 
 <div style="text-align: center;">
-  <img src="rastrigin_3d_grafica.png" alt="Gráfica de la función de Rastrigin 3D" style="width:350px; max-width:90%; display:block; margin:auto;">
+  <img src="images\graphics\rastrigin_3d_grafica.png" alt="Gráfica de la función de Rastrigin 3D" style="width:350px; max-width:90%; display:block; margin:auto;">
   <div style="font-weight:bold; margin-top:8px; font-size:1.05em;">Gráficas de la función de Rastrigin 3D</div>
 </div>
 
@@ -348,7 +365,7 @@ Las gráficas de la función de Rastrigin en 2 y 3 dimensiones se muestran a con
 
 El método de optimización por descenso de gradiente es una técnica iterativa utilizada para encontrar el mínimo de una función. Consiste en actualizar sucesivamente los valores de las variables en la dirección opuesta al gradiente de la función, con el objetivo de reducir su valor en cada paso.
 
-En nuestro caso, se utilizaron las siguientes variables para implementar el método: X₀, que representa la condición inicial del algoritmo; H, que define el tamaño de la ventana para el cálculo de la derivada numérica; y ETA, que corresponde a la tasa de aprendizaje, es decir, el tamaño del paso que se da en cada iteración hacia el mínimo.
+En nuestro caso, se utilizaron las siguientes variables para implementar el método: **X₀**, que representa la condición inicial del algoritmo; **H**, que define el tamaño de la ventana para el cálculo de la derivada numérica; y **ETA**, que corresponde a la tasa de aprendizaje, es decir, el tamaño del paso que se da en cada iteración hacia el mínimo.
 
 <a name="io1.2.1."></a>
 
@@ -381,8 +398,10 @@ optimizador_mult_numdev <- function(x0,fun,max_eval=100,h=0.01,eta=0.01){
 sol_rosen2d <- optimizador_mult_numdev(f_rosenbrock, x0=c(-4,-4), h=0.005, eta=0.5)
 ```
 
+La siguiente animación muestra el desempeño de la optimización a traves de su trayectoria:
+
 <div style="text-align: center;">
-  <img src="rosenbrock_opt_grad_2d.gif" alt="Animación de la optimización de Rosenbrock 2D" style="width:350px; max-width:90%; display:block; margin:auto;">
+  <img src="Parte 1\Descenso de gradiente\rosenbrock_opt_grad_2d.gif" alt="Animación de la optimización de Rosenbrock 2D" style="width:350px; max-width:90%; display:block; margin:auto;">
   <div style="font-weight:bold; margin-top:8px; font-size:1.05em;">Animación de la optimización de Rosenbrock 2D</div>
 </div>
 
@@ -394,15 +413,11 @@ sol_rosen2d <- optimizador_mult_numdev(f_rosenbrock, x0=c(-4,-4), h=0.005, eta=0
 sol_rosen3d <- optimizador_mult_numdev(f_rosenbrock, x0=c(-4,-4,-4), h=0.005, eta=0.5)
 ```
 
-| Iteración |     X        |     Y       |     Z        |   f       |
-|-----------|--------------|--------------|--------------|-----------|
-|    1      | -4.000000     | -4.000000     | -4.000000     | 48.000000 |
-|   11      | -0.3872184    | -0.6605544    |  0.1646661    | 38.426304 |
-|   21      |  0.2847338    |  0.0607084    | -0.0001942    | 12.968584 |
-|   31      |  0.8916011    |  0.7922555    |  0.6208702    | 28.667475 |
-|   41      |  0.9960646    |  0.9921280    |  0.9842283    |  3.009515 |
-|   50      |  0.9970042    |  0.9940273    |  0.9880900    |  2.995228 |
+En la siguiente tabla de muestran el comportamiento cada 10 iteraciones: 
 
+```{r}
+show_table("./Parte 1/Descenso de gradiente/rosenbrock_iter_grad.csv")
+```
 
 <a name="io1.2.4."></a>
 
@@ -412,8 +427,10 @@ sol_rosen3d <- optimizador_mult_numdev(f_rosenbrock, x0=c(-4,-4,-4), h=0.005, et
 sol_ras2d <- optimizador_mult_numdev(f_rastrigin, x0=c(4.5,4.5), h=0.005, eta=2)
 ```
 
+La siguiente animación muestra el desempeño de la optimización a traves de su trayectoria:
+
 <div style="text-align: center;">
-  <img src="rastrigin_opt_grad_2d.gif" alt="Animación de la optimización de Rastrigin 2D" style="width:350px; max-width:90%; display:block; margin:auto;">
+  <img src="Parte 1\Descenso de gradiente\rastrigin_opt_grad_2d.gif" alt="Animación de la optimización de Rastrigin 2D" style="width:350px; max-width:90%; display:block; margin:auto;">
   <div style="font-weight:bold; margin-top:8px; font-size:1.05em;">Animación de la optimización de Rastrigin 2D</div>
 </div>
 
@@ -425,20 +442,11 @@ sol_ras2d <- optimizador_mult_numdev(f_rastrigin, x0=c(4.5,4.5), h=0.005, eta=2)
 sol_ras3d <- optimizador_mult_numdev(f_rastrigin, x0=c(-4,-4,-4),  h=0.005, eta=2)
 ```
 
-| Iteración |     X        |     Y        |     Z       |   f      |
-|-----------|--------------|--------------|--------------|----------|
-|    1      | -4.000000     | -4.000000     | -4.000000     | 48.00000 |
-|   11      | -4.002614     | -4.002614     | -4.002614     | 48.06681 |
-|   21      | -4.006548     | -4.006548     | -4.006548     | 48.18267 |
-|   31      | -4.013471     | -4.013471     | -4.013471     | 48.43125 |
-|   41      | -4.031075     | -4.031075     | -4.031075     | 49.31872 |
-|   51      | -3.676394     | -3.676394     | -3.676394     | 83.93268 |
-|   61      | -4.965219     | -4.965219     | -4.964477     | 74.67566 |
-|   71      | -4.964956     | -4.964956     | -4.964150     | 74.67986 |
-|   81      | -4.964671     | -4.964671     | -4.963793     | 74.68354 |
-|   91      | -4.964362     | -4.964362     | -4.963399     | 74.68769 |
-|  100      | -4.985429     | -4.985429     | -4.986505     | 74.69392 |
+En la siguiente tabla de muestran el comportamiento cada 10 iteraciones: 
 
+```{r}
+show_table("./Parte 1/Descenso de gradiente/rastrigin_iter_grad.csv")
+```
 
 <a name="io1.2.6."></a>
 
@@ -457,6 +465,8 @@ La evolución diferencial es un algoritmo de optimización inspirado en la evolu
 -   **Selección**: se escoge el mejor entre el original y el nuevo.
 
 Este proceso se repite varias veces hasta encontrar una solución óptima.
+
+Las variables son: **dim**, que representa la cantidad de dimensiones o variables del problema; **NP**, que indica el tamaño de la población o número de soluciones en cada generación; **F**, que es el factor de mutación y determina la intensidad de la perturbación aplicada a las soluciones; **CR**, que corresponde a la tasa de recombinación y controla la probabilidad de intercambio de componentes entre vectores; **gens**, que define el número total de generaciones o iteraciones del algoritmo; y **bounds**, que establece los límites inferior y superior del espacio de búsqueda para cada dimensión.
 
 <a name="io1.3.1."></a>
 
@@ -521,6 +531,11 @@ En este gráfico se muestran las curvas de nivel de la función de Rosenbrock en
 
 La línea roja representa la trayectoria que siguió el algoritmo de evolución diferencial durante las iteraciones. Se puede observar cómo el enjambre de soluciones se fue acercando progresivamente hacia el mínimo, mejorando su posición en cada generación.
 
+<div style="text-align: center;">
+  <img src="Parte 1\Evolucion_Diferencial\rosenbrock_opt_evd_2d.gif" alt="Animación de la optimización de Rosenbrock 2D" style="width:350px; max-width:90%; display:block; margin:auto;">
+  <div style="font-weight:bold; margin-top:8px; font-size:1.05em;">Animación de la optimización de Rosenbrock 2D</div>
+</div>
+
 El resultado final obtenido fue: [1] 1.000000 1.000001 Valor mínimo encontrado: 1.91e-12
 
 <a name="io1.3.3."></a>
@@ -528,6 +543,10 @@ El resultado final obtenido fue: [1] 1.000000 1.000001 Valor mínimo encontrado:
 ### 1.3.3 Optimización de la función de Rosenbrock en 3 dimensiones
 
 En esta parte del informe se muestran los resultados numéricos para la optimización de las funciones en 3D. Dado que no se puede visualizar fácilmente en una gráfica 3D de trayectoria, se reportan las mejores posiciones y valores obtenido.
+
+```{r}
+show_table("./Parte 1/Evolucion_Diferencial/rosenbrock_iter_evd.csv")
+```
 
 <a name="io1.3.4."></a>
 
@@ -537,6 +556,11 @@ Aquí se grafican las curvas de nivel de la función de Rastrigin, que es multim
 
 La línea azul muestra cómo la evolución diferencial se mueve por el espacio de búsqueda y logra escapar de los mínimos locales hasta acercarse al óptimo global, que se encuentra en (0,0)(0,0).
 
+<div style="text-align: center;">
+  <img src="Parte 1\Evolucion_Diferencial\rastrigin_opt_evd_2d.gif" alt="Animación de la optimización de Rastrigin 2D" style="width:350px; max-width:90%; display:block; margin:auto;">
+  <div style="font-weight:bold; margin-top:8px; font-size:1.05em;">Animación de la optimización de Rastrigin 2D</div>
+</div>
+
 Resultado obtenido: [1] 2.176697e-06 -2.015785e-07 Valor mínimo: 9.48e-10
 
 <a name="io1.3.5."></a>
@@ -544,6 +568,10 @@ Resultado obtenido: [1] 2.176697e-06 -2.015785e-07 Valor mínimo: 9.48e-10
 ### 1.3.5 Optimización de la función de Rastrigin en 3 dimensiones
 
 En este caso, el algoritmo encontró una solución cercana al mínimo global, aunque no exacta. Esto es esperable, ya que Rastrigin es mucho más difícil en 3D debido a la gran cantidad de mínimos locales.
+
+```{r}
+show_table("./Parte 1/Evolucion_Diferencial/rastrigin_iter_evd.csv")
+```
 
 <a name="io1.3.6."></a>
 

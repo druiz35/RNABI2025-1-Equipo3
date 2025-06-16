@@ -344,6 +344,7 @@ contour(
 lines(sol_rosen2d, type="b",cex=1.5,col="red")
 ```
 
+
 ```{r}
 sol <- as.data.frame(sol_rosen2d)
 colnames(sol) <- c("x1", "x2")
@@ -379,7 +380,7 @@ sol_rosen3d <- optimizador_mult_numdev(f_rosenbrock,x0=c(-4,-4,-4), h=0.005, eta
 
 ```{r}
 # Evaluar la función objetivo en cada iteración
-valores <- apply(sol_rosen3d, 1, f_rastrigin)
+valores <- apply(sol_rosen3d, 1, f_rosenbrock)
 
 # Combinar iteraciones y valores en un dataframe
 df_resultados <- data.frame(
@@ -389,9 +390,14 @@ df_resultados <- data.frame(
   X3 = sol_rosen3d[,3],
   f_x = valores
 )
+```
+
+```{r}
+write.csv(df_resultados, "rosenbrock_iter_grad.csv", row.names = FALSE)
+```
 
 
-
+```{r}
 tabla_cada_10 <- df_resultados[df_resultados$Iteracion %% 10 == 1 | 
                                  df_resultados$Iteracion == max(df_resultados$Iteracion), ] 
 
@@ -531,9 +537,14 @@ df_resultados <- data.frame(
   X3 = sol_ras3d[,3],
   f_x = valores
 )
+```
+
+```{r}
+write.csv(df_resultados, "rastrigin_iter_grad.csv", row.names = FALSE)
+```
 
 
-
+```{r}
 tabla_cada_10 <- df_resultados[df_resultados$Iteracion %% 10 == 1 | 
                                  df_resultados$Iteracion == max(df_resultados$Iteracion), ] 
 

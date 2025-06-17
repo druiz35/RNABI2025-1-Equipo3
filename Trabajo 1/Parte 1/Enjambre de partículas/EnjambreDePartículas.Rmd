@@ -687,6 +687,11 @@ optimizacion <- optimizar_enjambre(
 )
 ```
 
+```{r}
+write.csv(optimizacion$resultados_df, "rosenbrock_iter_pso.csv", row.names = FALSE)
+```
+
+
 ## Optimización de función 2D de Rastrigin
 
 ```{r}
@@ -711,6 +716,7 @@ optimizacion <- optimizar_enjambre(
 )
 ```
 
+
 ## Optimización de función 3D de Rastrigin
 
 ```{r}
@@ -734,6 +740,11 @@ optimizacion <- optimizar_enjambre(
   verbose          = FALSE
 )
 ```
+
+```{r}
+write.csv(optimizacion$resultados_df, "rastrigin_iter_pso.csv", row.names = FALSE)
+```
+
 
 ```{r}
 library(gganimate)

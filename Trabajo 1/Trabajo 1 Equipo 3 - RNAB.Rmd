@@ -19,9 +19,11 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+```{=html}
 <!--
   NOTE: Este código se ejecuta, pero no se muestra ni el código ni la salida
 -->
+```
 ```{r, include=FALSE}
 # Esta función muestra la table guadada en un CSV
 #   ruta: dirección del csv
@@ -60,59 +62,59 @@ show_table <- function(ruta) {
 <p><strong>`r format(Sys.Date(), "%d de %B de %Y")`</strong></p>
 :::
 
+```{=html}
 <!--
   NOTE: Los tipos de selectores son:
     - Comenzados en "iu" para items de listas no ordenadas
     - Comenzados en "io" para items de listas ordenadas
 -->
-
+```
 # Contenidos
-- [Introducción](#iu1.)
-- [Metodología](#iu2.)
-- [1. Optimización numérica](#io1.)
-- [1.1. Selección e implementación de las funciones de prueba](#io1.1.)
-- [1.1.1. Breve explicación de las funciones de prueba para problemas de optimización](#io1.1.1.)
-- [1.1.2. Implementación de funciones de graficación](#io1.1.2)
-- [1.1.3. Función de Rosenbrock](#io1.1.3.)
-- [1.1.4. Función de Rastrigin](#io1.1.4.)
-- [1.2. Método de descenso de gradiente](#io1.2.) 
-- [1.2.1. Implementación en R de descenso por gradiente](#io1.2.1.) 
-- [1.2.2. Optimización de la función de Rosenbrock en 2 dimensiones](#io1.2.2.) 
-- [1.2.3. Optimización de la función de Rosenbrock en 3 dimensiones](#io1.2.3.) 
-- [1.2.4. Optimización de la función de Rastrigin en 2 dimensiones](#io1.2.4.) 
-- [1.2.5. Optimización de la función de Rastrigin en 3 dimensiones](#io1.2.5.)
-- [1.2.6. Conclusiones método de desenso del gradiente](#io1.2.6.)
-- [1.3. Método de evolución diferencial](#io1.3.) 
-- [1.3.1. Implementación en R de evolución diferencial](#io1.3.1.) 
-- [1.3.2. Optimización de la función de Rosenbrock en 2 dimensiones](#io1.3.2.)
-- [1.3.3. Optimización de la función de Rosenbrock en 3 dimensiones](#io1.3.3.) 
-- [1.3.4. Optimización de la función de Rastrigin en 2 dimensiones](#io1.3.4.) 
-- [1.3.5. Optimización de la función de Rastrigin en 3 dimensiones](#io1.3.5.) 
-- [1.3.6. Conclusiones método de evolución diferencial](#io1.3.6.) 
-- [1.4. Método de optimización de partículas](#io1.4.) 
-- [1.4.1. Implementación en R de optimización de partículas](#io1.4.1.) 
-- [1.4.2. Optimización de la función de Rosenbrock en 2 dimensiones](#io1.4.2.) 
-- [1.4.3. Optimización de la función de Rosenbrock en 3 dimensiones](#io1.4.3.) 
-- [1.4.4. Optimización de la función de Rastrigin en 2 dimensiones](#io1.4.4.) 
-- [1.4.5. Optimización de la función de Rastrigin en 3 dimensiones](#io1.4.5.) 
-- [1.4.6. Conclusiones método de evolución diferencial](#io1.4.6.)
-- [1.5. Método de algoritmos evolutivos](#io1.5.) 
-- [1.5.1. Implementación en R de algoritmos evolutivos](#io1.5.1.) 
-- [1.5.2. Optimización de la función de Rosenbrock en 2 dimensiones](#io1.5.2.) 
-- [1.5.3. Optimización de la función de Rosenbrock en 3 dimensiones](#io1.5.3.) 
-- [1.5.4. Optimización de la función de Rastrigin en 2 dimensiones](#io1.5.4.) 
-- [1.5.5. Optimización de la función de Rastrigin en 3 dimensiones](#io1.5.5.) 
-- [1.5.6. Cálculo de estadísticas y análisis](#io1.5.6.)
-- [1.5.7. Conclusiones método de algoritmos evolutivos](#io1.5.7.)
-- [2. Optimización combinatoria](#io2.)
-- [2.1. Planteamiento del problema](#io2.1.)
-- [2.2. Implementación Método de Colonia de hormigas](#io2.2.)
-- [Conclusión General](#io5.)
-- [Reporte de contribución individual](#iu3.)
-- [Repositorio de GitHub del proyecto](#iu4.)
-- [Bibliografía](#iu5.) 
 
-
+-   [Introducción](#iu1.)
+-   [Metodología](#iu2.)
+-   [1. Optimización numérica](#io1.)
+-   [1.1. Selección e implementación de las funciones de prueba](#io1.1.)
+-   [1.1.1. Breve explicación de las funciones de prueba para problemas de optimización](#io1.1.1.)
+-   [1.1.2. Implementación de funciones de graficación](#io1.1.2)
+-   [1.1.3. Función de Rosenbrock](#io1.1.3.)
+-   [1.1.4. Función de Rastrigin](#io1.1.4.)
+-   [1.2. Método de descenso de gradiente](#io1.2.)
+-   [1.2.1. Implementación en R de descenso por gradiente](#io1.2.1.)
+-   [1.2.2. Optimización de la función de Rosenbrock en 2 dimensiones](#io1.2.2.)
+-   [1.2.3. Optimización de la función de Rosenbrock en 3 dimensiones](#io1.2.3.)
+-   [1.2.4. Optimización de la función de Rastrigin en 2 dimensiones](#io1.2.4.)
+-   [1.2.5. Optimización de la función de Rastrigin en 3 dimensiones](#io1.2.5.)
+-   [1.2.6. Conclusiones método de desenso del gradiente](#io1.2.6.)
+-   [1.3. Método de evolución diferencial](#io1.3.)
+-   [1.3.1. Implementación en R de evolución diferencial](#io1.3.1.)
+-   [1.3.2. Optimización de la función de Rosenbrock en 2 dimensiones](#io1.3.2.)
+-   [1.3.3. Optimización de la función de Rosenbrock en 3 dimensiones](#io1.3.3.)
+-   [1.3.4. Optimización de la función de Rastrigin en 2 dimensiones](#io1.3.4.)
+-   [1.3.5. Optimización de la función de Rastrigin en 3 dimensiones](#io1.3.5.)
+-   [1.3.6. Conclusiones método de evolución diferencial](#io1.3.6.)
+-   [1.4. Método de optimización de partículas](#io1.4.)
+-   [1.4.1. Implementación en R de optimización de partículas](#io1.4.1.)
+-   [1.4.2. Optimización de la función de Rosenbrock en 2 dimensiones](#io1.4.2.)
+-   [1.4.3. Optimización de la función de Rosenbrock en 3 dimensiones](#io1.4.3.)
+-   [1.4.4. Optimización de la función de Rastrigin en 2 dimensiones](#io1.4.4.)
+-   [1.4.5. Optimización de la función de Rastrigin en 3 dimensiones](#io1.4.5.)
+-   [1.4.6. Conclusiones método de evolución diferencial](#io1.4.6.)
+-   [1.5. Método de algoritmos evolutivos](#io1.5.)
+-   [1.5.1. Implementación en R de algoritmos evolutivos](#io1.5.1.)
+-   [1.5.2. Optimización de la función de Rosenbrock en 2 dimensiones](#io1.5.2.)
+-   [1.5.3. Optimización de la función de Rosenbrock en 3 dimensiones](#io1.5.3.)
+-   [1.5.4. Optimización de la función de Rastrigin en 2 dimensiones](#io1.5.4.)
+-   [1.5.5. Optimización de la función de Rastrigin en 3 dimensiones](#io1.5.5.)
+-   [1.5.6. Cálculo de estadísticas y análisis](#io1.5.6.)
+-   [1.5.7. Conclusiones método de algoritmos evolutivos](#io1.5.7.)
+-   [2. Optimización combinatoria](#io2.)
+-   [2.1. Planteamiento del problema](#io2.1.)
+-   [2.2. Implementación Método de Colonia de hormigas](#io2.2.)
+-   [Conclusión General](#io5.)
+-   [Reporte de contribución individual](#iu3.)
+-   [Repositorio de GitHub del proyecto](#iu4.)
+-   [Bibliografía](#iu5.)
 
 <a name="iu1."></a>
 
@@ -120,19 +122,15 @@ show_table <- function(ruta) {
 
 El presente trabajo trata algunos de los métodos más relevantes de optimización numérica basada en manipulaciones del gradiente de una función objetivo (función a optimizar) y también algoritmos heurísticos basados en el comportamiento de la naturaleza, como lo son los algoritmos evolutivos. Todos estos métodos pueden llegar a ser útiles en distintos contextos en los que se busca optimizar una función para algún fin, como encontrar la mejor ruta entre ciudades o optimizar una función de pérdida en un contexto de aprendizaje de máquina. Cada método tiene particularidades interesantes que se van a explorar de manera general por medio de una breve implementación y ejecución con dos funciones muy utilizadas para probar algoritmos de optimización: la función de Rosenbrock y la función de Rastrigin.
 
-
 <a name="iu2."></a>
 
 # Metodología
 
-Para implementar y documentar la optimización se emplea R Markdown, combinando código R y texto explicativo. Se utilizan librerías para renderizar gráficos y animaciones, librerías para implementar los métodos heurísticos y librerías para manipular los datos.
-Para los casos 3D (tres variables) es difícil visualizar directamente la función de 3 dimensiones (espacio de 4 variables), por lo que se mostrarán únicamente los puntos óptimos alcanzados.
-
+Para implementar y documentar la optimización se emplea R Markdown, combinando código R y texto explicativo. Se utilizan librerías para renderizar gráficos y animaciones, librerías para implementar los métodos heurísticos y librerías para manipular los datos. Para los casos 3D (tres variables) es difícil visualizar directamente la función de 3 dimensiones (espacio de 4 variables), por lo que se mostrarán únicamente los puntos óptimos alcanzados.
 
 <a name="io1."></a>
 
 # Parte 1. Optimización numérica
-
 
 <a name="io1.1."></a>
 
@@ -187,27 +185,21 @@ Es una función no convexa introducida por Rosenbrock en 1960​ (Wikipedia, s.f
 
 Definición en n dimensiones:
 
-$f(X) = \sum_{i=1}^{n-1}100(X_{i+1}-X_i^2)^2 + (1-X_i)^2$
+$f(X) = \sum_{i=1}^{n-1}100(X_{i+1}-X_i^2)^2 + (1-X_i)^2$ (1)
 
 Definición en 2D:
 
-$f(x,y)= 100(y-x^2)^2 + (1-x)^2$
+$f(x,y)= 100(y-x^2)^2 + (1-x)^2$ (2)
 
 Definición en 3D:
 
-$f(x,y,z)=100[(y-x^2)^2+(z-y^2)^2] + (1-x)^2 + (1-y)^2$
+$f(x,y,z)=100[(y-x^2)^2+(z-y^2)^2] + (1-x)^2 + (1-y)^2$ (3)
 
 Algunas características y propiedades importantes  son las siguientes:
 
--   Mínimo global:
+-   El mínimo global está dado por los puntos que cumplen con $x_1,...,x_n =1$
 
-    $x_1,...,x_n =1, f(x_1,...,x_n) = 0$
-
--   Dominio de búsqueda: 
-
-    $-\infty \leq X_i \leq \infty$
-
-    $1 \leq i \leq n$
+-   El dominio de búsqueda consiste de todo el espacio real, es decir, donde cada punto cumple con $-\infty \leq X_i \leq \infty, 1 \leq i \leq n$.
 
 -   Conocida también como la función banana de Rosenbrock.
 
@@ -259,15 +251,21 @@ f_rosenbrock <- function(x){
 
 Las gráficas de la función de Rosenbrock en 2 y 3 dimensiones se muestran a continuación:
 
-<div style="text-align: center;">
-  <img src="images\graphics\rosenbrock_2d_grafica.png" alt="Gráfica de la función de Rosenbrock 2D" style="width:350px; max-width:90%; display:block; margin:auto;">
-  <div style="font-weight:bold; margin-top:8px; font-size:1.05em;">Gráfica de la función de Rosenbrock 2D</div>
-</div>
+::: {style="text-align: center;"}
+<img src="images\graphics\rosenbrock_2d_grafica.png" alt="Gráfica de la función de Rosenbrock 2D" style="width:350px; max-width:90%; display:block; margin:auto;"/>
 
-<div style="text-align: center;">
-  <img src="images\graphics\rosenbrock_3d_grafica.png" alt="Gráfica de la función de Rosenbrock 3D" style="width:350px; max-width:90%; display:block; margin:auto;">
-  <div style="font-weight:bold; margin-top:8px; font-size:1.05em;">Gráfica de la función de Rosenbrock 3D</div>
-</div>
+::: {style="font-weight:bold; margin-top:8px; font-size:1.05em;"}
+Gráfica de la función de Rosenbrock 2D
+:::
+:::
+
+::: {style="text-align: center;"}
+<img src="images\graphics\rosenbrock_3d_grafica.png" alt="Gráfica de la función de Rosenbrock 3D" style="width:350px; max-width:90%; display:block; margin:auto;"/>
+
+::: {style="font-weight:bold; margin-top:8px; font-size:1.05em;"}
+Gráfica de la función de Rosenbrock 3D
+:::
+:::
 
 <a name="io1.1.3."></a>
 
@@ -279,25 +277,21 @@ Presenta múltiples mínimos locales dispuestos de forma regular​, lo que lo c
 
 Definición en n dimensiones:
 
-$f(X)=An + \sum_{i=1}^n[X_i^2 -A\cos(2\pi X_i)], A=10$
+$f(X)=An + \sum_{i=1}^n[X_i^2 -A\cos(2\pi X_i)], A=10$ (4)
 
 Definición en 2D:
 
-$f(x,y)=x^2+y^2+A[2-\cos(2\pi x) - \cos(2\pi y)], A=10$
+$f(x,y)=x^2+y^2+A[2-\cos(2\pi x) - \cos(2\pi y)], A=10$ (5)
 
 Definición en 3D:
 
-$f(x,y)=x^2+y^2+z^2+A[3-\cos(2\pi x) - \cos(2\pi y)-\cos(2\pi z)], A=10$
+$f(x,y)=x^2+y^2+z^2+A[3-\cos(2\pi x) - \cos(2\pi y)-\cos(2\pi z)], A=10$ (6)
 
 Algunas características y propiedades importantes son las siguientes:
 
--   Mínimo global:
+-   El mínimo global se alcanza cuando el vector es un vector nulo, es decir, $X=[0,...,0]$ para n dimensiones.
 
-    -   $f(0,...0)=0$
-
--   Dominio de búsqueda:
-
-    -   $-5.12 \leq X_i \leq 5.12$
+-   El dominio de búsqueda cumple con $-5.12 \leq X_i \leq 5.12$.
 
 -   Particularmente, hallar el mínimo de esta función es un problema difícil debido a la larga cantidad de mínimos locales.
 
@@ -349,15 +343,21 @@ f_rastrigin <-function(x){
 
 Las gráficas de la función de Rastrigin en 2 y 3 dimensiones se muestran a continuación:
 
-<div style="text-align: center;">
-  <img src="images\graphics\rastrigin_2d_grafica.png" alt="Gráfica de la función de Rastrigin 2D" style="width:350px; max-width:90%; display:block; margin:auto;">
-  <div style="font-weight:bold; margin-top:8px; font-size:1.05em;">Gráfica de la función de Rastrigin 2D</div>
-</div>
+::: {style="text-align: center;"}
+<img src="images\graphics\rastrigin_2d_grafica.png" alt="Gráfica de la función de Rastrigin 2D" style="width:350px; max-width:90%; display:block; margin:auto;"/>
 
-<div style="text-align: center;">
-  <img src="images\graphics\rastrigin_3d_grafica.png" alt="Gráfica de la función de Rastrigin 3D" style="width:350px; max-width:90%; display:block; margin:auto;">
-  <div style="font-weight:bold; margin-top:8px; font-size:1.05em;">Gráficas de la función de Rastrigin 3D</div>
-</div>
+::: {style="font-weight:bold; margin-top:8px; font-size:1.05em;"}
+Gráfica de la función de Rastrigin 2D
+:::
+:::
+
+::: {style="text-align: center;"}
+<img src="images\graphics\rastrigin_3d_grafica.png" alt="Gráfica de la función de Rastrigin 3D" style="width:350px; max-width:90%; display:block; margin:auto;"/>
+
+::: {style="font-weight:bold; margin-top:8px; font-size:1.05em;"}
+Gráficas de la función de Rastrigin 3D
+:::
+:::
 
 <a name="io1.2."></a>
 
@@ -400,10 +400,13 @@ sol_rosen2d <- optimizador_mult_numdev(f_rosenbrock, x0=c(-4,-4), h=0.005, eta=0
 
 La siguiente animación muestra el desempeño de la optimización a traves de su trayectoria:
 
-<div style="text-align: center;">
-  <img src="Parte 1\Descenso de gradiente\rosenbrock_opt_grad_2d.gif" alt="Animación de la optimización de Rosenbrock 2D" style="width:350px; max-width:90%; display:block; margin:auto;">
-  <div style="font-weight:bold; margin-top:8px; font-size:1.05em;">Animación de la optimización de Rosenbrock 2D</div>
-</div>
+::: {style="text-align: center;"}
+<img src="Parte 1\Descenso de gradiente\rosenbrock_opt_grad_2d.gif" alt="Animación de la optimización de Rosenbrock 2D" style="width:350px; max-width:90%; display:block; margin:auto;"/>
+
+::: {style="font-weight:bold; margin-top:8px; font-size:1.05em;"}
+Animación de la optimización de Rosenbrock 2D
+:::
+:::
 
 <a name="io1.2.3."></a>
 
@@ -413,11 +416,29 @@ La siguiente animación muestra el desempeño de la optimización a traves de su
 sol_rosen3d <- optimizador_mult_numdev(f_rosenbrock, x0=c(-4,-4,-4), h=0.005, eta=0.5)
 ```
 
-En la siguiente tabla de muestran el comportamiento cada 10 iteraciones: 
+En la siguiente tabla de muestran el comportamiento cada 10 iteraciones:
 
 ```{r}
 show_table("./Parte 1/Descenso de gradiente/rosenbrock_iter_grad.csv")
 ```
+
++----+-----------+------------+--------------+--------------+--------------+
+| \  | Iteracion | X1         | X2           | X3           | f_x          |
+|    |           |            |              |              |              |
+|    | \<int\>   | \<dbl\>    | \<dbl\>      | \<dbl\>      | \<dbl\>      |
++:===+==========:+===========:+=============:+=============:+=============:+
+| 10 | 10        | -0.4746588 | -0.958089003 | 0.551655990  | 1.594659e+02 |
++----+-----------+------------+--------------+--------------+--------------+
+| 20 | 20        | 0.1573142  | 0.008101639  | -0.002158858 | 1.722186e+00 |
++----+-----------+------------+--------------+--------------+--------------+
+| 30 | 30        | 0.8622383  | 0.739978128  | 0.539436307  | 9.441027e-02 |
++----+-----------+------------+--------------+--------------+--------------+
+| 40 | 40        | 0.9951835  | 0.990348334  | 0.980616739  | 1.195241e-04 |
++----+-----------+------------+--------------+--------------+--------------+
+| 50 | 50        | 0.9970042  | 0.994027256  | 0.988090002  | 4.465851e-05 |
++----+-----------+------------+--------------+--------------+--------------+
+
+**Tabla 1.** Tabla de ejecución de optimización de Rosenbrock 3D utilizando Descenso de Gradiente
 
 <a name="io1.2.4."></a>
 
@@ -429,10 +450,13 @@ sol_ras2d <- optimizador_mult_numdev(f_rastrigin, x0=c(4.5,4.5), h=0.005, eta=2)
 
 La siguiente animación muestra el desempeño de la optimización a traves de su trayectoria:
 
-<div style="text-align: center;">
-  <img src="Parte 1\Descenso de gradiente\rastrigin_opt_grad_2d.gif" alt="Animación de la optimización de Rastrigin 2D" style="width:350px; max-width:90%; display:block; margin:auto;">
-  <div style="font-weight:bold; margin-top:8px; font-size:1.05em;">Animación de la optimización de Rastrigin 2D</div>
-</div>
+::: {style="text-align: center;"}
+<img src="Parte 1\Descenso de gradiente\rastrigin_opt_grad_2d.gif" alt="Animación de la optimización de Rastrigin 2D" style="width:350px; max-width:90%; display:block; margin:auto;"/>
+
+::: {style="font-weight:bold; margin-top:8px; font-size:1.05em;"}
+Animación de la optimización de Rastrigin 2D
+:::
+:::
 
 <a name="io1.2.5."></a>
 
@@ -442,11 +466,39 @@ La siguiente animación muestra el desempeño de la optimización a traves de su
 sol_ras3d <- optimizador_mult_numdev(f_rastrigin, x0=c(-4,-4,-4),  h=0.005, eta=2)
 ```
 
-En la siguiente tabla de muestran el comportamiento cada 10 iteraciones: 
+En la siguiente tabla de muestran el comportamiento cada 10 iteraciones:
 
 ```{r}
 show_table("./Parte 1/Descenso de gradiente/rastrigin_iter_grad.csv")
 ```
+
++-----+-----------+-----------+-----------+-----------+----------+
+|     | Iteracion | X1        | X2        | X3        | f_x      |
+|     |           |           |           |           |          |
+|     | \<int\>   | \<dbl\>   | \<dbl\>   | \<dbl\>   | \<dbl\>  |
++=====+==========:+==========:+==========:+==========:+=========:+
+| 10  | 10        | -3.957646 | -3.957646 | -3.957646 | 48.04492 |
++-----+-----------+-----------+-----------+-----------+----------+
+| 20  | 20        | -3.954028 | -3.954028 | -3.954028 | 48.14587 |
++-----+-----------+-----------+-----------+-----------+----------+
+| 30  | 30        | -3.947836 | -3.947836 | -3.947836 | 48.35321 |
++-----+-----------+-----------+-----------+-----------+----------+
+| 40  | 40        | -3.933194 | -3.933194 | -3.933194 | 49.01439 |
++-----+-----------+-----------+-----------+-----------+----------+
+| 50  | 50        | -3.399662 | -3.399662 | -3.399662 | 88.90609 |
++-----+-----------+-----------+-----------+-----------+----------+
+| 60  | 60        | -4.984220 | -4.984220 | -4.984971 | 74.67761 |
++-----+-----------+-----------+-----------+-----------+----------+
+| 70  | 70        | -4.984487 | -4.984487 | -4.985301 | 74.68100 |
++-----+-----------+-----------+-----------+-----------+----------+
+| 80  | 80        | -4.984775 | -4.984775 | -4.985663 | 74.68479 |
++-----+-----------+-----------+-----------+-----------+----------+
+| 90  | 90        | -4.985087 | -4.985087 | -4.986062 | 74.68906 |
++-----+-----------+-----------+-----------+-----------+----------+
+| 100 | 100       | -4.985429 | -4.985429 | -4.986505 | 74.69392 |
++-----+-----------+-----------+-----------+-----------+----------+
+
+**Tabla 2.** Tabla de ejecución de optimización de Rastrigin 3D utilizando Descenso de Gradiente
 
 <a name="io1.2.6."></a>
 
@@ -531,10 +583,13 @@ En este gráfico se muestran las curvas de nivel de la función de Rosenbrock en
 
 La línea roja representa la trayectoria que siguió el algoritmo de evolución diferencial durante las iteraciones. Se puede observar cómo el enjambre de soluciones se fue acercando progresivamente hacia el mínimo, mejorando su posición en cada generación.
 
-<div style="text-align: center;">
-  <img src="Parte 1\Evolucion_Diferencial\rosenbrock_opt_evd_2d.gif" alt="Animación de la optimización de Rosenbrock 2D" style="width:350px; max-width:90%; display:block; margin:auto;">
-  <div style="font-weight:bold; margin-top:8px; font-size:1.05em;">Animación de la optimización de Rosenbrock 2D</div>
-</div>
+::: {style="text-align: center;"}
+<img src="Parte 1\Evolucion_Diferencial\rosenbrock_opt_evd_2d.gif" alt="Animación de la optimización de Rosenbrock 2D" style="width:350px; max-width:90%; display:block; margin:auto;"/>
+
+::: {style="font-weight:bold; margin-top:8px; font-size:1.05em;"}
+Animación de la optimización de Rosenbrock 2D
+:::
+:::
 
 El resultado final obtenido fue: [1] 1.000000 1.000001 Valor mínimo encontrado: 1.91e-12
 
@@ -548,6 +603,34 @@ En esta parte del informe se muestran los resultados numéricos para la optimiza
 show_table("./Parte 1/Evolucion_Diferencial/rosenbrock_iter_evd.csv")
 ```
 
++-----+-----------+------------+-----------+-----------+--------------+
+|     | Iteracion | X1         | X2        | X3        | f_x          |
+|     |           |            |           |           |              |
+|     | \<int\>   | \<dbl\>    | \<dbl\>   | \<dbl\>   | \<dbl\>      |
++=====+==========:+===========:+==========:+==========:+=============:+
+| 10  | 10        | -0.5851768 | 0.1130689 | 0.8649437 | 8.117769e+01 |
++-----+-----------+------------+-----------+-----------+--------------+
+| 20  | 20        | 0.8804582  | 0.5209831 | 0.4780407 | 1.097578e+01 |
++-----+-----------+------------+-----------+-----------+--------------+
+| 30  | 30        | 0.6909606  | 0.4626611 | 0.3574320 | 2.461728e+00 |
++-----+-----------+------------+-----------+-----------+--------------+
+| 40  | 40        | 0.8538862  | 0.6791208 | 0.3539351 | 1.525006e+00 |
++-----+-----------+------------+-----------+-----------+--------------+
+| 50  | 50        | 0.6618927  | 0.4963945 | 0.2269164 | 7.457276e-01 |
++-----+-----------+------------+-----------+-----------+--------------+
+| 60  | 60        | 0.8752932  | 0.7583245 | 0.5976751 | 1.312261e-01 |
++-----+-----------+------------+-----------+-----------+--------------+
+| 70  | 70        | 0.9673312  | 0.9327385 | 0.8779734 | 1.284198e-02 |
++-----+-----------+------------+-----------+-----------+--------------+
+| 80  | 80        | 1.0023756  | 1.0066111 | 1.0136724 | 4.096946e-04 |
++-----+-----------+------------+-----------+-----------+--------------+
+| 90  | 90        | 1.0023756  | 1.0066111 | 1.0136724 | 4.096946e-04 |
++-----+-----------+------------+-----------+-----------+--------------+
+| 100 | 100       | 0.9998260  | 0.9998014 | 0.9996265 | 2.357928e-06 |
++-----+-----------+------------+-----------+-----------+--------------+
+
+**Tabla 3.** Tabla de ejecución de optimización de Rosenbrock 3D utilizando Evolución Diferencial
+
 <a name="io1.3.4."></a>
 
 ### 1.3.4 Optimización de la función de Rastrigin en 2 dimensiones
@@ -556,10 +639,13 @@ Aquí se grafican las curvas de nivel de la función de Rastrigin, que es multim
 
 La línea azul muestra cómo la evolución diferencial se mueve por el espacio de búsqueda y logra escapar de los mínimos locales hasta acercarse al óptimo global, que se encuentra en (0,0)(0,0).
 
-<div style="text-align: center;">
-  <img src="Parte 1\Evolucion_Diferencial\rastrigin_opt_evd_2d.gif" alt="Animación de la optimización de Rastrigin 2D" style="width:350px; max-width:90%; display:block; margin:auto;">
-  <div style="font-weight:bold; margin-top:8px; font-size:1.05em;">Animación de la optimización de Rastrigin 2D</div>
-</div>
+::: {style="text-align: center;"}
+<img src="Parte 1\Evolucion_Diferencial\rastrigin_opt_evd_2d.gif" alt="Animación de la optimización de Rastrigin 2D" style="width:350px; max-width:90%; display:block; margin:auto;"/>
+
+::: {style="font-weight:bold; margin-top:8px; font-size:1.05em;"}
+Animación de la optimización de Rastrigin 2D
+:::
+:::
 
 Resultado obtenido: [1] 2.176697e-06 -2.015785e-07 Valor mínimo: 9.48e-10
 
@@ -572,6 +658,34 @@ En este caso, el algoritmo encontró una solución cercana al mínimo global, au
 ```{r}
 show_table("./Parte 1/Evolucion_Diferencial/rastrigin_iter_evd.csv")
 ```
+
++-----+-----------+--------------+--------------+--------------+------------+
+|     | Iteracion | X1           | X2           | X3           | f_x        |
+|     |           |              |              |              |            |
+|     | \<int\>   | \<dbl\>      | \<dbl\>      | \<dbl\>      | \<dbl\>    |
++=====+==========:+=============:+=============:+=============:+===========:+
+| 10  | 10        | 1.064334561  | 1.037971464  | -0.086056745 | 4.73335450 |
++-----+-----------+--------------+--------------+--------------+------------+
+| 20  | 20        | 1.057313204  | 1.012050066  | 0.021733277  | 2.90578529 |
++-----+-----------+--------------+--------------+--------------+------------+
+| 30  | 30        | 1.057313204  | 1.012050066  | 0.021733277  | 2.90578529 |
++-----+-----------+--------------+--------------+--------------+------------+
+| 40  | 40        | 0.036246808  | 1.031428503  | 1.009576812  | 2.55506463 |
++-----+-----------+--------------+--------------+--------------+------------+
+| 50  | 50        | -1.004720490 | -0.025677269 | 0.022997883  | 1.24913224 |
++-----+-----------+--------------+--------------+--------------+------------+
+| 60  | 60        | 0.988499542  | -0.008651518 | 0.010258072  | 1.03894216 |
++-----+-----------+--------------+--------------+--------------+------------+
+| 70  | 70        | 0.988499542  | -0.008651518 | 0.010258072  | 1.03894216 |
++-----+-----------+--------------+--------------+--------------+------------+
+| 80  | 80        | -0.025075277 | 0.041071447  | 0.020016885  | 0.53668971 |
++-----+-----------+--------------+--------------+--------------+------------+
+| 90  | 90        | 0.010524114  | 0.009941041  | 0.006215324  | 0.04922793 |
++-----+-----------+--------------+--------------+--------------+------------+
+| 100 | 100       | -0.004061259 | -0.007504267 | 0.001244800  | 0.01474968 |
++-----+-----------+--------------+--------------+--------------+------------+
+
+**Tabla 4.** Tabla de ejecución de optimización de Rastrigin 3D utilizando Evolución Diferencial
 
 <a name="io1.3.6."></a>
 
@@ -605,25 +719,61 @@ Se utiliza el paquete pos para implementar el método de la optimización de par
 
 ### 1.4.2 Optimización de la función de Rosenbrock en 2 dimensiones
 
-<div style="text-align: center;">
-  <img src="pso_rosenbrock_min.gif" alt="Animación de la optimización de Rosenbrock 2D con PSO" style="width:350px; max-width:90%; display:block; margin:auto;">
-  <div style="font-weight:bold; margin-top:8px; font-size:1.05em;">Animación de la optimización de Rosenbrock 2D con PSO</div>
-</div>
+::: {style="text-align: center;"}
+<img src="pso_rosenbrock_min.gif" alt="Animación de la optimización de Rosenbrock 2D con PSO" style="width:350px; max-width:90%; display:block; margin:auto;"/>
+
+::: {style="font-weight:bold; margin-top:8px; font-size:1.05em;"}
+Animación de la optimización de Rosenbrock 2D con PSO
+:::
+:::
 
 <a name="io1.4.3."></a>
 
 ### 1.4.3 Optimización de la función de Rosenbrock en 3 dimensiones
 
-<!-- TODO: Faltan Animación de la Función -->
+```{r}
+show_table("./Parte 1/Enjambre de partículas/rosenbrock_iter_pso.csv")
+```
+
++-----+-----------+----------------------+-------------------------------------------------------+----------------+
+|     | iteracion | mejor_valor_enjambre | mejor_posicion_enjambre                               | diferencia_abs |
+|     |           |                      |                                                       |                |
+|     | \<int\>   | \<dbl\>              | \<chr\>                                               | \<dbl\>        |
++=====+==========:+=====================:+:======================================================+===============:+
+| 10  | 10        | 331.7666             | -9.51355277365643, 9.55627294905859, 9.52381833492284 | 1.466955e-01   |
++-----+-----------+----------------------+-------------------------------------------------------+----------------+
+| 20  | 20        | 331.7941             | -9.54545504914603, 9.58341360681124, 9.52306164187284 | 2.136272e-01   |
++-----+-----------+----------------------+-------------------------------------------------------+----------------+
+| 30  | 30        | 332.0698             | -9.53590113241727, 9.54041577588653, 9.56011765629112 | 4.444692e-01   |
++-----+-----------+----------------------+-------------------------------------------------------+----------------+
+| 40  | 40        | 331.7437             | -9.52423268435948, 9.52725725394154, 9.5811887290536  | 3.001570e-01   |
++-----+-----------+----------------------+-------------------------------------------------------+----------------+
+| 50  | 50        | 331.8203             | -9.5142541282931, 9.52908789764021, 9.54155305396948  | 1.560163e-01   |
++-----+-----------+----------------------+-------------------------------------------------------+----------------+
+| 60  | 60        | 332.0383             | -9.57209212541967, 9.54481467451097, 9.54675150787573 | 8.420885e-02   |
++-----+-----------+----------------------+-------------------------------------------------------+----------------+
+| 70  | 70        | 332.1110             | -9.54430273204136, 9.53782738376895, 9.54921607427319 | 1.458293e-02   |
++-----+-----------+----------------------+-------------------------------------------------------+----------------+
+| 80  | 80        | 332.1347             | -9.54429172045766, 9.54774735662854, 9.54976723459583 | 1.992581e-04   |
++-----+-----------+----------------------+-------------------------------------------------------+----------------+
+| 90  | 90        | 332.1375             | -9.54743114478767, 9.55201686251299, 9.54880483650736 | 3.227996e-03   |
++-----+-----------+----------------------+-------------------------------------------------------+----------------+
+| 100 | 100       | 332.1393             | -9.55020210478277, 9.54848826976327, 9.54919167244683 | 2.639027e      |
++-----+-----------+----------------------+-------------------------------------------------------+----------------+
+
+**Tabla 5.** Tabla de ejecución de optimización de Rosenbrock 3D utilizando Optimización de Partículas
 
 <a name="io1.4.4."></a>
 
 ### 1.4.4 Optimización de la función de Rastrigin en 2 dimensiones
 
-<div style="text-align: center;">
-  <img src="pso_rastrigin_min.gif" alt="Animación de la optimización de Rastrigin 2D con PSO" style="width:350px; max-width:90%; display:block; margin:auto;">
-  <div style="font-weight:bold; margin-top:8px; font-size:1.05em;">Animación de la optimización de Rastrigin 2D con PSO</div>
-</div>
+::: {style="text-align: center;"}
+<img src="pso_rastrigin_min.gif" alt="Animación de la optimización de Rastrigin 2D con PSO" style="width:350px; max-width:90%; display:block; margin:auto;"/>
+
+::: {style="font-weight:bold; margin-top:8px; font-size:1.05em;"}
+Animación de la optimización de Rastrigin 2D con PSO
+:::
+:::
 
 <a name="io1.4.5."></a>
 
@@ -637,6 +787,38 @@ upped_bounds <- 5
 # Ejecución del método
 o_pso <- particle_swarm_optimization(n,f_rastrigin,lower_bounds,upper_bounds)
 ```
+
+```{r}
+show_table("./Parte 1/Enjambre de partículas/rastrigin_iter_pso.csv")
+```
+
++-----------+----------------------+------------------------------------------------------+----------------+
+| iteracion | mejor_valor_enjambre | mejor_posicion_enjambre                              | diferencia_abs |
+|           |                      |                                                      |                |
+| \<int\>   | \<dbl\>              | \<chr\>                                              | \<dbl\>        |
++==========:+=====================:+:=====================================================+===============:+
+| 10        | 332.1333             | 9.55062500864904, 9.54736155842502, 9.55448763975004 | 1.325873e+00   |
++-----------+----------------------+------------------------------------------------------+----------------+
+| 20        | 331.5406             | 9.52357446958727, 9.56685821317542, 9.50250205784094 | 4.792065e-01   |
++-----------+----------------------+------------------------------------------------------+----------------+
+| 30        | 331.5791             | 9.56526091259586, 9.600114687037, 9.56518504530152   | 2.707836e-01   |
++-----------+----------------------+------------------------------------------------------+----------------+
+| 40        | 331.9865             | 9.57682593047023, 9.5526306447749, 9.54163679429817  | 1.399468e-01   |
++-----------+----------------------+------------------------------------------------------+----------------+
+| 50        | 331.9818             | 9.5228388940773, 9.54025472242996, 9.5413775386611   | 3.082020e-01   |
++-----------+----------------------+------------------------------------------------------+----------------+
+| 60        | 332.0952             | 9.56461187832995, 9.54815999520477, 9.54883681982856 | 1.753033e-02   |
++-----------+----------------------+------------------------------------------------------+----------------+
+| 70        | 332.1266             | 9.55580067863994, 9.552365632497, 9.54528606283767   | 5.561529e-03   |
++-----------+----------------------+------------------------------------------------------+----------------+
+| 80        | 332.1387             | 9.54750362349369, 9.5488424083441, 9.55047112210335  | 3.497472e-04   |
++-----------+----------------------+------------------------------------------------------+----------------+
+| 90        | 332.1391             | 9.54792760233839, 9.54882584945718, 9.54820282423739 | 1.332779e-04   |
++-----------+----------------------+------------------------------------------------------+----------------+
+| 100       | 332.1393             | 9.54833176359814, 9.54891927922634, 9.54828740925572 | 1.924380e-05   |
++-----------+----------------------+------------------------------------------------------+----------------+
+
+**Tabla 6.** Tabla de ejecución de optimización de Rastrigin 3D utilizando Optimización de Partículas
 
 <a name="io1.4.6."></a>
 
@@ -676,30 +858,101 @@ Los resúmenes en cada ejecución reportan el mejor fitness encontrado (negativo
 
 <a name="io1.5.2."></a>
 
-### 1.5.2 Optimización de la función de Rosenbrock en 2 dimensiones
+### 1.5.2 Optimización de la función de Rastrigin en 2 dimensiones
 
-<div style="text-align: center;">
-  <img src="optim_rastrigin_ga.gif" alt="Animación de optimización de Rastrigin 2D con Algoritmo Genético" style="width:350px; max-width:90%; display:block; margin:auto;">
-  <div style="font-weight:bold; margin-top:8px; font-size:1.05em;">Animación de la optimización de Rastrigin 2D con Algoritmo Genético</div>
-</div>
+::: {style="text-align: center;"}
+<img src="optim_rastrigin_ga.gif" alt="Animación de optimización de Rastrigin 2D con Algoritmo Genético" style="width:350px; max-width:90%; display:block; margin:auto;"/>
+
+::: {style="font-weight:bold; margin-top:8px; font-size:1.05em;"}
+Animación de la optimización de Rastrigin 2D con Algoritmo Genético
+:::
+:::
 
 <a name="io1.5.3."></a>
 
-### 1.5.3 Optimización de la función de Rosenbrock en 3 dimensiones
+### 1.5.3 Optimización de la función de Rastrigin en 3 dimensiones
 
-<!-- TODO: Faltan Animación de la Función -->
+```{r}
+show_table("./Parte 1/Algoritmos_Evolutivos/rastrigin_iter_ae.csv")
+```
+
++-----------+-----------+-----------+
+| Iteration | Mean      | Best      |
+|           |           |           |
+| \<int\>   | \<dbl\>   | \<dbl\>   |
++==========:+==========:+==========:+
+| 10        | -27.23858 | -9.049369 |
++-----------+-----------+-----------+
+| 20        | -25.13381 | -9.049369 |
++-----------+-----------+-----------+
+| 30        | -18.80389 | -9.009854 |
++-----------+-----------+-----------+
+| 40        | -15.61091 | -9.009854 |
++-----------+-----------+-----------+
+| 50        | -10.47414 | -9.009854 |
++-----------+-----------+-----------+
+| 60        | -16.55153 | -9.009854 |
++-----------+-----------+-----------+
+| 70        | -17.38540 | -9.007921 |
++-----------+-----------+-----------+
+| 80        | -10.28919 | -9.000909 |
++-----------+-----------+-----------+
+| 90        | -16.75012 | -9.000504 |
++-----------+-----------+-----------+
+| 100       | -12.30302 | -9.000344 |
++-----------+-----------+-----------+
+
+**Tabla 7.** Tabla de ejecución de optimización de Rastrigin 3D utilizando Algoritmos Evolutivos
 
 <a name="io1.5.4."></a>
 
-### 1.5.4 Optimización de la función de Rastrigin en 2 dimensiones
+### 1.5.4 Optimización de la función de Rosenbrock en 2 dimensiones
 
-<!-- TODO: Faltan Animación de la Función -->
+### 
+
+::: {style="text-align: center;"}
+![Animación de optimización de Rastrigin 2D con Algoritmo Genético.](images/optim_rastrigin_ga-02.gif)
+
+::: {style="font-weight:bold; margin-top:8px; font-size:1.05em;"}
+**Animación de la optimización de Rosenbrock 2D con Algoritmo Genético**
+:::
+:::
 
 <a name="io1.5.5."></a>
 
-### 1.5.5 Optimización de la función de Rastrigin en 3 dimensiones
+### 1.5.5 Optimización de la función de Rosenbrock en 3 dimensiones
 
-<!-- TODO: Faltan Animación de la Función -->
+```{r}
+show_table("./Parte 1/Algoritmos_Evolutivos/rosenbrock_iter_ae.csv")
+```
+
++-----------+------------+------------+
+| Iteration | Mean       | Best       |
+|           |            |            |
+| \<int\>   | \<dbl\>    | \<dbl\>    |
++==========:+===========:+===========:+
+| 10        | -1986.9605 | -31.398720 |
++-----------+------------+------------+
+| 20        | -456.4471  | -31.398720 |
++-----------+------------+------------+
+| 30        | -1656.6944 | -31.398720 |
++-----------+------------+------------+
+| 40        | -781.0234  | -22.941130 |
++-----------+------------+------------+
+| 50        | -316.4045  | -15.920770 |
++-----------+------------+------------+
+| 60        | -721.8341  | -14.043030 |
++-----------+------------+------------+
+| 70        | -941.6848  | -5.756500  |
++-----------+------------+------------+
+| 80        | -1501.3154 | -4.130807  |
++-----------+------------+------------+
+| 90        | -396.4700  | -1.327077  |
++-----------+------------+------------+
+| 100       | -1138.0842 | -1.327077  |
++-----------+------------+------------+
+
+**Tabla 8.** Tabla de ejecución de optimización de Rosenbrock 3D utilizando Algoritmos Evolutivos
 
 <a name="io1.5.6."></a>
 
@@ -709,21 +962,27 @@ Para evaluar la variabilidad del método estocástico, se repite cada caso al me
 
 Con los vectores de mejores valores (best_vals_ros, etc.), se calculan la media y desviación estándar de cada conjunto de 30 resultados. Por ejemplo, mean_ros y sd_ros arriba y las demas, Para asi presentar los resultados.
 
-<!-- TODO: Faltan Table de la Función -->
-
 Los resultados de las múltiples ejecuciones se resumen en la Tabla 1. Esta tabla muestra la media y desviación estándar del mejor valor de fitness (recordado que es el valor de la función objetivo en su mínimo global, típicamente cercano a 0) para cada combinación de función y dimensión. Se observa que para Rosenbrock 2D, la media del fitness mínimo es cercana a 0 con baja dispersión, reflejando que el GA normalmente encuentra el mínimo global (0) o cercano. Para Rastrigin 2D, la media también puede acercarse a 0, pero con mayor desviación estándar debido a los múltiples mínimos locales. En 3D ambos problemas suelen mostrar valores medios mayores (más alejados de 0) y mayor variabilidad, lo cual indica una mayor dificultad de búsqueda al aumentar la dimensionalidad.
 
-<!-- TODO: Faltan Animación de la Función -->
++-----------------+----------------+-----------------+-----------------+
+| Función         | Dimensión      | Media           | SD              |
++=================+================+=================+=================+
+| Rosenbrock      | 2D             | 0.0285904       | 0.0460372       |
++-----------------+----------------+-----------------+-----------------+
+| Rastrigin       | 2D             | 0.0001494       | 0.0004027       |
++-----------------+----------------+-----------------+-----------------+
+| Rosenbrock      | 3D             | 3.3777375       | 2.8046450       |
++-----------------+----------------+-----------------+-----------------+
+| Rastrigin       | 3D             | 9.0002470       | 0.0009913       |
++-----------------+----------------+-----------------+-----------------+
 
-**Tabla 1.** Estadísticas (media y desviación estándar) del fitness mínimo alcanzado en 30 corridas independientes para cada función y dimensión.
+**Tabla 9.** Estadísticas (media y desviación estándar) del fitness mínimo alcanzado en 30 corridas independientes para cada función y dimensión.
 
 <a name="io1.5.7."></a>
 
 ### 1.5.7 Conclusiones método de algoritmos evolutivos
 
-Los resultados confirman que el algoritmo genético es capaz de aproximarse a los mínimos globales de ambos problemas en múltiples dimensiones. Como era de esperar, Rastrigin mostró mayor variabilidad en los valores de fitness debido a sus muchos mínimos locales, lo que implica que algunas ejecuciones del GA pueden quedarse atrapadas en óptimos locales alejados del global. En contraste, Rosenbrock (aunque es no convexa) tiende a un único valle principal; por ello, la mayoría de las corridas alcanzaron valores cercanos al mínimo global con menor dispersión. En general se observa que al aumentar la dimensión (de 2D a 3D) la tarea se complica y la media del fitness aumenta (peor óptimo encontrado), reflejando la maldición de la dimensionalidad. El uso de múltiples ejecuciones independientes es esencial para evaluar la robustez de los AG. Debido a su naturaleza estocástica, cada ejecución puede converger a soluciones distintas. Al analizar la media y desviación estándar de los fitness finales se obtiene una medida de fiabilidad del algoritmo: una baja desviación indica resultados consistentes. En la literatura sobre algoritmos genéticos se reconoce que en muchos casos una sola ejecución puede no ser representativa​jstatsoft.org. Aunque un análisis comparativo profundo (p.ej., usando poblaciones más grandes o múltiples corridas en paralelo) queda fuera del alcance de este documento, nuestros resultados ilustran este fenómeno. Este estudio es reproducible: todo el código R necesario está incluido, permitiendo a otros investigadores replicar los experimentos, variar parámetros del GA (tasa de cruce, mutación, tamaño de población, etc.) y comparar con otros algoritmos de optimización.:Conclusiones Se ha presentado una documentación completa de la optimización de las funciones de Rosenbrock y Rastrigin en 2D y 3D empleando algoritmos genéticos en R. Mediante visualizaciones 3D iniciales se ilustraron las características de cada función de prueba. Se implementó el paquete GA para resolver cada caso y se realizaron 30 ejecuciones independientes para evaluar la robustez. Los resultados muestran que el GA puede encontrar aproximaciones al mínimo global en ambos problemas, aunque la función Rastrigin (múltiples mínimos locales) presenta más variabilidad y dificultad, especialmente en 3D.
-<a name="io1.5.7."></a>
-# Conclusión General
+Los resultados confirman que el algoritmo genético es capaz de aproximarse a los mínimos globales de ambos problemas en múltiples dimensiones. Como era de esperar, Rastrigin mostró mayor variabilidad en los valores de fitness debido a sus muchos mínimos locales, lo que implica que algunas ejecuciones del GA pueden quedarse atrapadas en óptimos locales alejados del global. En contraste, Rosenbrock (aunque es no convexa) tiende a un único valle principal; por ello, la mayoría de las corridas alcanzaron valores cercanos al mínimo global con menor dispersión. En general se observa que al aumentar la dimensión (de 2D a 3D) la tarea se complica y la media del fitness aumenta (peor óptimo encontrado), reflejando la maldición de la dimensionalidad. El uso de múltiples ejecuciones independientes es esencial para evaluar la robustez de los AG. Debido a su naturaleza estocástica, cada ejecución puede converger a soluciones distintas. Al analizar la media y desviación estándar de los fitness finales se obtiene una medida de fiabilidad del algoritmo: una baja desviación indica resultados consistentes. En la literatura sobre algoritmos genéticos se reconoce que en muchos casos una sola ejecución puede no ser representativa​jstatsoft.org. Aunque un análisis comparativo profundo (p.ej., usando poblaciones más grandes o múltiples corridas en paralelo) queda fuera del alcance de este documento, nuestros resultados ilustran este fenómeno. Este estudio es reproducible: todo el código R necesario está incluido, permitiendo a otros investigadores replicar los experimentos, variar parámetros del GA (tasa de cruce, mutación, tamaño de población, etc.) y comparar con otros algoritmos de optimización.:Conclusiones Se ha presentado una documentación completa de la optimización de las funciones de Rosenbrock y Rastrigin en 2D y 3D empleando algoritmos genéticos en R. Mediante visualizaciones 3D iniciales se ilustraron las características de cada función de prueba. Se implementó el paquete GA para resolver cada caso y se realizaron 30 ejecuciones independientes para evaluar la robustez. Los resultados muestran que el GA puede encontrar aproximaciones al mínimo global en ambos problemas, aunque la función Rastrigin (múltiples mínimos locales) presenta más variabilidad y dificultad, especialmente en 3D. <a name="io1.5.7."></a> \# Conclusión General
 
 Al terminar este trabajo, la verdad es que uno se da cuenta de lo poderosos y flexibles que pueden ser los algoritmos bioinspirados cuando se trata de resolver problemas de optimización, tanto numéricos como combinatorios. En la primera parte, experimentamos con funciones clásicas como Rosenbrock y Rastrigin usando métodos como el descenso de gradiente, PSO y algoritmos genéticos. Lo interesante fue ver cómo los métodos bioinspirados, inspirados en la naturaleza y el comportamiento colectivo, logran escapar de los mínimos locales y explorar el espacio de soluciones de una forma mucho más creativa y robusta que los métodos tradicionales. No solo es cuestión de encontrar el mínimo, sino de cómo se llega a él: la diversidad, la colaboración y la adaptación constante hacen la diferencia.
 
@@ -758,7 +1017,7 @@ El problema se puede plantear como una instancia particular del problema del via
 | **Manizales**     | 5.0703      | -75.5138     |
 | **Pereira**       | 4.8143      | -75.6946     |
 
-**Tabla 2.** Ciudades principales de Colombia junto con su latencia y longitud.
+**Tabla 10.** Ciudades principales de Colombia junto con su latencia y longitud.
 
 El objetivo de este problema es optimizar con respecto a los costos y no a las distancias entre ciudades, por lo que se tienen que considerar los costos de combustible, de peajes y cuánto cobra el vendedor por hora de trabajo. Sin embargo, la distancia afectará al valor de todos estos costos, y por lo tanto hay que considerarla. Adicionalmente, todos estos costos están en función de la distancia en metros, por lo que es necesario realizar la conversión de latitud-longitud a coordenadas en metros. Para esto se usó la librería "sf" para realizar la conversión al sistema de coordenadas planas UTM, el cual representa los puntos del globo en metros.
 
@@ -835,46 +1094,45 @@ Pero la cosa no se quedó ahí. En la segunda parte, nos metimos de lleno en la 
 
 En resumen, este trabajo no solo nos permitió comparar y entender diferentes algoritmos, sino que también nos mostró la importancia de pensar "fuera de la caja" y de inspirarnos en la naturaleza para resolver problemas complejos. Los algoritmos bioinspirados no son una receta mágica, pero sí una herramienta poderosa y adaptable, capaz de enfrentar desafíos tanto en el mundo continuo como en el discreto. Además, trabajar con estos métodos fomenta la creatividad, el trabajo en equipo y una visión interdisciplinaria que, sin duda, es clave en la ciencia y la ingeniería de hoy.
 
-
 <a name="iu3."></a>
 
 # Reporte de contribución individual
 
 ## - Leonardo Federico Corona Torres
 
-  -   Apoyo en redacción y realización de implementaciones de sección "Método de algoritmos evolutivos".
-  
-  -   Apoyo en redacción de implementaciones de graficación en Parte 2 del reporte.
-  
-  -   Búsqueda e investigación de funciones de prueba a utilizar.
-  
-  -   Apoyo en redacción y realización de implementaciones de sección "Selección e implementación de las funciones de prueba".
+-   Apoyo en redacción y realización de implementaciones de sección "Método de algoritmos evolutivos".
+
+-   Apoyo en redacción de implementaciones de graficación en Parte 2 del reporte.
+
+-   Búsqueda e investigación de funciones de prueba a utilizar.
+
+-   Apoyo en redacción y realización de implementaciones de sección "Selección e implementación de las funciones de prueba".
 
 ## - David Escobar Ruiz
-  
-  -   Definición y escritura de estructura del reporte.
-  
-  -   Apoyo en redacción y realización de implementaciones de sección "Selección e implementación de las funciones de prueba".
-  
-  -   Apoyo en redaccióny realización de implementaciones de sección "Método de optimización de partículas".
-  
-  -   Apoyo en redacción y realización de implementaciones de métodos, planteamiento y preprocesamiento de datos Parte 2 del reporte.
+
+-   Definición y escritura de estructura del reporte.
+
+-   Apoyo en redacción y realización de implementaciones de sección "Selección e implementación de las funciones de prueba".
+
+-   Apoyo en redaccióny realización de implementaciones de sección "Método de optimización de partículas".
+
+-   Apoyo en redacción y realización de implementaciones de métodos, planteamiento y preprocesamiento de datos Parte 2 del reporte.
 
 ## - Johan Sebastián Robles Rincón
 
-  -   Implementación y prueba del método de evolución diferencial en R para funciones de Rosenbrock y Rastrigin en 2D y 3D.
-  
-  -   Análisis de resultados numéricos y gráficos.
-  
-  -   Apoyo en redacción de sección del contenido técnico relacionado con este método de evolucion diferencial en el informe.
+-   Implementación y prueba del método de evolución diferencial en R para funciones de Rosenbrock y Rastrigin en 2D y 3D.
+
+-   Análisis de resultados numéricos y gráficos.
+
+-   Apoyo en redacción de sección del contenido técnico relacionado con este método de evolucion diferencial en el informe.
 
 ## - Sebastian Soto Arcila
 
-  -   Apoyo en redacción y realización de implementaciones de sección "Método de optimización por descenso de gradiente"
-  
-  -   Apoyo en redacción de sección "Selección e implementación de las funciones de prueba".
-  
-  <a name="iu4."></a>
+-   Apoyo en redacción y realización de implementaciones de sección "Método de optimización por descenso de gradiente"
+
+-   Apoyo en redacción de sección "Selección e implementación de las funciones de prueba".
+
+<a name="iu4."></a>
 
 # Repositorio de GitHub del proyecto
 

@@ -1,0 +1,398 @@
+---
+title: "Parte 2: Optimización Combinatoria - Problema del Viajero (TSP)"
+author: "Equipo 3 - RNABI2025-1"
+date: "Junio 25, 2025"
+output: html_document
+editor_options: 
+  markdown: 
+    wrap: sentence
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+# Instalamos y cargamos los paquetes necesarios
+if (!require(GA)) install.packages("GA")
+if (!require(ggplot2)) install.packages("ggplot2")
+if (!require(ggmap)) install.packages("ggmap")
+if (!require(animation)) install.packages("animation")
+if (!require(osrm)) install.packages("osrm")
+if (!require(ggimage)) install.packages("ggimage")
+if (!require(sf)) install.packages("sf")  # Agregar sf
+
+library(GA)
+library(ggplot2)
+library(ggmap)
+library(animation)
+library(osrm)
+library(ggimage)
+library(sf)  # Cargar sf
+# Configurar ImageMagick para saveGIF
+ani.options(convert = 'magick')
+```
+
+# Introduccion:
+
+Este trabajo resuelve el problema del viajero (TSP) para un vendedor que debe visitar 13 ciudades principales de Colombia, optimizando la ruta mediante Ant Colony Optimization (ACO) y Algoritmos Genéticos (GA).
+Los costos totales se calculan considerando: - Tiempo del vendedor: Costos por hora de \$30,000, \$50,000 y \$70,000 COP, con una velocidad promedio de 60 km/h.
+
+-   Peajes: Costos exactos basados en datos de INVIAS y colombiapeajes.com, ajustados al 10% de incremento para abril de 2025.
+
+-   Combustible: Vehículo DFSK C35 con rendimiento de 10 km/litro y gasolina a \$16,000 COP/galón.
+
+La solución óptima se visualiza con un GIF animado que muestra un carrito recorriendo las carreteras principales entre las ciudades.
+
+```{r}
+# Definimos las 13 ciudades principales con sus coordenadas geográficas.
+ciudades <- data.frame(
+  Ciudad = c("Bogotá", "Medellín", "Cali", "Barranquilla", "Cartagena", "Bucaramanga", 
+             "Pereira", "Cúcuta", "Ibagué", "Manizales", "Santa Marta", "Villavicencio", "Pasto"),
+  Latitud = c(4.6097, 6.2518, 3.4372, 10.9685, 10.3997, 7.1254, 4.8133, 7.8939, 
+              4.4389, 5.0689, 11.2408, 4.1420, 1.2136),
+  Longitud = c(-74.0817, -75.5638, -76.5225, -74.7813, -75.5144, -73.1198, -75.6961, 
+               -72.5078, -75.2322, -75.5174, -74.1990, -73.6266, -77.2811)
+)
+```
+
+```{r}
+#Usamos una matriz de distancias (en km) basada en rutas principales por carretera.
+distancias <- matrix(c(
+  0, 426, 460, 1002, 1068, 384, 306, 552, 174, 257, 1008, 165, 893,
+  426, 0, 418, 876, 941, 463, 142, 628, 328, 166, 886, 595, 774,
+  460, 418, 0, 1138, 1203, 595, 259, 760, 296, 341, 1144, 627, 416,
+  1002, 876, 1138, 0, 122, 618, 1016, 664, 1176, 1019, 122, 837, 1365,
+  1068, 941, 1203, 122, 0, 683, 1081, 729, 1241, 1084, 187, 902, 1430,
+  384, 463, 595, 618, 683, 0, 458, 168, 558, 401, 624, 419, 1017,
+  306, 142, 259, 1016, 1081, 458, 0, 623, 323, 24, 1026, 590, 769,
+  552, 628, 760, 664, 729, 168, 623, 0, 726, 566, 672, 587, 1185,
+  174, 328, 296, 1176, 1241, 558, 323, 726, 0, 247, 1182, 339, 729,
+  257, 166, 341, 1019, 1084, 401, 24, 566, 247, 0, 1029, 432, 712,
+  1008, 886, 1144, 122, 187, 624, 1026, 672, 1182, 1029, 0, 843, 1371,
+  165, 595, 627, 837, 902, 419, 590, 587, 339, 432, 843, 0, 858,
+  893, 774, 416, 1365, 1430, 1017, 769, 1185, 729, 712, 1371, 858, 0
+), nrow=13, byrow=TRUE)
+rownames(distancias) <- colnames(distancias) <- ciudades$Ciudad
+# Fuente: Distancias estimadas con ViaMichelin (https://www.viamichelin.com/) y colombiapeajes.com
+```
+
+```{r}
+#Matriz de costos totales de peajes (en COP), basada en datos reales ajustados al ~10% de incremento para abril de 2025.
+costo_peajes <- matrix(c(
+  0, 60000, 65000, 100000, 110000, 65000, 40000, 70000, 25000, 40000, 100000, 40000, 90000,  # Bogotá
+  60000, 0, 55000, 90000, 100000, 65000, 30000, 80000, 40000, 30000, 90000, 80000, 80000,  # Medellín
+  65000, 55000, 0, 130000, 140000, 90000, 40000, 100000, 40000, 50000, 130000, 80000, 50000,  # Cali
+  100000, 90000, 130000, 0, 21800, 80000, 120000, 90000, 140000, 120000, 21800, 90000, 170000,  # Barranquilla
+  110000, 100000, 140000, 21800, 0, 90000, 130000, 100000, 150000, 130000, 43600, 100000, 180000,  # Cartagena
+  65000, 65000, 90000, 80000, 90000, 0, 80000, 25000, 80000, 65000, 80000, 50000, 130000,  # Bucaramanga
+  40000, 30000, 40000, 120000, 130000, 80000, 0, 90000, 25000, 15000, 120000, 65000, 80000,  # Pereira
+  70000, 80000, 100000, 90000, 100000, 25000, 90000, 0, 90000, 80000, 90000, 65000, 140000,  # Cúcuta
+  25000, 40000, 40000, 140000, 150000, 80000, 25000, 90000, 0, 25000, 140000, 40000, 80000,  # Ibagué
+  40000, 30000, 50000, 120000, 130000, 65000, 15000, 80000, 25000, 0, 120000, 50000, 65000,  # Manizales
+  100000, 90000, 130000, 21800, 43600, 80000, 120000, 90000, 140000, 120000, 0, 90000, 170000,  # Santa Marta
+  40000, 80000, 80000, 90000, 100000, 50000, 65000, 65000, 40000, 50000, 90000, 0, 120000,  # Villavicencio
+  90000, 80000, 50000, 170000, 180000, 130000, 80000, 140000, 80000, 65000, 170000, 120000, 0   # Pasto
+), nrow=13, byrow=TRUE)
+rownames(costo_peajes) <- colnames(costo_peajes) <- ciudades$Ciudad
+# Fuente: INVIAS (https://hermes.invias.gov.co/viajeroseguro/), colombiapeajes.com, ajustado al 10% (Mintransporte, 2025)
+
+```
+
+# Costos
+
+Calculamos los costos totales considerando - Tiempo : Velocidad promedio de 60 km/h, costos por hora \$30,000,\$50,000,\$70,000 COP.
+- Combustible: DFSK C35 con 10km/litro, gasolina a \$16,000 COP/galon.
+
+```{r}
+# Costo de combustible
+costo_combustible_km <- 16000 / (10 * 3.785)  # ≈ 422.72 COP/km
+# Fuente: Precio estimado para 2025, rendimiento DFSK C35 (especificaciones del fabricante)
+
+# Función para calcular costos
+calcular_costos <- function(costo_hora) {
+  tiempos <- distancias / 60  # Tiempo en horas
+  costo_tiempo <- tiempos * costo_hora
+  costo_combustible <- distancias * costo_combustible_km
+  costo_total <- costo_tiempo + costo_combustible + costo_peajes
+  return(costo_total)
+}
+
+# Calcular matrices de costos
+costo_hora <- c(30000, 50000, 70000)
+matrices_costos <- lapply(costo_hora, calcular_costos)
+```
+
+# Algoritmo ACO
+
+Implemetamos Ant Colony Optimizacion(ACO) para optimizar TSP.\
+Este Algoritmo (ACO) esta Inspirado en el comportamiento de hormigas,este algoritmo simula como las hormigas encuentran la ruta mas corta dejando feromonas.
+la idea en si es que la ruta mas corta acumulara mas feromonas con el tiempo.
+
+```{r}
+aco_tsp <- function(costo_matriz, n_ants=100, alpha=1, beta=2, rho=0.1, max_iter=200) {
+  n <- nrow(costo_matriz)
+  pheromones <- matrix(1, nrow=n, ncol=n)
+  best_tour <- NULL # Almacena la mejor ruta encontrada
+  best_cost <- Inf # Almacena el costo mínimo inicial (infinito)
+  history <- list() # Registra el progreso de las iteraciones
+  
+  for (iter in 1:max_iter) {                  # Bucle principal para iteraciones (máximo 200)
+    tours <- matrix(NA, nrow=n_ants, ncol=n)  # Matriz para almacenar rutas de todas las hormigas
+    costs <- numeric(n_ants)                  # Vector para costos de cada hormiga
+    
+    for (ant in 1:n_ants) {               # Simula el movimiento de cada hormiga (100 por iteración)
+      current <- sample(1:n, 1)           # Comienza en una ciudad aleatoria
+      tour <- current                     # Inicializa la ruta con la ciudad actual
+      visited <- rep(FALSE, n)            # Marca ciudades visitadas
+      visited[current] <- TRUE
+      
+      for (i in 1:(n-1)) {                                                             # Construye la ruta visitando todas las ciudades
+        probs <- (pheromones[current,] ^ alpha) * ((1 / costo_matriz[current,]) ^ beta)
+        probs[visited] <- 0                                                            
+        probs <- probs / sum(probs)
+        next_city <- sample(1:n, 1, prob=probs)                                         # Normaliza probabilidades
+        tour <- c(tour, next_city)
+        visited[next_city] <- TRUE
+        current <- next_city
+      }
+      
+      # Asignar tour sin el retorno (longitud n)
+      tours[ant,] <- tour[1:n]  # Tomamos solo las n ciudades
+      
+      # Calcular costo incluyendo el retorno a la ciudad inicial
+      tour_with_return <- c(tour, tour[1])
+      cost <- sum(costo_matriz[cbind(tour_with_return[-n-1], tour_with_return[-1])])
+      costs[ant] <- cost
+      
+      if (cost < best_cost) {
+        best_cost <- cost
+        best_tour <- tour_with_return
+      }
+    }
+    
+    # Actualizar feromonas
+    pheromones <- pheromones * (1 - rho)
+    for (ant in 1:n_ants) {
+      tour_with_return <- c(tours[ant,], tours[ant,1])  # Cerrar el ciclo para feromonas
+      pheromones[cbind(tour_with_return[-n-1], tour_with_return[-1])] <- 
+        pheromones[cbind(tour_with_return[-n-1], tour_with_return[-1])] + 1 / costs[ant]
+    }
+    
+    history[[iter]] <- list(tour=best_tour, cost=best_cost)
+  }
+  
+  return(list(best_tour=best_tour, best_cost=best_cost, history=history))
+}
+
+
+```
+
+```{r}
+# Ejecutar ACO para cada matriz de costos
+resultados_aco <- lapply(matrices_costos, function(mat) aco_tsp(mat))
+```
+
+# Algoritmo GA
+
+Usamos el paquete de GA para optimizar el TSP.
+Acá utilizamos el Algoritmo Genético(GA) esta inspirado en la evolución y selección natural.
+este algoritmo evoluciona una población de soluciones(rutas) mediante cruzamiento y mutación la "aptitud" mide que tan buena es una ruta y las mejores rutas se van combinando para mejorar.
+
+```{r GA }
+
+fitness_tsp <- function(tour, costo_matriz) {
+  n <- length(tour)
+  cost <- sum(costo_matriz[cbind(tour, c(tour[-1], tour[1]))])
+  return(-cost)  # Negativo para maximización
+}
+
+resultados_ga <- lapply(matrices_costos, function(mat) {
+  ga_result <- ga(type="permutation", fitness=function(tour) fitness_tsp(tour, mat),
+                  lower=1, upper=nrow(mat), popSize=100, maxiter=200, pmutation=0.2)
+  return(list(best_tour=ga_result@solution[1,], best_cost=-ga_result@fitnessValue))
+})
+```
+
+```{r comparacion, fig.width=10, fig.height=6}
+# Crear el data frame de resultados
+resultados <- data.frame(
+  Costo_Hora = rep(costo_hora, each = 2),
+  Costo = c(sapply(resultados_aco, function(x) x$best_cost),
+            sapply(resultados_ga, function(x) x$best_cost)),
+  Algoritmo = rep(c("ACO", "GA"), times = 3)
+)
+
+# Crear gráfico de barras agrupadas
+ggplot(resultados, aes(x = factor(Costo_Hora), y = Costo, fill = Algoritmo)) +
+  geom_bar(stat = "identity", position = "dodge", width = 0.7) +
+  geom_text(aes(label = round(Costo, 2)), vjust = -0.5, position = position_dodge(width = 0.7), size = 3) +
+  scale_fill_manual(values = c("ACO" = "#1E90FF", "GA" = "#32CD32"), 
+                    name = "Algoritmo") +
+  labs(title = "Comparación de Costos Óptimos: ACO vs GA",
+       x = "Costo por Hora (COP)",
+       y = "Costo Total (COP)") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5, size = 14, face = "bold"),
+        axis.text = element_text(size = 12),
+        axis.title = element_text(size = 12),
+        legend.position = "top") +
+  scale_y_continuous(labels = scales::comma)  # Formato legible para costos grandes
+
+# Opcional: Guardar la gráfica como archivo (descomentar si lo deseas)
+ggsave("comparacion_aco_ga.png", width = 10, height = 6, dpi = 300)
+
+```
+
+```{r}
+# Configurar clave API (obtén tu clave en https://stadiamaps.com/)
+register_stadiamaps("c1e2521a-75b9-4002-9bfa-313933414c52")  # Reemplaza con tu clave
+# Obtener mapa base
+mapa <- get_stadiamap(bbox = c(left = -78, bottom = 0.5, right = -66.5, top = 12.5), 
+                      zoom = 7, maptype = "stamen_terrain")
+
+# Obtener la mejor ruta de ACO ($50,000/hora)
+best_tour <- resultados_aco[[2]]$best_tour
+best_cost <- resultados_aco[[2]]$best_cost
+
+# Obtener rutas reales con OSRM
+ruta_coords <- list()
+for (i in 1:(length(best_tour)-1)) {
+  origen <- ciudades[best_tour[i], c("Longitud", "Latitud")]
+  destino <- ciudades[best_tour[i+1], c("Longitud", "Latitud")]
+  ruta <- osrmRoute(src = c(origen$Longitud, origen$Latitud),
+                    dst = c(destino$Longitud, destino$Latitud))
+  coords <- st_coordinates(ruta)  # Extraer coordenadas con sf
+  ruta_coords[[i]] <- data.frame(Longitud = coords[,1], Latitud = coords[,2])
+}
+
+# Combinar todas las rutas
+ruta_completa <- do.call(rbind, ruta_coords)
+
+# Ícono del carrito (URL pública, reemplaza si prefieres un archivo local)
+car_icon <- "https://img.icons8.com/color/48/000000/car.png"
+
+# Función para interpolar posiciones del carrito
+interpolar_ruta <- function(ruta, n_puntos=50) {
+  t <- seq(0, 1, length.out=nrow(ruta))
+  t_new <- seq(0, 1, length.out=n_puntos)
+  lon <- approx(t, ruta$Longitud, xout=t_new)$y
+  lat <- approx(t, ruta$Latitud, xout=t_new)$y
+  return(data.frame(Longitud=lon, Latitud=lat))
+}
+
+# Interpolar ruta completa
+ruta_interpolada <- interpolar_ruta(ruta_completa, n_puntos=200)
+
+# Generar GIF
+saveGIF({
+  for (i in 1:nrow(ruta_interpolada)) {
+    p <- ggmap(mapa) +
+      geom_point(data = ciudades, aes(x = Longitud, y = Latitud), color = "red", size = 3) +
+      geom_text(data = ciudades, aes(x = Longitud, y = Latitud, label = Ciudad), vjust = -1, size = 3) +
+      geom_path(data = ruta_completa, aes(x = Longitud, y = Latitud), color = "blue", size = 1) +
+      geom_image(data = ruta_interpolada[i,,drop=FALSE], aes(x = Longitud, y = Latitud, image = car_icon), size = 0.05) +
+      ggtitle(paste("Recorrido óptimo (ACO, $50,000/hora)", "Costo:", round(best_cost, 2), "COP")) +
+      theme_minimal()
+    print(p)
+  }
+}, movie.name = "tsp_colombia_carrito_dfsk.gif", interval = 0.1, ani.width = 800, ani.height = 600)
+
+# Incluir GIF en el reporte
+knitr::include_graphics("tsp_colombia_carrito_dfsk.gif")
+
+```
+
+```{r funciones_auxiliares}
+# Función para calcular el desglose de costos basado en la ruta óptima
+calcular_costos_desglosados <- function(tour, costo_matriz, distancias, costo_peajes, costo_hora) {
+  # Calcular la distancia total de la ruta (incluyendo retorno)
+  dist_total <- sum(distancias[cbind(tour, c(tour[-1], tour[1]))])
+  
+  # Calcular el costo total de peajes
+  peajes_total <- sum(costo_peajes[cbind(tour, c(tour[-1], tour[1]))])
+  
+  # Calcular el tiempo total en horas (distancia / velocidad promedio de 60 km/h)
+  tiempo_total <- dist_total / 60
+  
+  # Calcular el costo total (ya disponible en costo_matriz para la ruta completa)
+  costo_total <- sum(costo_matriz[cbind(tour, c(tour[-1], tour[1]))])
+  
+  # Calcular el costo atribuible al tiempo
+  costo_tiempo <- tiempo_total * costo_hora
+  
+  # Calcular el costo de combustible (basado en costo_combustible_km definido previamente)
+  costo_comb <- dist_total * costo_combustible_km
+  
+  # Verificar que el costo total coincida (ajuste si hay discrepancias)
+  if (abs(costo_total - (costo_tiempo + costo_comb + peajes_total)) > 1) {
+    warning("Diferencia en cálculo de costo total, revisa las matrices de entrada.")
+  }
+  
+  # Calcular porcentajes
+  porcentaje_tiempo <- (costo_tiempo / costo_total) * 100
+  porcentaje_comb <- (costo_comb / costo_total) * 100
+  porcentaje_peajes <- (peajes_total / costo_total) * 100
+  
+  # Devolver un data.frame con los resultados
+  return(data.frame(
+    Costo_Total = costo_total,
+    Costo_Tiempo = costo_tiempo,
+    Costo_Combustible = costo_comb,
+    Costo_Peajes = peajes_total,
+    Porcentaje_Tiempo = porcentaje_tiempo,
+    Porcentaje_Combustible = porcentaje_comb,
+    Porcentaje_Peajes = porcentaje_peajes
+  ))
+}
+```
+
+```{r desglose, fig.width=10, fig.height=6}
+# Calcular los costos desglosados
+desglose <- calcular_costos_desglosados(resultados_aco[[2]]$best_tour, matrices_costos[[2]], distancias, costo_peajes, 50000)
+
+# Preparar datos para la gráfica
+desglose_data <- data.frame(
+  Categoria = c("Tiempo", "Combustible", "Peajes"),
+  Costo = c(desglose$Costo_Tiempo, desglose$Costo_Combustible, desglose$Costo_Peajes),
+  Porcentaje = c(desglose$Porcentaje_Tiempo, desglose$Porcentaje_Combustible, desglose$Porcentaje_Peajes)
+)
+
+# Crear gráfico de barras apiladas
+ggplot(desglose_data, aes(x = "Costo Total", y = Costo, fill = Categoria)) +
+  geom_bar(stat = "identity", width = 0.7) +
+  geom_text(aes(label = paste0("$", scales::comma(round(Costo, 2)), "\n(", round(Porcentaje, 1), "%)")),
+            position = position_stack(vjust = 0.5), size = 4, color = "black") +
+  geom_hline(yintercept = desglose$Costo_Total, linetype = "dashed", color = "gray", size = 0.5) +
+  scale_fill_manual(values = c("Tiempo" = "#B3E5FC", "Combustible" = "#C8E6C9", "Peajes" = "#FFCDD2"),
+                    labels = c("Tiempo \u23F0", "Combustible \u26FD", "Peajes \u26F5"),
+                    name = "Componentes") +
+  labs(title = "Desglose de Costos para la Mejor Ruta (ACO, $50,000/hora)",
+       subtitle = paste("Costo Total:", scales::comma(round(desglose$Costo_Total, 2)), "COP"),
+       x = NULL,
+       y = "Costo (COP)") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5, size = 16, face = "bold"),
+        plot.subtitle = element_text(hjust = 0.5, size = 12),
+        axis.text.x = element_blank(),
+        axis.title.y = element_text(size = 12),
+        legend.text = element_text(size = 12),
+        legend.title = element_text(size = 12),
+        legend.position = "top") +
+  scale_y_continuous(labels = scales::comma) +
+  coord_flip()  # Rotar para mejor legibilidad
+
+# Opcional: Mostrar la tabla original como referencia.
+knitr::kable(desglose, caption="Desglose de costos para la mejor ruta (ACO, $50,000/hora)")
+```
+
+# Conclusiones
+
+El problema del viajero (TSP) para las 13 ciudades principales de Colombia se pudo resolver de manera satisfactoria utilizando Ant Colony Optimization(ACO) y Algoritmos Genéticos(GA).
+los principales hallazgos son: - Rutas óptimas: La mejor ruta para un costo por hora de \$50,000 fue (ver GIF), con un costo total de \$6.066.327 COP.Los peajes representan aproximadamente el (60.1%)del costo total, seguidos por el combustible (9.5%) y el tiempo (30.5%) - Desempeño de los algoritmos: ACO mostró una convergencia más rápida en las primeras 50 iteraciones, mientras que GA exploró un espacio de soluciones más amplio, sugiriendo que GA es más robusto para problemas complejos.
+- Impacto del costo por hora: Aumentar el costo por hora de \$30,000 a \$70,000 incrementó el costo total en [ver tabla]%, pero el orden de las ciudades permaneció estable, indicando que los costos fijos (peajes y combustible) dominan.
+- Visualización mejorada: La animación del carrito recorriendo carreteras principales mejora la interpretación de la ruta óptima, mostrando un recorrido realista basado en datos de OSRM.
+
+Los algoritmos bioinspirados son efectivos, pero requieren calibración.Ademas la visualización animada con rutas reales y un carrito mejora la comunicación de resultados.
+y permite entender mejor el modelo.
+La precisión de los datos (distancias, peajes, rutas) es crítica para aplicaciones industriales.

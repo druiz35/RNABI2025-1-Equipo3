@@ -42,9 +42,8 @@ class CollaborativeRecommendator:
 
         users_path = general_path + "/Final_Updated_Expanded_Users.csv"
         self.users_df = pd.read_csv(users_path)
-
-        # Carga el DataFrame fusionado desde CSV local
         
+        # Imprime la ubicación donde se esta ejecutando el archivo
         print("-")
         print("-")
         print("-")
@@ -55,6 +54,7 @@ class CollaborativeRecommendator:
         print("-")
         print("-")
 
+        # Carga el DataFrame fusionado desde CSV local
         df = pd.read_csv(CollaborativeRecommendator.MERGED_DF_PATH)
 
         # Elimina columnas innecesarias (las dos primeras)

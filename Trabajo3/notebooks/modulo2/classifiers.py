@@ -42,13 +42,13 @@ class DriverClassifier:
         self.set_resnet()
     
     def set_vgg(self):
-        self.model = models.vgg19(pretrained=True)
+        self.model = models.vgg19()
         self.model.load_state_dict(torch.load(DriverClassifier.VGG19_PATH))
-        #self.model.fc = nn.Linear(self.model.fc.in_features, 5)  # Cambia la capa final DESPUÉS
+        self.model.fc = nn.Linear(4096, 5)  # Cambia la capa final DESPUÉS
         self.model.eval()
 
     def set_resnet(self): 
-        self.model = models.resnet18(pretrained=True)
+        self.model = models.resnet18()
         self.model.fc = nn.Linear(self.model.fc.in_features, 5)  # Cambia la capa final DESPUÉS
         self.model.load_state_dict(torch.load(DriverClassifier.RESTNET_PATH))
         self.model.eval()

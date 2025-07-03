@@ -12,6 +12,7 @@ import os
 import io
 import base64
 from notebooks.modulo2.classifiers import DriverClassifier
+from notebooks.modulo3.recommendators import CollaborativeRecommendator
 
 # Configuración de la página
 st.set_page_config(
@@ -21,14 +22,14 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Título principal
-st.title("🚗 Sistema Inteligente de Clasificación de Conducción Distractiva")
-st.markdown("---")
-
 # Configuración del sidebar
 st.sidebar.title("Configuración")
 st.sidebar.markdown("### Módulo 2: Clasificación de Imágenes")
-st.sidebar.markdown("### Módulo 3: Sistema de Recomendación de Destinos de Viaje:")
+st.sidebar.markdown("### Módulo 3: Recomendación de Destinos de Viaje")
+
+# Título principal
+st.title("🚗 Sistema Inteligente de Clasificación de Conducción Distractiva")
+st.markdown("---")
 
 # Clases de comportamiento
 CLASSES = [
@@ -350,6 +351,69 @@ with tab4:
     - El modelo funciona mejor con imágenes claras y bien iluminadas
     - Se recomienda usar imágenes donde el conductor sea claramente visible
     """)
+
+
+st.markdown("---")
+st.markdown("---")
+# Título principal
+st.title("🌄 Sistema de Recomendación de Destinos de Viaje")
+st.markdown("---")
+
+# Argumentos
+ARGSS3 = [
+    "DestinationID",
+    "Name",
+    "State",
+    "Type",
+    "Popularity",
+    "BestTimeToVisit"
+]
+
+
+ARGS3_ES = [
+    "ID del destino",
+    "Nombre",
+    "Estado/Provincia",
+    "Tipo",
+    "Popularidad",
+    "Mejor época para visitar"
+]
+
+# Función para cargar el modelo
+@st.cache_resource
+def load_model3():
+    return CollaborativeRecommendator()
+
+# Cargar modelo
+recommendator = load_model3()
+
+if model is None:
+    st.error("No se pudo cargar el modelo. Verifica que el archivo recommendators.py esté disponible.")
+    st.stop()
+
+st.write("Introduce tu **User ID** para recibir recomendaciones personalizadas de destinos en India.")
+
+# ---------------------------
+# Inputs de usuario
+# ---------------------------
+user_id = st.number_input("User ID", min_value=1, step=1)
+
+# ---------------------------
+# Ejecutar recomendación
+# ---------------------------
+if st.button("Obtener recomendaciones"):
+    with st.spinner("Generando recomendaciones..."):
+        recommendations = recommendator.recommend(user_id)
+
+        if recommendations.empty:
+            st.warning("No se encontraron recomendaciones para este usuario.")
+        else:
+            st.success("¡Aquí están tus recomendaciones!")
+            st.dataframe(recommendations)
+            # ---------------------------
+            # Nota opcional
+            # ---------------------------
+            st.caption("Dataset: India Travel Recommender | Modelo colaborativo | Desarrollado para proyectos educativos.")
 
 # Footer
 st.markdown("---")

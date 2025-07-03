@@ -6,6 +6,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
 import numpy as np
 import pandas as pd
 import kagglehub
+import os
 
 # EJEMPLO DE USO
 """
@@ -17,7 +18,7 @@ recommendator.recommend(user_id)
 """
 
 class CollaborativeRecommendator:
-    MERGED_DF_PATH = "./m3_merged_df.csv"  # Ruta local del DataFrame fusionado con toda la información
+    MERGED_DF_PATH = "./notebooks/modulo3/m3_merged_df.csv."  # Ruta local del DataFrame fusionado con toda la información
     USERHISTORY_DF_PATH = "./"              # (No se usa explícitamente, puedes eliminarla o usarla para futuras rutas)
 
     def __init__(self):
@@ -43,6 +44,17 @@ class CollaborativeRecommendator:
         self.users_df = pd.read_csv(users_path)
 
         # Carga el DataFrame fusionado desde CSV local
+        
+        print("-")
+        print("-")
+        print("-")
+
+        print(os.getcwd())
+
+        print("-")
+        print("-")
+        print("-")
+
         df = pd.read_csv(CollaborativeRecommendator.MERGED_DF_PATH)
 
         # Elimina columnas innecesarias (las dos primeras)

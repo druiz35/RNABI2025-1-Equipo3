@@ -146,9 +146,7 @@ dmypy.json
 *.feather
 
 # Image files (if too large)
-*.png
-*.jpg
-*.jpeg
+
 *.gif
 *.bmp
 *.tiff

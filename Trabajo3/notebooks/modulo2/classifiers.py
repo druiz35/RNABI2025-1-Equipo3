@@ -44,7 +44,7 @@ class DriverClassifier:
     def set_resnet(self): 
         self.model = models.resnet18()
         self.model.load_state_dict(torch.load(DriverClassifier.RESTNET_PATH, map_location=torch.device('cpu')))
-        self.model.fc = nn.Linear(self.model.fc.in_features, 5)  # Cambia la capa final DESPUÉS
+        self.model.fc = nn.Linear(self.model.fc.in_features, 6)  # Cambia la capa final DESPUÉS
         self.model.eval()
 
     def set_custom_model(self): ...# Método placeholder para implementar un modelo custom si se desea

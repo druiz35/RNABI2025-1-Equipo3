@@ -50,7 +50,7 @@ class DriverClassifier:
     def set_resnet(self): 
         self.model = models.resnet18()
         self.model.fc = nn.Linear(self.model.fc.in_features, 5)  # Cambia la capa final DESPUÉS
-        self.model.load_state_dict(torch.load(DriverClassifier.RESTNET_PATH))
+        self.model.load_state_dict(torch.load(DriverClassifier.RESTNET_PATH, map_location=torch.device('cpu')))
         self.model.eval()
 
     def set_custom_model(self): ...# Método placeholder para implementar un modelo custom si se desea
@@ -74,8 +74,15 @@ class DriverClassifier:
             output = self.model(input_tensor)
             # Obtenemos la clase con la probabilidad más alta
             predicted_idx = torch.argmax(output, dim=1).item()
-        # Retornamos el nombre de la clase predicha
-        return output, self.class_names[predicted_idx]
+        # Traducción de clases a español
+        class_names_es = [
+            "otras actividades",
+            "conducción segura",
+            "hablando por teléfono",
+            "escribiendo en el teléfono",
+            "girando"
+        ]
+        return class_names_es[predicted_idx]
 
 
 if __name__ == "__main__":
@@ -84,6 +91,6 @@ if __name__ == "__main__":
     # Ruta a la imagen que queremos clasificar
     image_path = "./safe_test.png"
     # Obtenemos la predicción para la imagen
-    output, predicted_class = model.predict(image_path)
+    predicted_class = model.predict(image_path)
     # Imprimimos la clase predicha
-    print(output, predicted_class)
+    print(predicted_class)

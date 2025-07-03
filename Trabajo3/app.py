@@ -186,43 +186,31 @@ with tab2:
         history_df = pd.DataFrame(st.session_state.prediction_history)
         
         # Mostrar estadísticas rápidas
-        col1, col2, col3 = st.columns(3)
+        col1, col2 = st.columns(2)
         with col1:
             st.metric("Total de predicciones", len(history_df))
         with col2:
-            avg_confidence = history_df['confidence'].mean()
-            st.metric("Confianza promedio", f"{avg_confidence:.2%}")
-        with col3:
             safe_driving_count = len(history_df[history_df['prediction'] == 'Conducción segura'])
             st.metric("Conducción segura", safe_driving_count)
         
         # Mostrar historial en tabla
         st.subheader("Historial Detallado")
-        
         # Crear tabla con imágenes
         for i, row in history_df.iterrows():
             with st.expander(f"Predicción {i+1} - {row['timestamp']}"):
                 col1, col2 = st.columns([1, 2])
-                
                 with col1:
                     # Decodificar imagen
                     img_data = base64.b64decode(row['image'])
                     img = Image.open(io.BytesIO(img_data))
                     st.image(img, caption="Imagen analizada", width=200)
-                
                 with col2:
                     st.markdown(f"**Comportamiento:** {row['prediction']}")
-                    st.markdown(f"**Confianza:** {row['confidence']:.2%}")
                     st.markdown(f"**Fecha:** {row['timestamp']}")
-                    
-                    # Indicador de confianza
-                    st.progress(row['confidence'])
-        
         # Botón para limpiar historial
         if st.button("🗑️ Limpiar Historial"):
             st.session_state.prediction_history = []
             st.rerun()
-    
     else:
         st.info("No hay predicciones en el historial. ¡Sube una imagen para comenzar!")
 
@@ -234,66 +222,15 @@ with tab3:
         
         # Análisis de comportamientos
         st.subheader("Distribución de Comportamientos")
-        
         behavior_counts = history_df['prediction'].value_counts()
-        
-        col1, col2 = st.columns(2)
-        
-        with col1:
-            fig, ax = plt.subplots(figsize=(10, 6))
-            behavior_counts.plot(kind='bar', ax=ax, color=['#4ecdc4', '#ff6b6b', '#45b7d1', '#96ceb4', '#feca57'])
-            ax.set_title('Frecuencia de Comportamientos Detectados')
-            ax.set_xlabel('Comportamiento')
-            ax.set_ylabel('Frecuencia')
-            plt.xticks(rotation=45, ha='right')
-            plt.tight_layout()
-            st.pyplot(fig)
-        
-        with col2:
-            # Gráfico de confianza
-            fig, ax = plt.subplots(figsize=(10, 6))
-            ax.hist(history_df['confidence'], bins=20, color='#4ecdc4', alpha=0.7)
-            ax.set_title('Distribución de Confianza')
-            ax.set_xlabel('Confianza')
-            ax.set_ylabel('Frecuencia')
-            plt.tight_layout()
-            st.pyplot(fig)
-        
-        # Métricas adicionales
-        st.subheader("Métricas de Rendimiento")
-        
-        col1, col2, col3, col4 = st.columns(4)
-        
-        with col1:
-            st.metric("Total de predicciones", len(history_df))
-        
-        with col2:
-            avg_conf = history_df['confidence'].mean()
-            st.metric("Confianza promedio", f"{avg_conf:.2%}")
-        
-        with col3:
-            max_conf = history_df['confidence'].max()
-            st.metric("Confianza máxima", f"{max_conf:.2%}")
-        
-        with col4:
-            min_conf = history_df['confidence'].min()
-            st.metric("Confianza mínima", f"{min_conf:.2%}")
-        
-        # Análisis temporal
-        st.subheader("Análisis Temporal")
-        history_df['timestamp'] = pd.to_datetime(history_df['timestamp'])
-        history_df['hour'] = history_df['timestamp'].dt.hour
-        
-        fig, ax = plt.subplots(figsize=(12, 6))
-        hourly_counts = history_df['hour'].value_counts().sort_index()
-        hourly_counts.plot(kind='line', marker='o', ax=ax, color='#45b7d1')
-        ax.set_title('Predicciones por Hora del Día')
-        ax.set_xlabel('Hora')
-        ax.set_ylabel('Número de Predicciones')
-        plt.grid(True, alpha=0.3)
+        fig, ax = plt.subplots(figsize=(10, 6))
+        behavior_counts.plot(kind='bar', ax=ax, color=['#4ecdc4', '#ff6b6b', '#45b7d1', '#96ceb4', '#feca57'])
+        ax.set_title('Frecuencia de Comportamientos Detectados')
+        ax.set_xlabel('Comportamiento')
+        ax.set_ylabel('Frecuencia')
+        plt.xticks(rotation=45, ha='right')
         plt.tight_layout()
         st.pyplot(fig)
-    
     else:
         st.info("No hay datos suficientes para mostrar estadísticas. ¡Realiza algunas predicciones primero!")
 

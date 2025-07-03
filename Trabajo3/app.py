@@ -296,26 +296,6 @@ st.markdown("---")
 st.title("🌄 Sistema de Recomendación de Destinos de Viaje")
 st.markdown("---")
 
-# Argumentos
-ARGSS3 = [
-    "DestinationID",
-    "Name",
-    "State",
-    "Type",
-    "Popularity",
-    "BestTimeToVisit"
-]
-
-
-ARGS3_ES = [
-    "ID del destino",
-    "Nombre",
-    "Estado/Provincia",
-    "Tipo",
-    "Popularidad",
-    "Mejor época para visitar"
-]
-
 # Función para cargar el modelo
 @st.cache_resource
 def load_model3():
@@ -323,6 +303,46 @@ def load_model3():
 
 # Cargar modelo
 recommendator = load_model3()
+
+# Carga la base de datos
+m3_df = pd.read_csv(recommendator.MERGED_DF_PATH)
+
+st.write("Eligue entre los 10 primeros usuarios para ver sus recomendaciones personalizadas")
+
+# Tomar primeros 10 usuarios: UserID + Name_y
+primeros_usuarios = m3_df[['UserID', 'Name_y']].drop_duplicates().head(10)
+
+# Crear un diccionario: nombre => UserID
+usuarios_dict = dict(zip(primeros_usuarios['Name_y'], primeros_usuarios['UserID']))
+
+# ---------------------------
+# Selectbox con nombres
+# ---------------------------
+selected_name = st.selectbox(
+    "Selecciona un usuario por nombre:",
+    options=list(usuarios_dict.keys())
+)
+
+# ---------------------------
+# Botón para generar recomendación
+# ---------------------------
+if st.button("Generar recomendaciones"):
+    # Mapear nombre a ID
+    selected_user_id = usuarios_dict[selected_name]
+
+    with st.spinner(f"Generando recomendaciones para **{selected_name}** (User ID: {selected_user_id})..."):
+        recommendations = recommendator.recommend(int(selected_user_id))
+
+        if recommendations.empty:
+            st.warning("¡No se encontraron recomendaciones para este usuario!")
+        else:
+            st.success(f"¡Recomendaciones para **{selected_name}**!")
+            st.dataframe(recommendations)
+            # ---------------------------
+            # Nota opcional
+            # ---------------------------
+            st.caption("Dataset: India Travel Recommender | Modelo colaborativo | Desarrollado para proyectos educativos.")
+
 
 if model is None:
     st.error("No se pudo cargar el modelo. Verifica que el archivo recommendators.py esté disponible.")

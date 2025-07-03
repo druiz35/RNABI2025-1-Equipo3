@@ -28,6 +28,7 @@ st.markdown("---")
 # Configuración del sidebar
 st.sidebar.title("Configuración")
 st.sidebar.markdown("### Módulo 2: Clasificación de Imágenes")
+st.sidebar.markdown("### Módulo 3: Sistema de Recomendación de Destinos de Viaje:")
 
 # Clases de comportamiento
 CLASSES = [

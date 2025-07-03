@@ -11,6 +11,7 @@ import pandas as pd
 import os
 import io
 import base64
+from notebooks.modulo2.classifiers import DriverClassifier
 
 # Configuración de la página
 st.set_page_config(
@@ -30,7 +31,7 @@ st.sidebar.markdown("### Módulo 2: Clasificación de Imágenes")
 
 # Clases de comportamiento
 CLASSES = [
-    "other_activities",
+    "other_actvities",
     "safe_driving", 
     "talking_phone",
     "texting_phone",
@@ -48,24 +49,7 @@ CLASSES_ES = [
 # Función para cargar el modelo
 @st.cache_resource
 def load_model():
-    """Carga el modelo ResNet18 entrenado"""
-    try:
-        # Crear modelo ResNet18
-        model = models.resnet18(pretrained=False)
-        model.fc = nn.Linear(model.fc.in_features, 5)  # 5 clases
-        
-        # Cargar pesos entrenados
-        model_path = "notebooks/modulo2/Resnet18.pth"
-        if os.path.exists(model_path):
-            model.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))
-            model.eval()
-            return model
-        else:
-            st.error(f"No se encontró el archivo del modelo en: {model_path}")
-            return None
-    except Exception as e:
-        st.error(f"Error al cargar el modelo: {str(e)}")
-        return None
+    return DriverClassifier()
 
 # Función para preprocesar imagen
 def preprocess_image(image):
@@ -85,15 +69,14 @@ def preprocess_image(image):
     return image_tensor
 
 # Función para hacer predicción
-def predict_image(model, image_tensor):
-    """Realiza la predicción de la imagen"""
-    with torch.no_grad():
-        outputs = model(image_tensor)
-        probabilities = torch.softmax(outputs, dim=1)
-        predicted_class = torch.argmax(probabilities, dim=1).item()
-        confidence = probabilities[0][predicted_class].item()
-        
-    return predicted_class, confidence, probabilities[0].numpy()
+def predict_image(model, image):
+    # Guardar la imagen temporalmente para usar el método predict de la clase
+    temp_path = "temp_image.png"
+    image.save(temp_path)
+    pred = model.predict(temp_path)
+    os.remove(temp_path)
+    # No tenemos probabilidades, solo la clase predicha
+    return pred
 
 # Función para crear gráfico de barras
 def plot_predictions(probabilities, classes_es):
@@ -121,15 +104,11 @@ def plot_predictions(probabilities, classes_es):
 
 # Función para guardar historial
 def save_prediction_history(image, prediction, confidence, timestamp):
-    """Guarda el historial de predicciones"""
     if 'prediction_history' not in st.session_state:
         st.session_state.prediction_history = []
-    
-    # Convertir imagen a bytes para guardar
     img_buffer = io.BytesIO()
     image.save(img_buffer, format='PNG')
     img_str = base64.b64encode(img_buffer.getvalue()).decode()
-    
     st.session_state.prediction_history.append({
         'timestamp': timestamp,
         'image': img_str,
@@ -149,115 +128,27 @@ tab1, tab2, tab3, tab4 = st.tabs(["📸 Clasificación", "📊 Historial", "📈
 
 with tab1:
     st.header("Clasificación de Imágenes de Conducción")
-    
-    # Opciones de entrada
-    input_option = st.radio(
-        "Selecciona el método de entrada:",
-        ["Subir imagen", "Usar imagen de ejemplo"]
+    uploaded_file = st.file_uploader(
+        "Sube una imagen del conductor:",
+        type=['png', 'jpg', 'jpeg'],
+        help="Formatos soportados: PNG, JPG, JPEG"
     )
-    
-    if input_option == "Subir imagen":
-        uploaded_file = st.file_uploader(
-            "Sube una imagen del conductor:",
-            type=['png', 'jpg', 'jpeg'],
-            help="Formatos soportados: PNG, JPG, JPEG"
-        )
-        
-        if uploaded_file is not None:
-            image = Image.open(uploaded_file)
-            st.image(image, caption="Imagen subida", use_column_width=True)
-            
-            # Botón para clasificar
-            if st.button("🔍 Clasificar Imagen", type="primary"):
-                with st.spinner("Procesando imagen..."):
-                    # Preprocesar imagen
-                    image_tensor = preprocess_image(image)
-                    
-                    # Hacer predicción
-                    predicted_class, confidence, probabilities = predict_image(model, image_tensor)
-                    
-                    # Mostrar resultados
-                    col1, col2 = st.columns(2)
-                    
-                    with col1:
-                        st.subheader("🎯 Resultado de la Clasificación")
-                        st.markdown(f"**Comportamiento detectado:** {CLASSES_ES[predicted_class]}")
-                        st.markdown(f"**Confianza:** {confidence:.2%}")
-                        
-                        # Indicador de confianza
-                        st.progress(confidence)
-                        
-                        # Color según el comportamiento
-                        if predicted_class == 1:  # safe_driving
-                            st.success("✅ Comportamiento seguro detectado")
-                        else:
-                            st.warning("⚠️ Comportamiento distractivo detectado")
-                    
-                    with col2:
-                        st.subheader("📊 Probabilidades por Clase")
-                        fig = plot_predictions(probabilities, CLASSES_ES)
-                        st.pyplot(fig)
-                    
-                    # Guardar en historial
-                    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                    save_prediction_history(image, CLASSES_ES[predicted_class], confidence, timestamp)
-                    
-                    st.success("✅ Clasificación completada y guardada en el historial")
-    
-    else:
-        st.subheader("Imágenes de Ejemplo")
-        st.info("Aquí puedes probar con imágenes de ejemplo del dataset")
-        
-        # Mostrar algunas imágenes de ejemplo (si están disponibles)
-        example_images = [
-            "notebooks/modulo2/image_set_0.png",
-            "notebooks/modulo2/image_set_1.png", 
-            "notebooks/modulo2/image_set_2.png",
-            "notebooks/modulo2/image_set_3.png",
-            "notebooks/modulo2/image_set_4.png"
-        ]
-        
-        available_images = [img for img in example_images if os.path.exists(img)]
-        
-        if available_images:
-            selected_image = st.selectbox(
-                "Selecciona una imagen de ejemplo:",
-                available_images,
-                format_func=lambda x: os.path.basename(x)
-            )
-            
-            if selected_image:
-                image = Image.open(selected_image)
-                st.image(image, caption="Imagen de ejemplo", use_column_width=True)
-                
-                if st.button("🔍 Clasificar Imagen de Ejemplo", type="primary"):
-                    with st.spinner("Procesando imagen..."):
-                        image_tensor = preprocess_image(image)
-                        predicted_class, confidence, probabilities = predict_image(model, image_tensor)
-                        
-                        col1, col2 = st.columns(2)
-                        
-                        with col1:
-                            st.subheader("🎯 Resultado de la Clasificación")
-                            st.markdown(f"**Comportamiento detectado:** {CLASSES_ES[predicted_class]}")
-                            st.markdown(f"**Confianza:** {confidence:.2%}")
-                            st.progress(confidence)
-                            
-                            if predicted_class == 1:
-                                st.success("✅ Comportamiento seguro detectado")
-                            else:
-                                st.warning("⚠️ Comportamiento distractivo detectado")
-                        
-                        with col2:
-                            st.subheader("📊 Probabilidades por Clase")
-                            fig = plot_predictions(probabilities, CLASSES_ES)
-                            st.pyplot(fig)
-                        
-                        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                        save_prediction_history(image, CLASSES_ES[predicted_class], confidence, timestamp)
-                        st.success("✅ Clasificación completada y guardada en el historial")
-        else:
-            st.warning("No se encontraron imágenes de ejemplo en el directorio especificado.")
+    if uploaded_file is not None:
+        image = Image.open(uploaded_file)
+        st.image(image, caption="Imagen subida", use_column_width=True)
+        if st.button("🔍 Clasificar Imagen", type="primary"):
+            temp_path = "temp_image.png"
+            image.save(temp_path)
+            predicted_class = model.predict(temp_path)
+            if predicted_class in CLASSES:
+                idx = CLASSES.index(predicted_class)
+                clase_es = CLASSES_ES[idx]
+            else:
+                clase_es = predicted_class
+            st.markdown(f"**Comportamiento detectado:** {clase_es}")
+            timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            save_prediction_history(image, clase_es, 1.0, timestamp)
+            st.success("✅ Clasificación completada y guardada en el historial")
 
 with tab2:
     st.header("📊 Historial de Predicciones")

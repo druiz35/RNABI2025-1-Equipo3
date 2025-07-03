@@ -4,6 +4,7 @@ from torch.utils.data import DataLoader, random_split
 import torch.nn as nn
 import torch.optim as optim
 import matplotlib.pyplot as plt
+import os
 
 import kagglehub
 
@@ -24,7 +25,7 @@ print(predicted_class)
 
 class DriverClassifier:
     # Ruta del modelo ResNet18 preentrenado guardado localmente
-    RESTNET_PATH = "./Resnet18.pth"
+    RESTNET_PATH = os.path.join(os.path.dirname(__file__), "Resnet18.pth")
 
     def __init__(self): 
         # Clases que el modelo puede predecir (5 clases de actividad al volante)
@@ -41,13 +42,9 @@ class DriverClassifier:
         self.set_resnet()
 
     def set_resnet(self): 
-        # Cargamos arquitectura ResNet18 base
         self.model = models.resnet18()
-        # Cargamos pesos previamente entrenados, asegurando que se cargue en CPU
         self.model.load_state_dict(torch.load(DriverClassifier.RESTNET_PATH, map_location=torch.device('cpu')))
-        # Ajustamos la última capa para 5 clases en vez de 1000
-        self.model.fc = nn.Linear(self.model.fc.in_features, 5)
-        # Ponemos el modelo en modo evaluación (sin dropout, batchnorm en modo eval)
+        self.model.fc = nn.Linear(self.model.fc.in_features, 5)  # Cambia la capa final DESPUÉS
         self.model.eval()
 
     def set_custom_model(self): ...# Método placeholder para implementar un modelo custom si se desea

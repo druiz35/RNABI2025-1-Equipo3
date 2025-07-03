@@ -128,18 +128,32 @@ tab1, tab2, tab3, tab4 = st.tabs(["📸 Clasificación", "📊 Historial", "📈
 
 with tab1:
     st.header("Clasificación de Imágenes de Conducción")
+    
+    # --- Estado para limpiar resultado al cambiar imagen ---
+    if 'last_uploaded_file' not in st.session_state:
+        st.session_state.last_uploaded_file = None
+    if 'predicted_class' not in st.session_state:
+        st.session_state.predicted_class = None
+
     uploaded_file = st.file_uploader(
         "Sube una imagen del conductor:",
         type=['png', 'jpg', 'jpeg'],
         help="Formatos soportados: PNG, JPG, JPEG"
     )
+
+    # Limpiar resultado si cambia la imagen
     if uploaded_file is not None:
+        if st.session_state.last_uploaded_file != uploaded_file.name:
+            st.session_state.predicted_class = None
+            st.session_state.last_uploaded_file = uploaded_file.name
+
         image = Image.open(uploaded_file)
-        st.image(image, caption="Imagen subida", use_column_width=True)
+        st.image(image, caption="Imagen subida", use_container_width=True)
         if st.button("🔍 Clasificar Imagen", type="primary"):
             temp_path = "temp_image.png"
             image.save(temp_path)
             predicted_class = model.predict(temp_path)
+            st.session_state.predicted_class = predicted_class
             if predicted_class in CLASSES:
                 idx = CLASSES.index(predicted_class)
                 clase_es = CLASSES_ES[idx]
@@ -149,6 +163,18 @@ with tab1:
             timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             save_prediction_history(image, clase_es, 1.0, timestamp)
             st.success("✅ Clasificación completada y guardada en el historial")
+        elif st.session_state.predicted_class is not None:
+            # Mostrar el resultado de la última predicción si existe
+            predicted_class = st.session_state.predicted_class
+            if predicted_class in CLASSES:
+                idx = CLASSES.index(predicted_class)
+                clase_es = CLASSES_ES[idx]
+            else:
+                clase_es = predicted_class
+            st.markdown(f"**Comportamiento detectado:** {clase_es}")
+    else:
+        st.session_state.last_uploaded_file = None
+        st.session_state.predicted_class = None
 
 with tab2:
     st.header("📊 Historial de Predicciones")

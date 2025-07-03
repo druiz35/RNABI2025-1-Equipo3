@@ -58,17 +58,25 @@ class DriverClassifier:
                                  std=[0.229, 0.224, 0.225])
         ])
 
-    def predict(self, image_path):
+    def predict(self, image_path, show_preprocessed=False):
         # Abrimos la imagen y la convertimos a RGB
         image = Image.open(image_path).convert("RGB")
         # Aplicamos las transformaciones y agregamos dimensión batch
         input_tensor = self.transform(image).unsqueeze(0)
+        if show_preprocessed:
+            import matplotlib.pyplot as plt
+            img_np = input_tensor.squeeze(0).permute(1,2,0).numpy()
+            img_np = img_np * [0.229, 0.224, 0.225] + [0.485, 0.456, 0.406]  # Desnormaliza
+            img_np = np.clip(img_np, 0, 1)
+            plt.imshow(img_np)
+            plt.title('Imagen que recibe el modelo (224x224)')
+            plt.axis('off')
+            plt.show()
         with torch.no_grad():
             # Ejecutamos la inferencia
             output = self.model(input_tensor)
             # Obtenemos la clase con la probabilidad más alta
             predicted_idx = torch.argmax(output, dim=1).item()
-            print(predicted_idx)  # Opcional: imprimir índice predicho
         # Retornamos el nombre de la clase predicha
         return self.class_names[predicted_idx]
 

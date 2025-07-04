@@ -296,6 +296,49 @@ st.markdown("---")
 st.title("🌄 Sistema de Recomendación de Destinos de Viaje")
 st.markdown("---")
 
+def update_destination_rep(recommendations_df):
+    """
+    Actualiza un archivo CSV que almacena el número de veces que cada destino
+    ha sido recomendado.
+
+    Args:
+        recommendations_df (pd.DataFrame): DataFrame con al menos la columna 'DestinationID'.
+        reporte_path (str): Ruta del archivo CSV donde se guardará el reporte acumulado.
+    """
+    reporte_path="./notebooks/modulo3/destinationRep.csv"
+
+    # Verificar que exista la columna esperada
+    if 'DestinationID' not in recommendations_df.columns:
+        raise ValueError("El DataFrame de recomendaciones debe contener la columna 'DestinationID'.")
+
+    # Leer el archivo existente o crear uno vacío si no existe
+    if os.path.exists(reporte_path):
+        reporte_df = pd.read_csv(reporte_path)
+    else:
+        # Crear DataFrame vacío con las columnas necesarias
+        reporte_df = pd.DataFrame(columns=['DestinationID', 'Recomendaciones'])
+    
+    # Contar cuántas veces aparece cada DestinationID en este nuevo lote
+    nuevas_recomendaciones = recommendations_df['DestinationID'].value_counts().reset_index()
+    nuevas_recomendaciones.columns = ['DestinationID', 'Nuevas']
+
+    # Combinar con el historial
+    reporte_df = pd.merge(
+        reporte_df,
+        nuevas_recomendaciones,
+        on='DestinationID',
+        how='outer'
+    )
+
+    # Rellenar NaN con 0 y sumar
+    reporte_df['Recomendaciones'] = reporte_df['Recomendaciones'].fillna(0) + reporte_df['Nuevas'].fillna(0)
+
+    # Eliminar columna auxiliar
+    reporte_df.drop(columns=['Nuevas'], inplace=True)
+
+    # Guardar actualizado
+    reporte_df.to_csv(reporte_path, index=False)
+
 # Función para cargar el modelo
 @st.cache_resource
 def load_model3():
@@ -307,70 +350,85 @@ recommendator = load_model3()
 # Carga la base de datos
 m3_df = pd.read_csv(recommendator.MERGED_DF_PATH)
 
-st.write("Eligue entre los 10 primeros usuarios para ver sus recomendaciones personalizadas")
+# Pestañas principales
+tab_3_1, tab_3_2 = st.tabs(["👥 Recomendación por Nombre", "📖 Recomendación por ID"])
 
-# Tomar primeros 10 usuarios: UserID + Name_y
-primeros_usuarios = m3_df[['UserID', 'Name_y']].drop_duplicates().head(10)
+with tab_3_1:
+    st.header("Recomendación por Nombre")
 
-# Crear un diccionario: nombre => UserID
-usuarios_dict = dict(zip(primeros_usuarios['Name_y'], primeros_usuarios['UserID']))
+    if model is None:
+        st.error("No se pudo cargar el modelo. Verifica que el archivo recommendators.py esté disponible.")
+        st.stop()
 
-# ---------------------------
-# Selectbox con nombres
-# ---------------------------
-selected_name = st.selectbox(
-    "Selecciona un usuario por nombre:",
-    options=list(usuarios_dict.keys())
-)
+    st.write("Eligue entre algunos usuarios para ver sus recomendaciones personalizadas")
 
-# ---------------------------
-# Botón para generar recomendación
-# ---------------------------
-if st.button("Generar recomendaciones"):
-    # Mapear nombre a ID
-    selected_user_id = usuarios_dict[selected_name]
+    # Tomar primeros 10 usuarios: UserID + Name_y
+    primeros_usuarios = m3_df[['UserID', 'Name_y']].drop_duplicates().head(10)
+    primeros_usuarios = primeros_usuarios[primeros_usuarios['UserID'] < 642]
 
-    with st.spinner(f"Generando recomendaciones para **{selected_name}** (User ID: {selected_user_id})..."):
-        recommendations = recommendator.recommend(int(selected_user_id))
+    # Crear un diccionario: nombre => UserID
+    usuarios_dict = dict(zip(primeros_usuarios['Name_y'], primeros_usuarios['UserID']))
 
-        if recommendations.empty:
-            st.warning("¡No se encontraron recomendaciones para este usuario!")
-        else:
-            st.success(f"¡Recomendaciones para **{selected_name}**!")
-            st.dataframe(recommendations)
-            # ---------------------------
-            # Nota opcional
-            # ---------------------------
-            st.caption("Dataset: India Travel Recommender | Modelo colaborativo | Desarrollado para proyectos educativos.")
+    # ---------------------------
+    # Selectbox con nombres
+    # ---------------------------
+    selected_name = st.selectbox(
+        "Selecciona un usuario por nombre:",
+        options=list(usuarios_dict.keys())
+    )
 
+    # ---------------------------
+    # Botón para generar recomendación
+    # ---------------------------
+    if st.button("Generar recomendaciones"):
+        # Mapear nombre a ID
+        selected_user_id = usuarios_dict[selected_name]
 
-if model is None:
-    st.error("No se pudo cargar el modelo. Verifica que el archivo recommendators.py esté disponible.")
-    st.stop()
+        with st.spinner(f"Generando recomendaciones para **{selected_name}** (User ID: {selected_user_id})..."):
+            recommendations = recommendator.recommend(int(selected_user_id))
 
-st.write("Introduce tu **User ID** para recibir recomendaciones personalizadas de destinos en India.")
+            if recommendations.empty:
+                st.warning("¡No se encontraron recomendaciones para este usuario!")
+            else:
+                st.success(f"¡Recomendaciones para **{selected_name}**!")
+                st.dataframe(recommendations)
+                update_destination_rep(recommendations)
+                # ---------------------------
+                # Nota opcional
+                # ---------------------------
+                st.caption("Dataset: India Travel Recommender | Modelo colaborativo | Desarrollado para proyectos educativos.")
 
-# ---------------------------
-# Inputs de usuario
-# ---------------------------
-user_id = st.number_input("User ID", min_value=1, step=1)
+with tab_3_2:
+    st.header("Recomendación por ID")
 
-# ---------------------------
-# Ejecutar recomendación
-# ---------------------------
-if st.button("Obtener recomendaciones"):
-    with st.spinner("Generando recomendaciones..."):
-        recommendations = recommendator.recommend(user_id)
+    if model is None:
+        st.error("No se pudo cargar el modelo. Verifica que el archivo recommendators.py esté disponible.")
+        st.stop()
 
-        if recommendations.empty:
-            st.warning("No se encontraron recomendaciones para este usuario.")
-        else:
-            st.success("¡Aquí están tus recomendaciones!")
-            st.dataframe(recommendations)
-            # ---------------------------
-            # Nota opcional
-            # ---------------------------
-            st.caption("Dataset: India Travel Recommender | Modelo colaborativo | Desarrollado para proyectos educativos.")
+    st.write("Introduce tu **User ID** para recibir recomendaciones personalizadas de destinos en India.")
+
+    # ---------------------------
+    # Inputs de usuario
+    # ---------------------------
+    user_id = st.number_input("User ID", min_value=1, step=1)
+
+    # ---------------------------
+    # Ejecutar recomendación
+    # ---------------------------
+    if st.button("Obtener recomendaciones"):
+        with st.spinner("Generando recomendaciones..."):
+            recommendations = recommendator.recommend(user_id)
+
+            if recommendations.empty:
+                st.warning("No se encontraron recomendaciones para este usuario.")
+            else:
+                st.success("¡Aquí están tus recomendaciones!")
+                st.dataframe(recommendations)
+                update_destination_rep(recommendations)
+                # ---------------------------
+                # Nota opcional
+                # ---------------------------
+                st.caption("Dataset: India Travel Recommender | Modelo colaborativo | Desarrollado para proyectos educativos.")
 
 # Footer
 st.markdown("---")

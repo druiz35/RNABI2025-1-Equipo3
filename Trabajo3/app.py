@@ -13,6 +13,7 @@ import io
 import base64
 from notebooks.modulo2.classifiers import DriverClassifier
 from notebooks.modulo3.recommendators import CollaborativeRecommendator
+from notebooks.modulo1.modulo1 import run_module1
 
 # Configuración de la página
 st.set_page_config(
@@ -23,13 +24,108 @@ st.set_page_config(
 )
 
 # Configuración del sidebar
-st.sidebar.title("Configuración")
-st.sidebar.markdown("### Módulo 2: Clasificación de Imágenes")
-st.sidebar.markdown("### Módulo 3: Recomendación de Destinos de Viaje")
+st.sidebar.title("MODULOS")
+st.sidebar.markdown("### Módulo 1: Predicción de Demanda")
+st.sidebar.markdown("### Módulo 2: Clasificación de Imágenes de Conducción")
+st.sidebar.markdown("### Módulo 3: Sistema de Recomendación de Destinos de Viaje")
 
 # Título principal
-st.title("🚗 Sistema Inteligente de Clasificación de Conducción Distractiva")
+st.title("🛠️ Herramienta Web para el Análisis Inteligente de Transporte")
+
+st.header("4.1 Introducción")
+st.markdown("""
+La presente herramienta web ha sido desarrollada como una solución integral para la gestión, análisis y toma de decisiones en el sector transporte, combinando técnicas avanzadas de inteligencia artificial y ciencia de datos. Su objetivo principal es facilitar a empresas, investigadores y tomadores de decisiones el acceso a modelos predictivos, clasificadores automáticos y sistemas de recomendación, todo desde una interfaz intuitiva y accesible desde cualquier navegador.
+
+A través de esta plataforma, el usuario puede interactuar con distintos módulos inteligentes que permiten anticipar la demanda de rutas, analizar el comportamiento de conductores y recibir recomendaciones personalizadas de destinos, optimizando así la operación y la experiencia de los usuarios finales.
+
+Esta herramienta es el resultado de un trabajo colaborativo y multidisciplinario, integrando conocimientos de análisis de datos, machine learning, desarrollo web y experiencia de usuario, con el fin de aportar valor real y tangible al sector transporte.
+""")
+
+st.header("4.2 Tecnologías utilizadas")
+st.markdown("""
+Esta herramienta se apoya en un stack tecnológico moderno y robusto, que garantiza tanto la eficiencia en el procesamiento como la facilidad de uso:
+
+- **Python**: Lenguaje principal para el desarrollo de la lógica y los modelos.
+- **Streamlit**: Framework para la creación de aplicaciones web interactivas de manera rápida y sencilla, ideal para prototipos y despliegue de soluciones de ciencia de datos.
+- **PyTorch**: Biblioteca de deep learning utilizada para la construcción y entrenamiento de modelos de clasificación de imágenes.
+- **scikit-learn**: Herramientas de machine learning para tareas de recomendación y análisis de datos.
+- **Pandas y NumPy**: Manipulación y análisis eficiente de grandes volúmenes de datos.
+- **Matplotlib y Seaborn**: Visualización avanzada de resultados, métricas y tendencias.
+- **Otras librerías**: PIL para procesamiento de imágenes, y utilidades estándar de Python para manejo de archivos y fechas.
+
+El uso de estas tecnologías permite integrar modelos complejos y visualizaciones ricas en una experiencia de usuario fluida y amigable. Además, la arquitectura modular facilita la escalabilidad y el mantenimiento del sistema, permitiendo la incorporación de nuevos módulos o funcionalidades en el futuro.
+""")
+
+st.header("4.3 Descripción de la interfaz")
+st.markdown("""
+La interfaz de la herramienta está diseñada bajo principios de simplicidad y claridad, permitiendo que cualquier usuario, sin importar su nivel técnico, pueda aprovechar al máximo las funcionalidades ofrecidas.
+
+- **Estructura en bloques**: Cada módulo se presenta como un bloque independiente, con su propio formulario de entrada y visualización de resultados.
+- **Inputs intuitivos**: Los parámetros requeridos por cada módulo (como número de días a predecir, imágenes a analizar o ID de usuario) se solicitan mediante controles sencillos como cajas numéricas, selectores y botones.
+- **Visualización inmediata**: Los resultados, métricas y gráficas se muestran de forma clara y ordenada justo después de cada acción, permitiendo una interpretación rápida y efectiva.
+- **Navegación vertical**: El usuario puede desplazarse fácilmente entre los diferentes módulos y secciones, accediendo a la información y funcionalidades de manera secuencial.
+- **Mensajes y ayudas contextuales**: Se incluyen descripciones, recomendaciones y advertencias para guiar al usuario durante el uso de la herramienta.
+
+**Ejemplo de uso:**
+- Un planificador de rutas puede anticipar la demanda futura de los destinos turísticos más populares y ajustar la oferta de transporte en consecuencia.
+- Un supervisor de seguridad vial puede analizar imágenes de conductores y detectar comportamientos distractivos de manera automática.
+- Un turista o usuario final puede recibir recomendaciones personalizadas de destinos según su historial y preferencias, mejorando su experiencia de viaje.
+
+Esta organización facilita la experimentación, el análisis comparativo y la toma de decisiones informadas en tiempo real, tanto para usuarios técnicos como no técnicos.
+""")
+
+st.header("4.4 Funcionalidades")
+st.markdown("""
+La herramienta integra tres módulos principales, cada uno orientado a resolver un problema específico dentro del ámbito del transporte inteligente:
+
+- **Módulo 1: Predicción de demanda de rutas o destinos turísticos**
+    - Permite anticipar la demanda futura en las rutas más populares, ayudando a planificar recursos y optimizar la operación.
+    - El usuario selecciona el horizonte de predicción (número de días) y obtiene gráficas, métricas y análisis detallados para cada ruta.
+    - Ideal para la gestión de flotas, planificación de servicios y análisis de tendencias turísticas.
+    - **Beneficio:** Reduce la incertidumbre y mejora la asignación de recursos.
+
+- **Módulo 2: Clasificación automática de imágenes de conducción**
+    - Analiza imágenes de conductores para detectar comportamientos distractivos o inseguros mediante modelos de deep learning.
+    - El usuario sube una imagen y recibe una clasificación automática, junto con métricas de confianza y recomendaciones.
+    - Útil para empresas de transporte, aseguradoras y proyectos de seguridad vial.
+    - **Beneficio:** Contribuye a la prevención de accidentes y mejora la seguridad en carretera.
+
+- **Módulo 3: Recomendación personalizada de destinos o rutas**
+    - Ofrece sugerencias de destinos turísticos o rutas a partir de las preferencias y el historial de cada usuario.
+    - El usuario puede ingresar su ID o seleccionar su nombre para recibir recomendaciones personalizadas, visualizando además la popularidad y el tipo de cada destino sugerido.
+    - Facilita la personalización de la experiencia y la promoción de destinos menos conocidos.
+    - **Beneficio:** Aumenta la satisfacción del usuario y fomenta el descubrimiento de nuevas opciones.
+
+Cada módulo puede ser utilizado de manera independiente, permitiendo adaptar la herramienta a diferentes necesidades y escenarios de uso. Además, la integración de los tres módulos en una sola plataforma potencia el análisis cruzado y la toma de decisiones estratégicas.
+""")
+
 st.markdown("---")
+
+# ─── MÓDULO 1: Predicción de Demanda ────────────────────
+st.header("📈 Módulo 1: Predicción de Demanda de Transporte")
+st.markdown("Introduce sólo el horizonte (días) y ejecuta.")
+
+horizon = st.number_input(
+    "Horizonte (días)", min_value=1, max_value=365, value=30
+)
+
+if st.button("▶ Ejecutar Módulo 1"):
+    with st.spinner("Generando predicciones…"):
+        resultados = run_module1(horizon)
+
+    for ruta, info in resultados.items():
+        st.subheader(f"Ruta: {ruta}")
+        st.subheader("📊 Métricas de Backtest")
+        st.table(info["metrics"])
+        st.subheader("📈 Demanda Sintética")
+        st.pyplot(info["fig_demand"])
+        st.subheader("🔍 Descomposición de la Serie")
+        st.pyplot(info["fig_decomp"])
+
+st.markdown("---")
+
+st.markdown("---")
+
 
 # Clases de comportamiento
 CLASSES = [

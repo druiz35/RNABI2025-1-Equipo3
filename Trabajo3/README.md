@@ -103,6 +103,11 @@ Trabajo3/
         ├── m2_modelling.ipynb    # Notebook de entrenamiento
         ├── Resnet18.pth          # Modelo entrenado
         └── image_set_*.png       # Imágenes de ejemplo
+    └── modulo3/
+        ├── destinationRep.csv    # Reporte de recomendaciones generadas
+        ├── recommendators.py     # Modelo entrenado
+        ├── m3_merged_df.csv      # Base de datos
+        └── qualification.csv     # Reporte de Calificaciones
 ```
 
 ## ⚠️ Requisitos del Sistema

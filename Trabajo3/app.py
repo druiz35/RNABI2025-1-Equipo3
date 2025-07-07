@@ -102,7 +102,7 @@ Cada módulo puede ser utilizado de manera independiente, permitiendo adaptar la
 st.markdown("---")
 
 # ─── MÓDULO 1: Predicción de Demanda ────────────────────
-st.header("📈 Módulo 1: Predicción de Demanda de Transporte")
+st.header("📈 Predicción de Demanda de Transporte")
 st.markdown("Introduce sólo el horizonte (días) y ejecuta.")
 
 horizon = st.number_input(

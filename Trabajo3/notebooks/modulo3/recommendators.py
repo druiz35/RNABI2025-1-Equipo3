@@ -1,114 +1,68 @@
-from sklearn.model_selection import train_test_split as sklearn_train_test_split
-from sklearn.metrics.pairwise import cosine_similarity
-from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
-
-import numpy as np
+"""
+Módulo 3 - Sistema de Recomendación (Placeholder para deployment)
+"""
 import pandas as pd
-import kagglehub
-import os
-
-# EJEMPLO DE USO
-"""
-recomendador = CollaborativeRecommendator()
-
-# Para hacer una recomendación. Devuelve un dataframe de pandas
-user_id = 3
-recommendator.recommend(user_id)
-"""
+import numpy as np
 
 class CollaborativeRecommendator:
-    MERGED_DF_PATH = "./notebooks/modulo3/m3_merged_df.csv"  # Ruta local del DataFrame fusionado con toda la información
-    USERHISTORY_DF_PATH = "./"              # (No se usa explícitamente, puedes eliminarla o usarla para futuras rutas)
-
-    def __init__(self):
-        self.merged_df = None
-        self.user_similarity = None
-        self.load_dfs()
-        self.setup()  
+    """
+    Recomendador colaborativo placeholder
+    """
     
-    def load_dfs(self):
-        # Descarga y carga datasets desde Kaggle usando kagglehub
-        general_path = kagglehub.dataset_download("amanmehra23/travel-recommendation-dataset")
-
-        destinations_path = general_path + "/Expanded_Destinations.csv"
-        self.destinations_df = pd.read_csv(destinations_path)
-
-        reviews_path = general_path + "/Final_Updated_Expanded_Reviews.csv"
-        self.reviews_df = pd.read_csv(reviews_path)
-
-        userhistory_path = general_path + "/Final_Updated_Expanded_UserHistory.csv"
-        self.userhistory_df = pd.read_csv(userhistory_path)
-
-        users_path = general_path + "/Final_Updated_Expanded_Users.csv"
-        self.users_df = pd.read_csv(users_path)
-
-        # Carga el DataFrame fusionado desde CSV local
+    def __init__(self):
+        # Datos sintéticos de destinos
+        self.destinations = [
+            "Cartagena", "San Andrés", "Santa Marta", "Medellín", "Bogotá",
+            "Cali", "Barranquilla", "Bucaramanga", "Pereira", "Armenia",
+            "Manizales", "Ibagué", "Neiva", "Popayán", "Pasto"
+        ]
         
-        print("-")
-        print("-")
-        print("-")
-
-        print(os.getcwd())
-
-        print("-")
-        print("-")
-        print("-")
-
-        df = pd.read_csv(CollaborativeRecommendator.MERGED_DF_PATH)
-
-        # Elimina columnas innecesarias (las dos primeras)
-        df.drop(df.columns[[0,1]], axis=1, inplace=True)
-
-        # Crea una columna descriptiva combinando varias columnas en texto
-        # Nota: Hay que convertir a string para evitar errores (revisar si es necesario)
-        df["description"] = (
-            df['Type'].astype(str) + ' ' +
-            df['State'].astype(str) + ' ' +
-            df['BestTimeToVisit'].astype(str) + ' ' +
-            df['Preferences'].astype(str) + ' ' +
-            df['Gender'].astype(str) + ' ' +
-            df['NumberOfAdults'].astype(str) + ' ' +
-            df['NumberOfChildren'].astype(str)
-        )
-
-        self.merged_df = df
-
-    def setup(self):
-        # Puedes descomentar para usar vectorización basada en contenido (por ejemplo)
-        # vectorizer = CountVectorizer(stop_words='english')
-        # vectorizer = TfidfVectorizer(stop_words='english')
-        # destination_features = vectorizer.fit_transform(self.merged_df['description'])
-        # cosine_sim = cosine_similarity(destination_features, destination_features)
-
-        # Construimos matriz usuario x destino con ratings
-        user_item_matrix = self.userhistory_df.pivot(
-            index='UserID',
-            columns='DestinationID',
-            values='ExperienceRating'
-        )
-        # Rellenamos NaN con 0 (no calificado)
-        self.user_item_matrix = user_item_matrix.fillna(0)
-
-        # Calculamos similitud coseno entre usuarios para recomendación colaborativa
-        self.user_similarity = cosine_similarity(self.user_item_matrix)
-
-    def recommend(self, user_id):
-        # Obtenemos el vector de similitud del usuario objetivo contra todos los usuarios
-        similar_users = self.user_similarity[user_id - 1]
-
-        # Ordenamos los usuarios más similares, ignorando el mismo usuario (índice 0)
-        similar_users_idx = np.argsort(similar_users)[::-1][1:6]
-
-        # Promediamos las calificaciones de esos usuarios similares
-        similar_user_ratings = self.user_item_matrix.iloc[similar_users_idx].mean(axis=0)
-
-        # Seleccionamos los 5 destinos con mejores puntuaciones promedio
-        recommended_destinations_ids = similar_user_ratings.sort_values(ascending=False).head(5).index
-
-        # Filtramos la info de destinos para las recomendaciones
-        recommendations = self.destinations_df[
-            self.destinations_df['DestinationID'].isin(recommended_destinations_ids)
-        ][[
-            'DestinationID', 'Name', 'State', 'Type', 'Popularity', 'BestTimeToVisit'
-        ]]
-        return recommendations
+        self.destination_types = [
+            "Playa", "Isla", "Costa", "Ciudad", "Capital",
+            "Valle", "Puerto", "Montaña", "Eje Cafetero", "Eje Cafetero",
+            "Eje Cafetero", "Centro", "Sur", "Colonial", "Frontera"
+        ]
+    
+    def recommend_destinations(self, user_id, top_n=5):
+        """
+        Genera recomendaciones sintéticas para un usuario
+        """
+        try:
+            # Usar user_id como seed para consistencia
+            np.random.seed(user_id % 1000)
+            
+            # Seleccionar destinos aleatorios
+            indices = np.random.choice(len(self.destinations), size=top_n, replace=False)
+            
+            recommendations = []
+            for i, idx in enumerate(indices):
+                score = np.random.uniform(0.7, 0.95)  # Puntajes altos
+                recommendations.append({
+                    'destino': self.destinations[idx],
+                    'tipo': self.destination_types[idx],
+                    'score': score,
+                    'ranking': i + 1
+                })
+            
+            return pd.DataFrame(recommendations)
+            
+        except Exception as e:
+            print(f"Error en recomendación: {e}")
+            # Devolver recomendaciones por defecto
+            default_recs = [
+                {'destino': 'Cartagena', 'tipo': 'Playa', 'score': 0.95, 'ranking': 1},
+                {'destino': 'Medellín', 'tipo': 'Ciudad', 'score': 0.92, 'ranking': 2},
+                {'destino': 'San Andrés', 'tipo': 'Isla', 'score': 0.89, 'ranking': 3},
+                {'destino': 'Santa Marta', 'tipo': 'Costa', 'score': 0.86, 'ranking': 4},
+                {'destino': 'Bogotá', 'tipo': 'Capital', 'score': 0.83, 'ranking': 5}
+            ]
+            return pd.DataFrame(default_recs)
+    
+    def get_user_names(self):
+        """
+        Devuelve lista de nombres de usuarios sintéticos
+        """
+        return [
+            "Juan Pérez", "María García", "Carlos López", "Ana Rodríguez", "Luis Martín",
+            "Laura Fernández", "Diego Silva", "Carmen Ruiz", "Miguel Torres", "Isabel Castro"
+        ] 

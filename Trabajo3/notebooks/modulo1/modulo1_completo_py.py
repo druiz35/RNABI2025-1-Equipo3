@@ -171,8 +171,7 @@ def run_module1(horizon_days: int = 30) -> dict:
         fig1.tight_layout()
         # demand_path = os.path.join(base, f"demanda_{ruta}.png")
         # fig1.savefig(demand_path, dpi=300, bbox_inches="tight")
-        # plt.close(fig1)
-        # print(f"Guardado: {demand_path}")
+        # No cerrar fig1 aquí, se necesita para Streamlit
 
         # 10) Descomposición (mejorada)
         ser = df_fc.set_index("ds")["y"].asfreq("D")
@@ -197,8 +196,7 @@ def run_module1(horizon_days: int = 30) -> dict:
             fig2.tight_layout()
             # decomp_path = os.path.join(base, f"descomposicion_{ruta}.png")
             # fig2.savefig(decomp_path, dpi=300, bbox_inches="tight")
-            # plt.close(fig2)
-            # print(f"Guardado: {decomp_path}")
+            # No cerrar fig2 aquí, se necesita para Streamlit
         except ValueError as e:
             print(f"Error en descomposición para {ruta}: {e}")
             fig2 = None
@@ -210,6 +208,9 @@ def run_module1(horizon_days: int = 30) -> dict:
             "fig_demand": fig1,
             "fig_decomp": fig2
         }
+        
+        # Cerrar figuras después de guardarlas en results para liberar memoria
+        # No las cerramos para que Streamlit pueda mostrarlas
 
     # Resultados procesados
     print(f"\nProcesadas {len(results)} rutas con éxito.")

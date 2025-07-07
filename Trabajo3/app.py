@@ -103,26 +103,37 @@ st.markdown("---")
 
 # ─── MÓDULO 1: Predicción de Demanda ────────────────────
 st.header("📈 Predicción de Demanda de Transporte")
-st.markdown("Introduce sólo el horizonte (días) y ejecuta.")
+st.markdown("Predicción fija a 30 días para las 5 rutas principales.")
 
-horizon = st.number_input(
-    "Horizonte (días)", min_value=1, max_value=365, value=30
-)
+# Horizonte fijo en 30 días
+horizon = 30
 
 if st.button("▶ Ejecutar Módulo 1"):
     with st.spinner("Generando predicciones…"):
         resultados = run_module1(horizon)
 
-    for ruta, info in resultados.items():
-        st.subheader(f"Ruta: {ruta}")
-        st.subheader("📊 Métricas de Backtest")
-        st.table(info["metrics"])
-        st.subheader("📈 Demanda Sintética")
-        st.pyplot(info["fig_demand"])
-        st.subheader("🔍 Descomposición de la Serie")
-        st.pyplot(info["fig_decomp"])
-
-st.markdown("---")
+    if not resultados:
+        st.warning("⚠️ No se pudieron generar resultados. Verifica que los archivos CSV estén disponibles.")
+    else:
+        st.success(f"✅ Se procesaron {len(resultados)} rutas exitosamente")
+        
+        for ruta, info in resultados.items():
+            st.subheader(f"🚌 Ruta: {ruta}")
+            
+            # Mostrar solo los gráficos, sin métricas
+            if info.get("fig_demand") is not None:
+                st.subheader("📈 Demanda Sintética")
+                st.pyplot(info["fig_demand"])
+            else:
+                st.warning("No se pudo generar el gráfico de demanda")
+            
+            if info.get("fig_decomp") is not None:
+                st.subheader("🔍 Descomposición de la Serie")
+                st.pyplot(info["fig_decomp"])
+            else:
+                st.info("No se pudo generar el gráfico de descomposición (puede ser normal con pocos datos)")
+            
+            st.markdown("---")
 
 st.markdown("---")
 

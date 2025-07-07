@@ -1,4 +1,3 @@
-
 from sklearn.model_selection import train_test_split as sklearn_train_test_split
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
@@ -18,7 +17,7 @@ recommendator.recommend(user_id)
 """
 
 class CollaborativeRecommendator:
-    MERGED_DF_PATH = "./notebooks/modulo3/m3_merged_df.csv."  # Ruta local del DataFrame fusionado con toda la información
+    MERGED_DF_PATH = "./notebooks/modulo3/m3_merged_df.csv"  # Ruta local del DataFrame fusionado con toda la información
     USERHISTORY_DF_PATH = "./"              # (No se usa explícitamente, puedes eliminarla o usarla para futuras rutas)
 
     def __init__(self):

@@ -447,7 +447,7 @@ recommendator = load_model3()
 m3_df = pd.read_csv(recommendator.MERGED_DF_PATH)
 
 # Pestañas principales
-tab_3_1, tab_3_2 = st.tabs(["👥 Recomendación por Nombre", "📖 Recomendación por ID"])
+tab_3_1, tab_3_2, tab_3_3 = st.tabs(["👥 Recomendación por Nombre", "📖 Recomendación por ID", "📊 Top 5 Destinos Más Recomendados"])
 
 with tab_3_1:
     st.header("Recomendación por Nombre")
@@ -465,17 +465,13 @@ with tab_3_1:
     # Crear un diccionario: nombre => UserID
     usuarios_dict = dict(zip(primeros_usuarios['Name_y'], primeros_usuarios['UserID']))
 
-    # ---------------------------
     # Selectbox con nombres
-    # ---------------------------
     selected_name = st.selectbox(
         "Selecciona un usuario por nombre:",
         options=list(usuarios_dict.keys())
     )
 
-    # ---------------------------
     # Botón para generar recomendación
-    # ---------------------------
     if st.button("Generar recomendaciones"):
         # Mapear nombre a ID
         selected_user_id = usuarios_dict[selected_name]
@@ -489,9 +485,9 @@ with tab_3_1:
                 st.success(f"¡Recomendaciones para **{selected_name}**!")
                 st.dataframe(recommendations)
                 update_destination_rep(recommendations)
-                # ---------------------------
+        
                 # Nota opcional
-                # ---------------------------
+        
                 st.caption("Dataset: India Travel Recommender | Modelo colaborativo | Desarrollado para proyectos educativos.")
 
 with tab_3_2:
@@ -503,14 +499,10 @@ with tab_3_2:
 
     st.write("Introduce tu **User ID** para recibir recomendaciones personalizadas de destinos en India.")
 
-    # ---------------------------
     # Inputs de usuario
-    # ---------------------------
     user_id = st.number_input("User ID", min_value=1, step=1)
 
-    # ---------------------------
     # Ejecutar recomendación
-    # ---------------------------
     if st.button("Obtener recomendaciones"):
         with st.spinner("Generando recomendaciones..."):
             recommendations = recommendator.recommend(user_id)
@@ -521,10 +513,50 @@ with tab_3_2:
                 st.success("¡Aquí están tus recomendaciones!")
                 st.dataframe(recommendations)
                 update_destination_rep(recommendations)
-                # ---------------------------
+        
                 # Nota opcional
-                # ---------------------------
+        
                 st.caption("Dataset: India Travel Recommender | Modelo colaborativo | Desarrollado para proyectos educativos.")
+
+with tab_3_3:
+    st.header("Top 5 Destinos Más Recomendados")
+
+    # Ruta del reporte acumulado
+    REPORTE_PATH = "./notebooks/modulo3/destinationRep.csv"
+    DESTINATIONS_PATH = "./notebooks/modulo3/m3_merged_df.csv"
+
+    # Verificar que exista el reporte
+    if os.path.exists(REPORTE_PATH):
+        # Leer reporte acumulado
+        reporte_df = pd.read_csv(REPORTE_PATH)
+        
+        # Leer dataset de destinos para obtener nombres
+        destinations_df = pd.read_csv(DESTINATIONS_PATH)
+        destinos_info = destinations_df[['DestinationID_x', 'Name_x']]
+        destinos_info = destinos_info.rename(columns={
+            'DestinationID_x': 'DestinationID',
+            'Name_x' : 'Name'
+        })
+
+        # Unir para agregar nombre
+        reporte_completo = pd.merge(
+            reporte_df,
+            destinos_info,
+            on='DestinationID',
+            how='left'
+        )
+
+        # Ordenar por número de recomendaciones descendente
+        top5 = reporte_completo.sort_values(by='Recomendaciones', ascending=False).head(5)
+
+        # Reorganizar columnas
+        top5 = top5[['DestinationID', 'Name', 'Recomendaciones']]
+
+        # Mostrar tabla
+        st.dataframe(top5, use_container_width=True)
+
+    else:
+        st.warning("⚠️ Aún no existe un reporte acumulado. Genera primero recomendaciones para crear el archivo.")
 
 # Footer
 st.markdown("---")

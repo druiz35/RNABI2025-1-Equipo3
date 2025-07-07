@@ -447,7 +447,12 @@ recommendator = load_model3()
 m3_df = pd.read_csv(recommendator.MERGED_DF_PATH)
 
 # Pestañas principales
-tab_3_1, tab_3_2, tab_3_3 = st.tabs(["👥 Recomendación por Nombre", "📖 Recomendación por ID", "📊 Top 5 Destinos Más Recomendados"])
+tab_3_1, tab_3_2, tab_3_3, tab_3_4= st.tabs([
+    "👥 Recomendación por Nombre",
+    "📖 Recomendación por ID",
+    "📊 Top 5 Destinos Más Recomendados",
+    "⭐ Evaluación del Servicio"
+])
 
 with tab_3_1:
     st.header("Recomendación por Nombre")
@@ -557,6 +562,44 @@ with tab_3_3:
 
     else:
         st.warning("⚠️ Aún no existe un reporte acumulado. Genera primero recomendaciones para crear el archivo.")
+
+with tab_3_4:
+    CSV_PATH = "./notebooks/modulo3/qualification.csv"
+
+    st.header("Evaluación del Servicio")
+
+    st.write(
+        """
+        Ayúdanos a mejorar calificando nuestro servicio.
+        Por favor selecciona una puntuación entre 0 y 5.
+        """
+    )
+
+    # Entrada de calificación
+    rating = st.slider("Selecciona tu calificación:", min_value=0, max_value=5, step=1)
+
+    if st.button("Enviar calificación"):
+        # Verificar si existe el archivo
+        if os.path.exists(CSV_PATH):
+            df = pd.read_csv(CSV_PATH)
+        else:
+            df = pd.DataFrame(columns=['Calificacion'])
+
+        # Agregar nueva calificación
+        df = pd.concat([df, pd.DataFrame({'Calificacion': [rating]})], ignore_index=True)
+
+        # Guardar CSV actualizado
+        df.to_csv(CSV_PATH, index=False)
+
+        st.success(f"¡Gracias! Tu calificación ({rating}) ha sido registrada.")
+
+    # Mostrar promedio actual
+    if os.path.exists(CSV_PATH):
+        df = pd.read_csv(CSV_PATH)
+        promedio = df['Calificacion'].mean()
+        st.write(f"⭐ **Promedio actual de calificaciones:** {promedio:.2f} / 5")
+    else:
+        st.info("Aún no hay calificaciones registradas.")
 
 # Footer
 st.markdown("---")

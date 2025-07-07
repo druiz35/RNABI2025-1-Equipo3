@@ -1,0 +1,51 @@
+# Archivos de Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+
+# Entornos virtuales
+venv/
+.venv/
+env/
+.env
+
+# Jupyter notebooks (solo mantener los notebooks necesarios)
+*.ipynb
+.ipynb_checkpoints/
+
+# Git
+.git/
+.gitignore
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Documentación
+README.md
+DOCUMENTACION.md
+*.md
+
+# Scripts de setup
+setup.py
+test_app.py
+run.sh
+run.bat
+
+# Archivos grandes innecesarios
+notebooks/modulo2/image_set_*.png
+notebooks/modulo2/m2_eda.ipynb
+*.csv
+
+# Logs y temporales
+*.log
+.streamlit/
+
+# Archivos de sistema
+.DS_Store
+Thumbs.db 

@@ -257,7 +257,7 @@ with tab1:
             st.session_state.last_uploaded_file = uploaded_file.name
 
         image = Image.open(uploaded_file)
-        st.image(image, caption="Imagen subida", use_container_width=True)
+        st.image(image, caption="Imagen subida", use_column_width=True)
         if st.button("🔍 Clasificar Imagen", type="primary"):
             temp_path = "temp_image.png"
             image.save(temp_path)

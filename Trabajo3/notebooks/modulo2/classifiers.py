@@ -1,17 +1,7 @@
 import torch
-from torchvision import datasets, transforms, models
-from torch.utils.data import DataLoader, random_split
+from torchvision import transforms, models
 import torch.nn as nn
-import torch.optim as optim
 import os
-
-import kagglehub
-
-from sklearn.metrics import roc_auc_score, confusion_matrix
-
-import seaborn as sns
-import time
-import numpy as np
 from PIL import Image
 
 # EJEMPLO DE USO
@@ -43,8 +33,8 @@ class DriverClassifier:
     
     def set_vgg(self):
         self.model = models.vgg19()
-        self.model.load_state_dict(torch.load(DriverClassifier.VGG19_PATH))
-        self.model.fc = nn.Linear(4096, 5)  # Cambia la capa final DESPUÉS
+        self.model.load_state_dict(torch.load(DriverClassifier.VGG19_PATH, map_location=torch.device('cpu')))
+        self.model.classifier[6] = nn.Linear(4096, 5)  # Cambia la capa final DESPUÉS
         self.model.eval()
 
     def set_resnet(self): 
@@ -53,7 +43,9 @@ class DriverClassifier:
         self.model.load_state_dict(torch.load(DriverClassifier.RESTNET_PATH, map_location=torch.device('cpu')))
         self.model.eval()
 
-    def set_custom_model(self): ...# Método placeholder para implementar un modelo custom si se desea
+    def set_custom_model(self): 
+        # Método placeholder para implementar un modelo custom si se desea
+        pass
 
     def set_transform_pipeline(self): 
         # Definimos las transformaciones que se aplicarán a cada imagen antes de la predicción

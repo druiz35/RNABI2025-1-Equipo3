@@ -9,10 +9,10 @@ Original file is located at
 
 # modulo1_completo.py
 # Módulo 1: Predicción de Demanda de Transporte
-# Genera predicciones de demanda usando LSTM para cada destino.
+# Genera predicciones de demanda usando modelos simples para cada destino.
 # Entrada: horizon_days (días a predecir, por defecto 30).
-# Salida: Archivos CSV (predicciones_<ruta>.csv) y PNG (demanda_<ruta>.png, descomposicion_<ruta>.png) en ./proyecto_streamlit/.
-# Requiere: Final_Updated_Expanded_UserHistory.csv, Expanded_Destinations.csv en ./proyecto_streamlit/.
+# Salida: dict con resultados por ruta.
+# Requiere: Final_Updated_Expanded_UserHistory.csv, Expanded_Destinations.csv en ./notebooks/modulo1/.
 
 import os
 import pandas as pd
@@ -20,41 +20,38 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import mean_squared_error, mean_absolute_error
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import LSTM, Dense
+from sklearn.linear_model import LinearRegression
 from statsmodels.tsa.seasonal import seasonal_decompose
+from statsmodels.tsa.arima.model import ARIMA
 import warnings
 
 warnings.filterwarnings("ignore")
 
 def run_module1(horizon_days: int = 30) -> dict:
     """
-    Forecast LSTM por destino.
+    Forecast simple usando ARIMA/Linear Regression por destino. 
     Input: horizon_days (int).
     Lee Final_Updated_Expanded_UserHistory.csv y Expanded_Destinations.csv
-    en el mismo directorio de este archivo.
-    Output: dict con llave=ruta y valor={
+    en el directorio notebooks/modulo1/.
+    Output: dict con clave=ruta y valor={
         metrics: {RMSE, MAE, R2},
-        forecast_df: DataFrame con fechas (ds) y valores (y),
+        forecast_df: DataFrame completo,
         fig_demand: Figura demanda sintética,
         fig_decomp: Figura descomposición
     }
-    Guarda CSV y PNG en ./proyecto_streamlit/.
     """
-    # Directorio de trabajo
     base = os.path.dirname(__file__)
     history_csv = os.path.join(base, "Final_Updated_Expanded_UserHistory.csv")
     dest_csv = os.path.join(base, "Expanded_Destinations.csv")
 
-    # 1) Leer datos
     try:
+        # 1) Leer datos
         user_hist = pd.read_csv(history_csv, parse_dates=["VisitDate"])
         dests = pd.read_csv(dest_csv)
+        name_map = dests.set_index("DestinationID")["Name"].to_dict()
     except FileNotFoundError as e:
-        print(f"Error: {e}. Asegúrate de que los archivos CSV estén en {base}")
+        print(f"Error: No se pudo encontrar el archivo: {e}")
         return {}
-
-    name_map = dests.set_index("DestinationID")["Name"].to_dict()
 
     # 2) Pivot diario de trips
     trips = (
@@ -73,147 +70,131 @@ def run_module1(horizon_days: int = 30) -> dict:
     )
     pivot.index.name = "ds"
     pivot.columns = [
-        f"{name_map.get(i, f'Destination_{i}')}_{i}" for i in pivot.columns
+        f"{name_map.get(i,i)}_{i}" for i in pivot.columns
     ]
 
-    # Nota sobre aumentación
-    print("NOTA: Debido a solo 3 fechas únicas por destino, se aplicó aumentación de datos "
-          "(interpolación para descomposición). Esto genera series sintéticas, "
-          "limitando la validez de las predicciones.")
-
     results = {}
-    seq_len = 7  # Ventana de 7 días
-
+    
     # 3) Por cada destino (limitado a 5 para pruebas)
     for ruta in pivot.columns[:5]:
         df_ts = pivot[[ruta]].reset_index().rename(columns={ruta: "y"})
-        if len(df_ts) <= seq_len:
+        if len(df_ts) <= 10:  # Necesitamos al menos 10 puntos
             print(f"Ruta {ruta} omitida: datos insuficientes.")
             continue
 
-        # 4) Escalar y generar secuencias X, Y
-        scaler = MinMaxScaler()
-        y_s = scaler.fit_transform(df_ts[["y"]])
-        X, Y = [], []
-        for i in range(len(y_s) - seq_len):
-            X.append(y_s[i: i + seq_len])
-            Y.append(y_s[i + seq_len])
-        X, Y = np.array(X), np.array(Y)
-        if X.shape[0] == 0:
-            print(f"Ruta {ruta} omitida: no hay secuencias.")
-            continue
-
-        # 5) Definir y entrenar LSTM
-        model = Sequential([
-            LSTM(50, input_shape=(seq_len, 1)),
-            Dense(1)
-        ])
-        model.compile(optimizer="adam", loss="mse")
-        model.fit(X, Y, epochs=50, batch_size=8, verbose=0)
-
-        # 6) Forecast recursivo
-        last = y_s[-seq_len:].reshape(1, seq_len, 1)
-        preds = []
-        for _ in range(horizon_days):
-            p = model.predict(last, verbose=0)[0]
-            preds.append(p)
-            last = np.roll(last, -1, axis=1)
-            last[0, -1, 0] = p
-
-        # 7) Construir DataFrame histórico + pronóstico
-        fut_idx = pd.date_range(
-            df_ts["ds"].iloc[-1] + pd.Timedelta(days=1),
-            periods=horizon_days,
-            freq="D"
-        )
-        df_fc = pd.DataFrame({
-            "ds": np.concatenate([df_ts["ds"].values, fut_idx]),
-            "y": np.concatenate([
-                df_ts["y"].values,
-                scaler.inverse_transform(preds).flatten()
-            ])
-        })
-
-        # Guardar CSV (comentado para uso en app)
-        # csv_path = os.path.join(base, f"predicciones_{ruta}.csv")
-        # df_fc.to_csv(csv_path, index=False)
-        # print(f"Guardado: {csv_path}")
-
-        # 8) Métricas back-test
-        n = len(df_ts)
-        if n >= horizon_days:
-            y_true = df_ts["y"].iloc[-horizon_days:].values
-            y_pred = df_fc["y"].iloc[-horizon_days: n].values
-        else:
-            y_true = df_ts["y"].values
-            y_pred = scaler.inverse_transform(preds[:n]).flatten()
-
-        if len(y_true) == len(y_pred) and len(y_true) > 0:
-            rmse = np.sqrt(mean_squared_error(y_true, y_pred))
-            mae = mean_absolute_error(y_true, y_pred)
-            ssr = ((y_true - y_pred) ** 2).sum()
-            sst = ((y_true - y_true.mean()) ** 2).sum()
-            r2 = 1 - ssr / sst if sst != 0 else np.nan
-            metrics = {"RMSE": rmse, "MAE": mae, "R2": r2}
-            print(f"Métricas para {ruta}: RMSE={rmse:.2f}, MAE={mae:.2f}, R²={r2:.2f}")
-        else:
-            metrics = {"RMSE": np.nan, "MAE": np.nan, "R2": np.nan}
-            print(f"Métricas para {ruta}: No disponibles (datos insuficientes).")
-
-        # 9) Figura de demanda sintética (mejorada)
-        fig1, ax1 = plt.subplots(figsize=(10, 5))
-        ax1.plot(df_fc["ds"], df_fc["y"], label="Histórico + Predicciones", color="red", linewidth=2)
-        ax1.set_title(f"Demanda de Viajes: {ruta}", fontsize=14, pad=10)
-        ax1.set_xlabel("Fecha", fontsize=12)
-        ax1.set_ylabel("Número de Viajes", fontsize=12)
-        ax1.legend(fontsize=10)
-        ax1.grid(True, linestyle="--", alpha=0.7)
-        fig1.tight_layout()
-        # demand_path = os.path.join(base, f"demanda_{ruta}.png")
-        # fig1.savefig(demand_path, dpi=300, bbox_inches="tight")
-        # No cerrar fig1 aquí, se necesita para Streamlit
-
-        # 10) Descomposición (mejorada)
-        ser = df_fc.set_index("ds")["y"].asfreq("D")
-        if ser.isna().any():
-            ser = ser.interpolate().fillna(method="bfill").fillna(method="ffill")
         try:
-            decomp = seasonal_decompose(ser, model="additive", period=7)
-            fig2, (ax_trend, ax_seasonal, ax_resid) = plt.subplots(3, 1, figsize=(10, 8))
-            fig2.suptitle(f"Descomposición Aditiva: {ruta}", fontsize=14, y=0.95)
-            ax_trend.plot(decomp.trend, color="blue", label="Tendencia")
-            ax_trend.set_ylabel("Tendencia", fontsize=12)
-            ax_trend.legend(fontsize=10)
-            ax_trend.grid(True, linestyle="--", alpha=0.7)
-            ax_seasonal.plot(decomp.seasonal, color="green", label="Estacionalidad")
-            ax_seasonal.set_ylabel("Estacionalidad", fontsize=12)
-            ax_seasonal.legend(fontsize=10)
-            ax_seasonal.grid(True, linestyle="--", alpha=0.7)
-            ax_resid.plot(decomp.resid, color="purple", label="Residuo")
-            ax_resid.set_ylabel("Residuo", fontsize=12)
-            ax_resid.legend(fontsize=10)
-            ax_resid.grid(True, linestyle="--", alpha=0.7)
-            fig2.tight_layout()
-            # decomp_path = os.path.join(base, f"descomposicion_{ruta}.png")
-            # fig2.savefig(decomp_path, dpi=300, bbox_inches="tight")
-            # No cerrar fig2 aquí, se necesita para Streamlit
-        except ValueError as e:
-            print(f"Error en descomposición para {ruta}: {e}")
-            fig2 = None
+            # 4) Preparar datos para forecasting simple
+            ts_data = df_ts["y"].values
+            
+            # 5) Modelo simple de tendencia lineal
+            X = np.arange(len(ts_data)).reshape(-1, 1)
+            y = ts_data
+            
+            # Entrenar modelo lineal simple
+            model = LinearRegression()
+            model.fit(X, y)
+            
+            # 6) Generar forecast
+            future_X = np.arange(len(ts_data), len(ts_data) + horizon_days).reshape(-1, 1)
+            future_preds = model.predict(future_X)
+            
+            # Asegurar que las predicciones no sean negativas
+            future_preds = np.maximum(future_preds, 0)
+            
+            # 7) Construir DataFrame histórico + pronóstico
+            fut_idx = pd.date_range(
+                df_ts["ds"].iloc[-1] + pd.Timedelta(days=1),
+                periods=horizon_days,
+                freq="D"
+            )
+            df_fc = pd.DataFrame({
+                "ds": np.concatenate([df_ts["ds"].values, fut_idx]),
+                "y": np.concatenate([ts_data, future_preds])
+            })
 
-        # 11) Guardar en resultados
-        results[ruta] = {
-            "metrics": metrics,
-            "forecast_df": df_fc,
-            "fig_demand": fig1,
-            "fig_decomp": fig2
-        }
-        
-        # Cerrar figuras después de guardarlas en results para liberar memoria
-        # No las cerramos para que Streamlit pueda mostrarlas
+            # 8) Métricas back-test simples
+            n = len(df_ts)
+            if n >= horizon_days:
+                # Usar últimos días para validación
+                split_point = n - min(horizon_days, 7)  # máximo 7 días para test
+                train_data = ts_data[:split_point]
+                test_data = ts_data[split_point:]
+                
+                # Entrenar en datos de entrenamiento
+                X_train = np.arange(len(train_data)).reshape(-1, 1)
+                model_test = LinearRegression()
+                model_test.fit(X_train, train_data)
+                
+                # Predecir en datos de prueba
+                X_test = np.arange(len(train_data), len(train_data) + len(test_data)).reshape(-1, 1)
+                test_preds = model_test.predict(X_test)
+                test_preds = np.maximum(test_preds, 0)
+                
+                # Calcular métricas
+                rmse = np.sqrt(mean_squared_error(test_data, test_preds))
+                mae = mean_absolute_error(test_data, test_preds)
+                
+                # R² simple
+                ss_res = np.sum((test_data - test_preds) ** 2)
+                ss_tot = np.sum((test_data - np.mean(test_data)) ** 2)
+                r2 = 1 - (ss_res / ss_tot) if ss_tot != 0 else 0
+            else:
+                rmse, mae, r2 = 0, 0, 0
 
-    # Resultados procesados
-    print(f"\nProcesadas {len(results)} rutas con éxito.")
+            # 9) Figuras
+            fig_demand, ax1 = plt.subplots(figsize=(12, 6))
+            hist_len = len(df_ts)
+            
+            # Histórico
+            ax1.plot(df_fc["ds"][:hist_len], df_fc["y"][:hist_len], 
+                    label="Histórico", color="blue", linewidth=2)
+            # Pronóstico
+            ax1.plot(df_fc["ds"][hist_len-1:], df_fc["y"][hist_len-1:], 
+                    label="Pronóstico", color="red", linestyle="--", linewidth=2)
+            
+            ax1.set_title(f"Demanda de {ruta}")
+            ax1.set_xlabel("Fecha")
+            ax1.set_ylabel("Número de viajes")
+            ax1.legend()
+            ax1.grid(True, alpha=0.3)
+            
+            # Rotar labels de fecha
+            import matplotlib.dates as mdates
+            ax1.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
+            ax1.xaxis.set_major_locator(mdates.DayLocator(interval=max(1, len(df_fc)//10)))
+            plt.xticks(rotation=45)
+            plt.tight_layout()
+
+            # 10) Descomposición (si hay suficientes datos)
+            fig_decomp = None
+            try:
+                if len(df_ts) > 14:  # Necesitamos suficientes datos
+                    # Crear serie temporal con frecuencia diaria
+                    ts_series = pd.Series(df_ts["y"].values, index=pd.to_datetime(df_ts["ds"]))
+                    ts_series.index.freq = 'D'
+                    
+                    decomposition = seasonal_decompose(ts_series, model='additive', period=7)  # Periodo semanal
+                    
+                    fig_decomp, axes = plt.subplots(4, 1, figsize=(12, 10))
+                    decomposition.observed.plot(ax=axes[0], title="Serie Original")
+                    decomposition.trend.plot(ax=axes[1], title="Tendencia")
+                    decomposition.seasonal.plot(ax=axes[2], title="Estacionalidad")
+                    decomposition.resid.plot(ax=axes[3], title="Residuos")
+                    
+                    plt.tight_layout()
+            except Exception as e:
+                print(f"No se pudo generar descomposición para {ruta}: {e}")
+
+            results[ruta] = {
+                "metrics": {"RMSE": rmse, "MAE": mae, "R2": r2},
+                "forecast_df": df_fc,
+                "fig_demand": fig_demand,
+                "fig_decomp": fig_decomp
+            }
+
+        except Exception as e:
+            print(f"Error procesando ruta {ruta}: {e}")
+            continue
 
     return results
 

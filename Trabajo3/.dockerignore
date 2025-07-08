@@ -27,9 +27,6 @@ env/
 *.swo
 
 # Documentación
-README.md
-DOCUMENTACION.md
-*.md
 
 # Scripts de setup
 setup.py
@@ -39,7 +36,6 @@ run.bat
 
 # Archivos grandes innecesarios
 notebooks/modulo2/image_set_*.png
-notebooks/modulo2/m2_eda.ipynb
 *.csv
 
 # Logs y temporales

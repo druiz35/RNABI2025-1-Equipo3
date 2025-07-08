@@ -20,6 +20,7 @@
   <li>Implementar en el lenguaje R los siguientes métodos de optimización: Descenso de gradiente, Algoritmos evolutivos, Colonias de hormigas, Enjambre de partículas, Evolución diferencial.</li>
   <li>Comparar los resultados de cada método de optimización sobre la evaluación de dos funciones de prueba elegidas para entender cómo se comportan bajo distintos escenarios de optimización.</li>
 </ul>
+
 <h2>Trabajo 2: Predictor de Riesgo Crediticio</h2>
 <p>
 Este proyecto es una aplicación web desarrollada en Django que permite predecir el riesgo de incumplimiento crediticio de un solicitante utilizando un modelo de red neuronal entrenado con PyTorch. El sistema toma en cuenta variables financieras y personales para calcular la probabilidad de incumplimiento y asignar un score crediticio.
@@ -70,10 +71,102 @@ Este proyecto es una aplicación web desarrollada en Django que permite predecir
     </ol>
   </li>
 </ul>
-=======
-<h3>Trabajo 2: Aplicaciones de redes neuronales a datos tabulares</h3>
-<h3>Trabajo 3: Aplicaciones en sistemas de recomendación e imágenes</h3>
-<h3>Trabajo 4: Aplicaciones de grandes modelos de lenguaje</h3>
+
+<h2>Trabajo 3: Sistema Inteligente Integrado para Análisis de Transporte</h2>
+<p>
+Este proyecto implementa una solución integral de inteligencia artificial para el sector transporte, combinando tres módulos especializados en una aplicación web desarrollada con Streamlit. El sistema permite la predicción de demanda, clasificación de comportamientos de conducción y recomendación personalizada de destinos.
+</p>
+<ul>
+  <li><b>URL de despliegue:</b> <a href="https://plankton-app-3dxgp.ondigitalocean.app/">https://plankton-app-3dxgp.ondigitalocean.app/</a></li>
+</ul>
+
+<h3>Módulos Implementados</h3>
+<ul>
+  <li><b>Módulo 1: Predicción de Demanda</b>
+    <ul>
+      <li>Utiliza modelos LSTM (Long Short-Term Memory) con TensorFlow/Keras</li>
+      <li>Predice la demanda de transporte para los próximos 30 días</li>
+      <li>Genera visualizaciones de tendencias y descomposición temporal</li>
+      <li>Procesa datos históricos de viajes para 5 rutas principales</li>
+    </ul>
+  </li>
+  <li><b>Módulo 2: Clasificación de Conducción</b>
+    <ul>
+      <li>Implementa ResNet18 con transfer learning para clasificación de imágenes</li>
+      <li>Detecta 5 tipos de comportamientos: conducción segura, hablando por teléfono, enviando mensajes, girando y otras actividades</li>
+      <li>Proporciona niveles de confianza y visualizaciones de probabilidades</li>
+      <li>Incluye historial de predicciones y análisis estadísticos</li>
+    </ul>
+  </li>
+  <li><b>Módulo 3: Sistema de Recomendación</b>
+    <ul>
+      <li>Algoritmo de filtrado colaborativo para recomendación de destinos</li>
+      <li>Personalización basada en historial de usuarios y preferencias</li>
+      <li>Visualización de destinos recomendados con información detallada</li>
+      <li>Análisis de popularidad y características de destinos</li>
+    </ul>
+  </li>
+</ul>
+
+<h3>Características Técnicas</h3>
+<ul>
+  <li><b>Framework Principal:</b> Streamlit para interfaz web interactiva</li>
+  <li><b>Deep Learning:</b> PyTorch para clasificación de imágenes</li>
+  <li><b>Series Temporales:</b> TensorFlow/Keras LSTM para predicción de demanda</li>
+  <li><b>Machine Learning:</b> scikit-learn para sistemas de recomendación</li>
+  <li><b>Visualización:</b> Matplotlib, Seaborn y Plotly para gráficos interactivos</li>
+  <li><b>Procesamiento:</b> Pandas y NumPy para análisis de datos</li>
+</ul>
+
+<h3>Funcionalidades de la Aplicación</h3>
+<ul>
+  <li><b>Interfaz Intuitiva:</b> Navegación por pestañas con controles sencillos</li>
+  <li><b>Procesamiento en Tiempo Real:</b> Resultados inmediatos para cada módulo</li>
+  <li><b>Visualizaciones Avanzadas:</b> Gráficos interactivos y métricas detalladas</li>
+  <li><b>Historial de Análisis:</b> Almacenamiento y consulta de predicciones anteriores</li>
+  <li><b>Análisis Estadísticos:</b> Métricas de rendimiento y tendencias temporales</li>
+</ul>
+
+
+
+<p><b>¿Cómo montarlo localmente?</b></p>
+<ul>
+  <li><b>Opción 1: Instalación local</b>
+    <ol>
+      <li>Clona el repositorio:<br>
+        <code>git clone https://github.com/druiz35/RNABI2025-1-Equipo3.git</code><br>
+        <code>cd RNABI2025-1-Equipo3/Trabajo3</code>
+      </li>
+      <li>Crea y activa un entorno virtual:<br>
+        <code>python -m venv venv</code><br>
+        <code>source venv/bin/activate</code> (Linux/Mac) o <code>venv\Scripts\activate</code> (Windows)
+      </li>
+      <li>Instala las dependencias:<br>
+        <code>pip install -r requirements.txt</code>
+      </li>
+      <li>Ejecuta la aplicación:<br>
+        <code>streamlit run app.py</code>
+      </li>
+      <li>Accede a la app en <a href="http://localhost:8501">http://localhost:8501</a></li>
+    </ol>
+  </li>
+  <li><b>Opción 2: Usando Docker</b>
+    <ol>
+      <li>Ve a la carpeta del proyecto:<br>
+        <code>cd RNABI2025-1-Equipo3/Trabajo3</code>
+      </li>
+      <li>Construye la imagen Docker:<br>
+        <code>docker build -t streamlit-app:final .</code>
+      </li>
+      <li>Ejecuta el contenedor:<br>
+        <code>docker run -p 8501:8501 streamlit-app:final</code>
+      </li>
+      <li>Accede a la app en <a href="http://localhost:8501">http://localhost:8501</a></li>
+    </ol>
+  </li>
+</ul>
+
+<p><b>Objetivo:</b> Proporcionar una herramienta integral para la toma de decisiones en el sector transporte, combinando análisis predictivo, clasificación automática y personalización de servicios para optimizar la operación y mejorar la experiencia del usuario.</p>
 
 <h1>Miembros del Equipo</h1>
 <h3>Leonardo Federico Corona Torres</h3>

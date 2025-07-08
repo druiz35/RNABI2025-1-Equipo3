@@ -140,7 +140,6 @@ dmypy.json
 *.weights
 
 # Dataset files
-*.csv
 *.json
 *.parquet
 *.feather

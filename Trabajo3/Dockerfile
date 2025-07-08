@@ -19,16 +19,18 @@ RUN pip install --no-cache-dir \
     --index-url https://download.pytorch.org/whl/cpu \
     torch==2.1.0+cpu torchvision==0.16.0+cpu
 
-# Instalar TODAS las dependencias identificadas
+# Instalar dependencias compatibles SIN especificar versiones exactas para evitar conflictos
 RUN pip install --no-cache-dir \
-    streamlit==1.29.0 \
-    pandas==2.1.4 \
-    numpy==1.25.2 \
-    Pillow==10.1.0 \
-    plotly==5.17.0 \
-    matplotlib==3.7.2 \
-    seaborn==0.12.2 \
-    scikit-learn==1.3.2
+    streamlit \
+    pandas \
+    numpy \
+    Pillow \
+    plotly \
+    matplotlib \
+    seaborn \
+    scikit-learn \
+    statsmodels \
+    "tensorflow>=2.10,<2.14"
 
 # Copiar toda la aplicación
 COPY . .

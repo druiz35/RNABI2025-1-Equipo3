@@ -13,7 +13,7 @@ import io
 import base64
 from notebooks.modulo2.classifiers import DriverClassifier
 from notebooks.modulo3.recommendators import CollaborativeRecommendator
-from notebooks.modulo1.modulo1_completo_py import run_module1
+from notebooks.modulo1.modulo1 import run_module1
 
 # Configuración de la página
 st.set_page_config(

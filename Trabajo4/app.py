@@ -16,8 +16,9 @@ st.title("📖 Generador de Prompt para Historia")
 
 # Opciones predefinidas para género y tono
 generos = [
-    "Fantasía", "Ciencia ficción", "Romance", "Misterio", "Terror",
-    "Aventura", "Drama", "Histórico", "Distopía", "Comedia"
+     "Fantasía", "Misterio", "Romance",
+     "Terror", "Ciencia Ficción", "Comedia",
+     "Aventura"
 ]
 
 tonos = [

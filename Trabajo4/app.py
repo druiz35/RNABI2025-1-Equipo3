@@ -50,6 +50,7 @@ personajes = st.text_area("👥 Personajes", placeholder="Nombres y descripcione
 
 # Botón para generar el prompt
 if st.button("Generar la historia"):
+    # TODO: Solución temporal a los campos vacios
     campos_vacios = []
 
     if not periodo_de_tiempo:

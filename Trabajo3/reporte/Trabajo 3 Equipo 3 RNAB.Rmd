@@ -201,7 +201,7 @@ El Módulo 1 tiene como objetivo pronosticar la demanda de viajes por destino tu
 
 -   **Fuente:** Travel Recommendation Dataset (Mehra, 2024).
 
--    **Ubicación:** Los archivos deben estar en la carpeta ./proyecto_streamlit/ en el repositorio del proyecto (Ver Anexos).
+-   **Ubicación:** Los archivos deben estar en la carpeta ./proyecto_streamlit/ en el repositorio del proyecto (Ver Anexos).
 
 -   **Características:**
 
@@ -703,55 +703,55 @@ El dataset consiste de 4 conjuntos de datos separados: Expanded_Destinations, Fi
 
 En la Tabla 6 se resume el tamaño de cada uno de estos conjuntos de datos, junto con el nombre de sus columnas.
 
-+------------------------------------+---------------+------------------+
-| **Dataset**                        | **Tamaño**    | **Columnas**     |
-+------------------------------------+---------------+------------------+
-| Expanded_Destinations              | 1000          | DestinationID    |
-|                                    |               |                  |
-|                                    |               | Name             |
-|                                    |               |                  |
-|                                    |               | State            |
-|                                    |               |                  |
-|                                    |               | Type             |
-|                                    |               |                  |
-|                                    |               | Popularity       |
-|                                    |               |                  |
-|                                    |               | BestTimeToVisit  |
-+------------------------------------+---------------+------------------+
-| Final_Updated_Expanded_Reviews     | 999           | ReviewID         |
-|                                    |               |                  |
-|                                    |               | DestinationID    |
-|                                    |               |                  |
-|                                    |               | UserID           |
-|                                    |               |                  |
-|                                    |               | Rating           |
-|                                    |               |                  |
-|                                    |               | ReviewText       |
-+------------------------------------+---------------+------------------+
-| Final_Updated_Expanded_UserHistory | 999           | HistoryID        |
-|                                    |               |                  |
-|                                    |               | UserID           |
-|                                    |               |                  |
-|                                    |               | DestinationID    |
-|                                    |               |                  |
-|                                    |               | VisitDate        |
-|                                    |               |                  |
-|                                    |               | ExperienceRating |
-+------------------------------------+---------------+------------------+
-| Final_Updated_Expanded_Users       | 999           | UserID           |
-|                                    |               |                  |
-|                                    |               | Name             |
-|                                    |               |                  |
-|                                    |               | Email            |
-|                                    |               |                  |
-|                                    |               | Preferences      |
-|                                    |               |                  |
-|                                    |               | Gender           |
-|                                    |               |                  |
-|                                    |               | NumberOfAdults   |
-|                                    |               |                  |
-|                                    |               | NumberOfChildren |
-+------------------------------------+---------------+------------------+
++------------------------------------+------------+------------------+
+| **Dataset**                        | **Tamaño** | **Columnas**     |
++------------------------------------+------------+------------------+
+| Expanded_Destinations              | 1000       | DestinationID    |
+|                                    |            |                  |
+|                                    |            | Name             |
+|                                    |            |                  |
+|                                    |            | State            |
+|                                    |            |                  |
+|                                    |            | Type             |
+|                                    |            |                  |
+|                                    |            | Popularity       |
+|                                    |            |                  |
+|                                    |            | BestTimeToVisit  |
++------------------------------------+------------+------------------+
+| Final_Updated_Expanded_Reviews     | 999        | ReviewID         |
+|                                    |            |                  |
+|                                    |            | DestinationID    |
+|                                    |            |                  |
+|                                    |            | UserID           |
+|                                    |            |                  |
+|                                    |            | Rating           |
+|                                    |            |                  |
+|                                    |            | ReviewText       |
++------------------------------------+------------+------------------+
+| Final_Updated_Expanded_UserHistory | 999        | HistoryID        |
+|                                    |            |                  |
+|                                    |            | UserID           |
+|                                    |            |                  |
+|                                    |            | DestinationID    |
+|                                    |            |                  |
+|                                    |            | VisitDate        |
+|                                    |            |                  |
+|                                    |            | ExperienceRating |
++------------------------------------+------------+------------------+
+| Final_Updated_Expanded_Users       | 999        | UserID           |
+|                                    |            |                  |
+|                                    |            | Name             |
+|                                    |            |                  |
+|                                    |            | Email            |
+|                                    |            |                  |
+|                                    |            | Preferences      |
+|                                    |            |                  |
+|                                    |            | Gender           |
+|                                    |            |                  |
+|                                    |            | NumberOfAdults   |
+|                                    |            |                  |
+|                                    |            | NumberOfChildren |
++------------------------------------+------------+------------------+
 
 **Tabla 6.** Tamaño y columnas de los datasets para el sistema de recomendación de destinos de viaje.
 
@@ -924,47 +924,34 @@ Se procede a mostrar los destinos obtenidos tras ejecutar cada uno de estos mét
 
 Para el usuario con ID=3 (usuario nunca antes visto), se obtuvieron los destinos recomendados mostrados en la Tabla 7.
 
-+-------------------+-------------+------------+------------+----------------+
-| **DestinationID** | **Name**    | **State**  | **Type**   | **Popularity** |
-+===================+=============+============+============+================+
-| 28                | Jaipur City | Rajasthan  | City       | 8.471855       |
-+-------------------+-------------+------------+------------+----------------+
-| 33                | Jaipur City | Rajasthan  | City       | 7.684440       |
-+-------------------+-------------+------------+------------+----------------+
-| 108               | Jaipur City | Rajasthan  | City       | 8.180180       |
-+-------------------+-------------+------------+------------+----------------+
-| 102               | Goa Beaches | Goa        | Beach      | 7.901206       |
-+-------------------+-------------+------------+------------+----------------+
-| 742               | Goa Beaches | Goa        | Beach      | 8.532766       |
-+-------------------+-------------+------------+------------+----------------+
+| **DestinationID** | **Name**    | **State** | **Type** | **Popularity** |
+|-------------------|-------------|-----------|----------|----------------|
+| 28                | Jaipur City | Rajasthan | City     | 8.471855       |
+| 33                | Jaipur City | Rajasthan | City     | 7.684440       |
+| 108               | Jaipur City | Rajasthan | City     | 8.180180       |
+| 102               | Goa Beaches | Goa       | Beach    | 7.901206       |
+| 742               | Goa Beaches | Goa       | Beach    | 8.532766       |
 
 **Tabla 7.** Destinos recomendados por el Método de Collaborative Filtering básico para usuario con ID=3.
 
 Para el usuario con ID=2 (usuario en el conjunto de datos), se obtuvieron los destinos recomendados mostrados en la Tabla 8.
 
-+-------------------+-------------+-------------------+-------------+----------------+
-| **DestinationID** | **Name**    | **State**         | **Type**    | **Popularity** |
-+===================+=============+===================+=============+================+
-| 30                | Leh Ladakh  | Jammu and Kashmir | Adventure   | 7.930638       |
-+-------------------+-------------+-------------------+-------------+----------------+
-| 31                | Taj Mahal   | Uttar Pradesh     | Historical  | 8.534267       |
-+-------------------+-------------+-------------------+-------------+----------------+
-| 8                 | Jaipur City | Rajasthan         | City        | 9.458705       |
-+-------------------+-------------+-------------------+-------------+----------------+
-| 340               | Leh Ladakh  | Jammu and Kashmir | Adventure   | 9.051579       |
-+-------------------+-------------+-------------------+-------------+----------------+
-| 341               | Taj Mahal   | Uttar Pradesh     | Historical  | 8.408281       |
-+-------------------+-------------+-------------------+-------------+----------------+
+| **DestinationID** | **Name**    | **State**         | **Type**   | **Popularity** |
+|-------------------|-------------|-------------------|------------|----------------|
+| 30                | Leh Ladakh  | Jammu and Kashmir | Adventure  | 7.930638       |
+| 31                | Taj Mahal   | Uttar Pradesh     | Historical | 8.534267       |
+| 8                 | Jaipur City | Rajasthan         | City       | 9.458705       |
+| 340               | Leh Ladakh  | Jammu and Kashmir | Adventure  | 9.051579       |
+| 341               | Taj Mahal   | Uttar Pradesh     | Historical | 8.408281       |
 
 **Tabla 8.** Destinos recomendados por el Método de Collaborative Filtering básico para usuario con ID=2.
 
 Como referencia para la comparación, se tiene la Tabla 9 con los destinos que el usuario con ID=2 ha visitado.
 
-+-------------------+-------------+------------+------------+-------------------+
-| **DestinationID** | **Name**    | **State**  | **Type**   | **Popularity**    |
-+-------------------+-------------+------------+------------+-------------------+
-| 2                 | Goa Beaches | Goa        | Beach      | 8.605031858363876 |
-+-------------------+-------------+------------+------------+-------------------+
+|                   |             |           |          |                   |
+|-------------------|-------------|-----------|----------|-------------------|
+| **DestinationID** | **Name**    | **State** | **Type** | **Popularity**    |
+| 2                 | Goa Beaches | Goa       | Beach    | 8.605031858363876 |
 
 **Tabla 9.** Destinos visitados por el usuario con ID=2.
 
@@ -974,39 +961,29 @@ De lo anterior se puede ver que para el usuario ID=2 no hay sitios de los cuales
 
 Para el usuario con ID=3 (usuario nunca antes visto), se obtuvieron los destinos recomendados mostrados en la Tabla 10.
 
-+-------------------+-------------------+-------------+-------------+----------------+
-| **DestinationID** | **Name**          | **State**   | **Type**    | **Popularity** |
-+===================+===================+=============+=============+================+
-| 19                | Kerala Backwaters | Kerala      | Nature      | 9.01709        |
-+-------------------+-------------------+-------------+-------------+----------------+
+| **DestinationID** | **Name**          | **State** | **Type** | **Popularity** |
+|-------------------|-------------------|-----------|----------|----------------|
+| 19                | Kerala Backwaters | Kerala    | Nature   | 9.01709        |
 
 **Tabla 10.** Destinos recomendados por el Método de Neural Collaborative Filtering para usuario con ID=3.
 
 Para el usuario con ID=1 (usuario en el conjunto de datos), se obtuvieron los destinos recomendados mostrados en la Tabla 11.
 
-+---------------+----------+-------------+---------------+----------------+---------------------+
-| DestinationID | **Name** | **State**   | **Type**      | **Popularity** | **BestTimeToVisit** |
-+===============+==========+=============+===============+================+=====================+
-| 5             | 6        | Taj Mahal   | Uttar Pradesh | Historical     | 7.648950            |
-+---------------+----------+-------------+---------------+----------------+---------------------+
-| 6             | 7        | Goa Beaches | Goa           | Beach          | 9.145068            |
-+---------------+----------+-------------+---------------+----------------+---------------------+
-| 7             | 8        | Jaipur City | Rajasthan     | City           | 9.458705            |
-+---------------+----------+-------------+---------------+----------------+---------------------+
-| 10            | 11       | Taj Mahal   | Uttar Pradesh | Historical     | 8.177709            |
-+---------------+----------+-------------+---------------+----------------+---------------------+
-| 46            | 47       | Goa Beaches | Goa           | Beach          | 7.726021            |
-+---------------+----------+-------------+---------------+----------------+---------------------+
+| DestinationID | **Name** | **State** | **Type** | **Popularity** | **BestTimeToVisit** |
+|----|----|----|----|----|----|
+| 5 | 6 | Taj Mahal | Uttar Pradesh | Historical | 7.648950 |
+| 6 | 7 | Goa Beaches | Goa | Beach | 9.145068 |
+| 7 | 8 | Jaipur City | Rajasthan | City | 9.458705 |
+| 10 | 11 | Taj Mahal | Uttar Pradesh | Historical | 8.177709 |
+| 46 | 47 | Goa Beaches | Goa | Beach | 7.726021 |
 
 **Tabla 11.** Destinos recomendados por el Método de Neural Collaborative Filtering para usuario con ID=1.
 
 Los datos reales para este usuario son los que se muestran en la Tabla 12.
 
-+-------------------+----------+-----------+---------------+----------------+---------------------+
-| **DestinationID** | **Name** | **State** | **Type**      | **Popularity** | **BestTimeToVisit** |
-+===================+==========+===========+===============+================+=====================+
-| 705               | 706      | Taj Mahal | Uttar Pradesh | Historical     | 9.023746            |
-+-------------------+----------+-----------+---------------+----------------+---------------------+
+| **DestinationID** | **Name** | **State** | **Type** | **Popularity** | **BestTimeToVisit** |
+|----|----|----|----|----|----|
+| 705 | 706 | Taj Mahal | Uttar Pradesh | Historical | 9.023746 |
 
 **Tabla 12.** Destinos recomendados por el Método de Neural Collaborative Filtering para usuario con ID=1.
 

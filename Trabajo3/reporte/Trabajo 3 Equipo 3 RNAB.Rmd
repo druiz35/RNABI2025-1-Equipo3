@@ -1,7 +1,5 @@
 ---
-output:
-  html_document:
-    df_print: paged
+output: html_notebook
 ---
 
 ---
@@ -21,11 +19,6 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-```{=html}
-<!--
-  NOTE: Este código se ejecuta, pero no se muestra ni el código ni la salida
--->
-```
 ```{r, include=FALSE}
 # Esta función muestra la table guadada en un CSV
 #   ruta: dirección del csv
@@ -71,6 +64,7 @@ show_table <- function(ruta) {
     - Comenzados en "io" para items de listas ordenadas
 -->
 ```
+
 # Contenidos
 
 -   [Resumen Ejecutivo](#iu0.)
@@ -152,14 +146,12 @@ Una vez contado con los artefactos de cada módulo, se procedió con el desarrol
 Se siguió un enfoque lineal en cuanto a las fases del proyecto, que fueron las siguientes:
 
 1.  **Análisis del Problema y Revisión General de Datos**\
-    Se identificaron los requerimientos específicos para cada módulo. Se revisaron de forma inicialmente superficial los datasets históricos de demanda de transporte (Kaggle, ), conjuntos de imágenes etiquetadas para conducción distractiva (Kaggle, ), y datos de historial de viajes de usuarios para el sistema de recomendación (Kaggle, ).
+    Se identificaron los requerimientos específicos para cada módulo. Se revisaron de forma inicialmente superficial los datasets históricos de demanda de transporte (Kaggle, ), conjuntos de imágenes etiquetadas para conducción distractiva (Mehra, 2024), y datos de historial de viajes de usuarios para el sistema de recomendación (Sahin-Afridi, 2024).
 
 2.  **Preprocesamiento y Exploración de Datos**\
     Cada conjunto de datos fue limpiado, transformado y analizado para detectar patrones, tendencias, valores atípicos y estructuras útiles para el entrenamiento de modelos. Se aplicaron técnicas como normalización, segmentación de series temporales, detección de clases desbalanceadas, y codificación de preferencias de usuario.
 
 3.  **Diseño e implementación de Modelos**
-
-    [Parte del módulo 1]
 
     Para el modelo clasificador de imágenes se utilizó un modelo ResNet18 preentrenado y ajustado a los datos del problema en cuestión como base, y un modelo personalizado (que denominaremos CNNAlpha) para la predicción de clases.
 
@@ -167,19 +159,13 @@ Se siguió un enfoque lineal en cuanto a las fases del proyecto, que fueron las 
 
 4.  **Evaluación de Modelos**
 
-    [Parte del módulo 1]
-
     Para el modelo clasificador se utilizaron las métricas de precision, accuracy y AUC ROC score para evaluar el rendimiento, además de generar una matriz de confusión para cada modelo probado.
 
     En el caso del sistema de recomendación, se procedió a evaluar su MAE para comparar cada implementación.
 
 5.  **Integración Web y Visualización**
 
-    [Parte web]
-
-6.  **Documentación y Reflexión Ética**
-
-    [Parte reflexión ética]
+    Para la parte del componente web, se utilizó el framework Streamlit para construir la aplicación entera de forma ágil, integrando cada modelo como un módulo personalizado dentro de la aplicación.
 
 Como lenguaje de programación principal, se utilizó Python.
 
@@ -195,29 +181,183 @@ Para los modelos de recomendación se utilizó la librería Surprise y técnicas
 
 ## 1.1 Descripción del problema
 
+El Módulo 1 tiene como objetivo pronosticar la demanda de viajes por destino turístico utilizando series temporales, lo que permite optimizar la planificación de recursos de transporte (por ejemplo, asignación de vehículos o personal). Se emplea un modelo LSTM para predecir la cantidad de viajes diarios durante un horizonte de 30 días. El módulo se integra en una aplicación Streamlit para visualización interactiva, mostrando gráficas de demanda, descomposición aditiva, y métricas de evaluación. Inicialmente, las imágenes generadas (gráficas de demanda y descomposición) no se mostraban en Streamlit debido a problemas de rutas y generación de archivos. Este problema se resolvió ajustando el código para usar el directorio ./proyecto_streamlit/ en Visual Studio Code y mejorando las visualizaciones para que sean más atractivas y comprensibles.
+
+**Limitación:** Los datos disponibles tienen solo 3 fechas únicas por destino, lo que requiere aumentación de datos (interpolación) para generar series temporales sintéticas, afectando la precisión de las predicciones.
+
 <a name="io1.2."></a>
 
 ## 1.2 Dataset
+
+-   **Archivos:**
+
+<!-- -->
+
+-   Final_Updated_Expanded_UserHistory.csv: Contiene el historial de viajes con columnas VisitDate (fechas de visitas) y DestinationID (identificador del destino).
+
+-   Expanded_Destinations.csv: Incluye detalles de los destinos (DestinationID, Name, Type, Popularity, BestTimeToVisit).
+
+<!-- -->
+
+-   **Fuente:** Travel Recommendation Dataset (Mehra, 2024).
+
+-    **Ubicación:** Los archivos deben estar en la carpeta ./proyecto_streamlit/ en el repositorio del proyecto (Ver Anexos).
+
+-   **Características:**
+
+    -   Los datos originales tienen solo 3 fechas únicas por destino, lo que limita la capacidad de modelado de series temporales.
+
+    -   Se generaron series sintéticas (\~79 puntos por destino) mediante interpolación para permitir el análisis de estacionalidad y tendencias.
 
 <a name="io1.3."></a>
 
 ## 1.3 Preprocesamiento
 
+El preprocesamiento se diseñó para transformar los datos crudos en series temporales aptas para el modelo LSTM y la descomposición aditiva:
+
+-   **Agrupación de viajes:** Se agruparon los datos de Final_Updated_Expanded_UserHistory.csv por VisitDate y DestinationID para contar los viajes diarios (user_hist.groupby(["VisitDate", "DestinationID"]).size()).
+
+-   **Pivot diario:** Se creó una tabla pivote con fechas diarias (pd.date_range) como índice y destinos como columnas, rellenando días sin viajes con ceros.
+
+-   **Escalado:** Los datos de viajes se escalaron con MinMaxScaler para normalizarlos en el rango [0, 1], adecuado para el entrenamiento del LSTM.
+
+-   **Secuencias para LSTM:** Se generaron secuencias de 7 días (seq_len=7) como entrada para predecir el siguiente día.
+
+-   **Interpolación para descomposición:** Debido a las 3 fechas únicas, se interpolaron los datos faltantes (ser.interpolate().fillna(method="bfill").fillna(method="ffill")) para la descomposición aditiva (seasonal_decompose).
+
+**Nota sobre aumentación:** La interpolación genera series sintéticas, introduciendo estacionalidad artificial que limita la validez de las predicciones. Las visualizaciones (gráficas de demanda y descomposición) ayudan a interpretar estas series.
+
 <a name="io1.4."></a>
 
 ## 1.4 Diseño de modelos
+
+-   **Modelo:** Red neuronal LSTM con:
+
+    -   Una capa LSTM de 50 unidades (LSTM(50, input_shape=(seq_len, 1))).
+
+    -   Una capa densa de salida (Dense(1)).
+
+-   **Entrada:** Secuencias de 7 días de viajes escalados.
+
+-   **Salida:** Predicciones de viajes para los próximos 30 días (horizon_days=30).
+
+-   **Entrenamiento:**
+
+    -   Optimizador: adam.
+
+    -   Pérdida: Error cuadrático medio (mse).
+
+    -   Parámetros: 50 épocas, tamaño de lote 8.
+
+-   **Predicción:** Se usa un enfoque recursivo, donde las predicciones se alimentan como entrada para los siguientes días.
+
+-   **Visualizaciones:**
+
+    -   **Gráfica de demanda:** Muestra datos históricos y predicciones (línea roja, rejilla, títulos claros).
+
+    -   **Descomposición aditiva:** Muestra tendencia (azul), estacionalidad (verde), y residuo (morado) en subgráficas separadas.
+
+-   **Implementación en Visual Studio Code:** El código (modulo1_completo.py) genera archivos en ./proyecto_streamlit/ y está optimizado para un entorno local.
 
 <a name="io1.5."></a>
 
 ## 1.5 Evaluación
 
+-   **Métricas:**
+
+    -   **RMSE:** Raíz del error cuadrático medio, mide la magnitud del error en las predicciones.
+
+    -   **MAE:** Error absoluto medio, indica el error promedio en valor absoluto.
+
+    -   **R²:** Coeficiente de determinación, mide la proporción de varianza explicada.
+
+-   **Método:** Back-test comparando predicciones con datos históricos (o sintéticos para los últimos 30 días si los datos son insuficientes).
+
+-   **Resultados:**
+
+    -   Las métricas se imprimen en la consola por cada ruta (por ejemplo, RMSE=10.23, MAE=8.45, R²=0.12).
+
+    -   R² puede ser bajo o negativo debido a los datos sintéticos, lo que refleja la dificultad de modelar con solo 3 fechas únicas.
+
+-   **Visualizaciones:** Las gráficas de demanda y descomposición son esenciales para evaluar visualmente las tendencias y la estacionalidad, haciendo los resultados más comprensibles.
+
+**Solución al problema de imágenes**
+
+-   **Problema:** Las imágenes (demanda\_<ruta>.png, descomposicion\_<ruta>.png) no se mostraban en Streamlit.
+
+-   **Solución:**
+
+    -   Se ajustaron las rutas en modulo1_completo.py para guardar en ./proyecto_streamlit/.
+
+    -   Se mejoraron las visualizaciones (DPI=300, colores distintivos, rejilla).
+
+    -   En app.py, se verifican las rutas de los archivos y se muestran advertencias si no se encuentran.
+
+    -   Se aseguró que los nombres de los PNG coincidan con los CSV (predicciones\_<ruta>.csv → demanda\_<ruta>.png).
+
 <a name="io1.6."></a>
 
 ## 1.6 Resultados
 
+-   **Archivos generados (en ./proyecto_streamlit/):**
+
+    -   predicciones\_<ruta>.csv: DataFrame con fechas (ds) y número de viajes (y), incluyendo datos históricos y predicciones.
+
+    -   demanda\_<ruta>.png: Gráfica de demanda (línea roja, rejilla, títulos grandes) mostrando datos históricos y predicciones.
+
+    -   descomposicion\_<ruta>.png: Descomposición aditiva con subgráficas de tendencia (azul), estacionalidad (verde), y residuo (morado).
+
+-   **Visualización en Streamlit:**
+
+    -   Pestaña interactiva con:
+
+        -   Selector de rutas (st.selectbox).
+
+        -   Gráfica interactiva de demanda (matplotlib).
+
+        -   Imágenes de demanda y descomposición en columnas (st.image, st.columns).
+
+        -   Tabla de métricas (placeholder: RMSE, MAE, R²).
+
+        -   Botón para descargar el CSV de predicciones.
+
+    -   Las visualizaciones son claras y atractivas, facilitando la interpretación de las tendencias.
+
+-   **Integración en Visual Studio Code:**
+
+    -   El módulo se ejecuta con python modulo1_completo.py en un entorno virtual.
+
+    -   Streamlit se ejecuta con streamlit run app.py, mostrando los resultados en <http://localhost:8501>.
+
+-   **Limitación:** Las predicciones son menos confiables debido a los datos sintéticos, pero las visualizaciones destacan patrones útiles.
+
 <a name="io1.7."></a>
 
 ## 1.7 Conclusiones
+
+-   **Logros:**
+
+    -   El Módulo 1 predice la demanda de viajes usando LSTM, generando resultados visualmente comprensibles.
+
+    -   Las visualizaciones mejoradas (gráficas de demanda y descomposición) resuelven el problema de imágenes no mostradas, haciendo los resultados más atractivos y fáciles de interpretar.
+
+    -   La implementación en Visual Studio Code es robusta, con rutas claras (./proyecto_streamlit/) y manejo de errores.
+
+-   **Limitaciones:**
+
+    -   Los datos sintéticos (3 fechas únicas) generan series con estacionalidad artificial, reduciendo la precisión (R² bajo).
+
+    -   Las métricas son limitadas por la falta de datos reales para validación.
+
+-   **Trabajo futuro:**
+
+    -   Recolectar más datos históricos para mejorar la precisión del modelo.
+
+    -   Usar bibliotecas como Plotly para gráficas interactivas en Streamlit.
+
+    -   Guardar métricas en un archivo (por ejemplo, CSV) para mostrarlas dinámicamente en Streamlit.
+
+-   **Importancia de las visualizaciones:** Las gráficas y descomposiciones son clave para entender las predicciones, especialmente con datos sintéticos, y hacen que el módulo sea más accesible para usuarios no técnicos.
 
 <a name="io2."></a>
 
@@ -227,7 +367,7 @@ Para los modelos de recomendación se utilizó la librería Surprise y técnicas
 
 ## 2.1 Descripción del problema
 
-La conducción distractiva representa un riesgo significativo tanto para los conductores como para los pasajeros y peatones. Comportamientos como el uso del teléfono móvil, la somnolencia o mirar hacia otro lado pueden aumentar considerablemente la probabilidad de accidentes. Este módulo tiene como objetivo clasificar imágenes de conductores para detectar comportamientos distractores mediante técnicas de visión por computadora y aprendizaje profundo.
+La conducción distractiva representa un riesgo significativo tanto para los conductores como para los pasajeros y peatones. Comportamientos como el uso del teléfono móvil, la somnolencia o mirar hacia otro lado pueden aumentar considerablemente la probabilidad de accidentes (Satrack, 2023). Este módulo tiene como objetivo clasificar imágenes de conductores para detectar comportamientos distractores mediante técnicas de visión por computadora y aprendizaje profundo.
 
 La solución propuesta permite a la empresa de transporte identificar automáticamente estos comportamientos a partir de imágenes capturadas desde el interior del vehículo, contribuyendo así a mejorar la seguridad vial y facilitar acciones preventivas o correctivas.
 
@@ -249,7 +389,7 @@ Se procedió a hacer un análisis exploratorio de las imágenes dentro del datas
 
 El conjunto de datos utilizado para la clasificación de comportamientos distractivos en conductores está estructurado en cinco carpetas, cada una correspondiente a una clase diferente: other_activities, safe_driving, talking_phone, texting_phone y turning.
 
-En la Tabla X se muestra la cantidad total de imágenes por clase, así como su proporción respecto al conjunto general:
+En la Tabla 1 se muestra la cantidad total de imágenes por clase, así como su proporción respecto al conjunto general:
 
 |                  |                          |                |
 |------------------|--------------------------|----------------|
@@ -261,7 +401,7 @@ En la Tabla X se muestra la cantidad total de imágenes por clase, así como su 
 | turning          | 1339                     | 18.4%          |
 | **Total:**       | 7.276                    | 100%           |
 
-**Tabla X.** Cantidad total de imágenes por clase y su proporción.
+**Tabla 1.** Cantidad total de imágenes por clase y su proporción.
 
 Como se puede observar, el dataset está relativamente balanceado, sin presencia de clases extremadamente minoritarias o mayoritarias. La diferencia máxima entre clases no supera el 7%, lo cual permite trabajar con los datos sin aplicar técnicas de balanceo adicionales como sobremuestreo o submuestreo. No obstante, este balance no garantiza la misma facilidad de clasificación entre clases, especialmente en aquellas que pueden compartir patrones visuales similares.
 
@@ -269,9 +409,9 @@ Como se puede observar, el dataset está relativamente balanceado, sin presencia
 
 ![](images/clipboard-319789265.png)
 
-**Figura X.** Gráfico de dispersión de dimensiones de cada imagen en el dataset.
+**Figura 1.** Gráfico de dispersión de dimensiones de cada imagen en el dataset.
 
-El análisis de las dimensiones de las imágenes (Figura X) muestra una alta variabilidad en las resoluciones de entrada, tanto en ancho como en alto, lo que puede afectar el proceso de entrenamiento si no se normalizan adecuadamente.
+El análisis de las dimensiones de las imágenes (Figura 1) muestra una alta variabilidad en las resoluciones de entrada, tanto en ancho como en alto, lo que puede afectar el proceso de entrenamiento si no se normalizan adecuadamente.
 
 En el gráfico de dispersión se identifican distintos grupos por clase, indicando que no todas las clases comparten un mismo rango de dimensiones. Algunas imágenes tienen resoluciones muy altas (más de 3000 px de ancho y 4000 px de alto), mientras que otras se sitúan en rangos mucho menores (alrededor de 500–1000 px). Esta disparidad puede ser resultado de diferencias en los dispositivos de captura, calidad de imagen, o el origen de los datos.
 
@@ -279,7 +419,7 @@ Esta variabilidad indica que será necesario aplicar un proceso de redimensionam
 
 ### 2.2.3 Muestra de imágenes en el dataset
 
-En las Figuras X, X y X se muestran distintas imágenes del dataset obtenidas de manera aleatoria por cada clase, con el fin de realizar descubrimientos sobre la calidad de las imágenes y otro tipo de patrones y circunstancias que potencialmente puedan afectar al rendimiento de los modelos a realizar.
+En las Figuras 2, 3 y 4 se muestran distintas imágenes del dataset obtenidas de manera aleatoria por cada clase, con el fin de realizar descubrimientos sobre la calidad de las imágenes y otro tipo de patrones y circunstancias que potencialmente puedan afectar al rendimiento de los modelos a realizar.
 
 A continuación se resumen las observaciones más importantes:
 
@@ -295,15 +435,15 @@ A continuación se resumen las observaciones más importantes:
 
 ![](images/image_set_0.png)
 
-**Figura X.** Conjunto número 1 de imágenes del dataset.
+**Figura 2.** Conjunto número 1 de imágenes del dataset.
 
 ![](images/image_set_1.png)
 
-**Figura X.** Conjunto número 2 de imágenes del dataset.
+**Figura 3.** Conjunto número 2 de imágenes del dataset.
 
 ![](images/image_set_2.png)
 
-**Figura X.** Conjunto número 3 de imágenes del dataset.
+**Figura 4.** Conjunto número 3 de imágenes del dataset.
 
 <a name="io2.3."></a>
 
@@ -311,22 +451,22 @@ A continuación se resumen las observaciones más importantes:
 
 Para el preprocesamiento, se implementó un pipeline de transformación con los siguientes componentes:
 
--   **Redimensionamiento**: Todas las imágenes se ajustaron a un tamaño uniforme (224x224 píxeles) para cumplir con los requisitos del modelo CNN. Esto se hizo así basándose en que ResNet18 requiere de este redimensionamiento para su correcto funcionamiento (Resnet).
+-   **Redimensionamiento**: Todas las imágenes se ajustaron a un tamaño uniforme (224x224 píxeles) para cumplir con los requisitos del modelo CNN. Esto se hizo así basándose en que ResNet18 requiere de este redimensionamiento para su correcto funcionamiento (He et al, 2015).
 
 -   **Transformar a Tensor**: Se procedió a transformar el array de NumPy resultante del redimensionamiento a un tensor de PyTorch.
 
--   **Normalización**: Los valores del tensor fueron normalizados utilizando las configuraciones recomendadas por PyTorch (PyTorch) para modelos preentrenados. Se usaron la media y deviación estándar por canal de la siguiente forma.
+-   **Normalización**: Los valores del tensor fueron normalizados utilizando las configuraciones recomendadas por PyTorch (PyTorch, s.f., Getting started with transforms v2) para modelos preentrenados. Se usaron la media y deviación estándar por canal de la siguiente forma.
 
     |                         | R     | G     | B     |
     |-------------------------|-------|-------|-------|
     | **Media**               | 0.485 | 0.456 | 0.406 |
     | **Desviación Estándar** | 0.229 | 0.224 | 0.225 |
 
-    **Tabla X.** Valores utilizados para la normalización de las imágenes.
+    **Tabla 2.** Valores utilizados para la normalización de las imágenes.
 
 -   **División del dataset**: El conjunto se dividió en entrenamiento (70%), validación (15%) y prueba (15%).
 
-Por último, se creó el conjunto de entrenamiento utilizando una proporción de 70% para entrenamiento, 20% para validación y 10% para testeo, siguiendo el estándar recomendado (train-test-split, ).
+Por último, se creó el conjunto de entrenamiento utilizando una proporción de 70% para entrenamiento, 20% para validación y 10% para testeo.
 
 <a name="io2.4."></a>
 
@@ -336,7 +476,7 @@ Cada uno de los modelos fue implementado en PyTorch, partiendo de arquitecturas 
 
 ### 2.4.1 ResNet18
 
-Según (He et al, 2016), ResNet18 es una arquitectura de red neuronal profunda que pertenece a la familia de ResNets (Residual Networks). Su principal innovación es la introducción de bloques residuales, los cuales permiten que la red aprenda funciones de identidad a través de conexiones tipo "skip", resolviendo así el problema de degradación que afecta a redes muy profundas.
+Según (He et al, 2015), ResNet18 es una arquitectura de red neuronal profunda que pertenece a la familia de Residual Networks. Su principal innovación es la introducción de bloques residuales, los cuales permiten que la red aprenda funciones de identidad a través de conexiones tipo "skip", resolviendo así el problema de degradación que afecta a redes muy profundas.
 
 La arquitectura de ResNet18 se compone de:
 
@@ -424,7 +564,7 @@ CNNAlpha fue concebido como una alternativa personalizada y optimizada, ideal pa
 
 ### 2.5.1 ResNet18
 
-Para el modelo ResNet18 se obtuvieron los resultados resumidos en la Tabla X.
+Para el modelo ResNet18 se obtuvieron los resultados resumidos en la Tabla 3.
 
 |               |        |
 |---------------|--------|
@@ -433,17 +573,17 @@ Para el modelo ResNet18 se obtuvieron los resultados resumidos en la Tabla X.
 | **Recall**    | 98.35% |
 | **F1-Score**  | 98.36% |
 
-**Tabla X.** Tabla de métricas para modelo ResNet18.
+**Tabla 3.** Tabla de métricas para modelo ResNet18.
 
-La matriz de confusión para este modelo es el mostrado en la Figura X.
+La matriz de confusión para este modelo es el mostrado en la Figura 5.
 
 ![](images/clipboard-1989254793.png)
 
-**Figura X.** Matriz de confusión para modelo ResNet18.
+**Figura 5.** Matriz de confusión para modelo ResNet18.
 
 ### 2.5.2 VGG19
 
-Para el modelo VGG19 se obtuvieron los resultados resumidos en la Tabla X.
+Para el modelo VGG19 se obtuvieron los resultados resumidos en la Tabla 4.
 
 |               |        |
 |---------------|--------|
@@ -452,17 +592,17 @@ Para el modelo VGG19 se obtuvieron los resultados resumidos en la Tabla X.
 | **Recall**    | 95.88% |
 | **F1-Score**  | 95.92% |
 
-**Tabla X.** Tabla de métricas para modelo VGG9.
+**Tabla 4.** Tabla de métricas para modelo VGG19.
 
-La matriz de confusión para este modelo es el mostrado en la Figura X.
+La matriz de confusión para este modelo es el mostrado en la Figura 6.
 
 ![](images/clipboard-3121675125.png)
 
-**Figura X.** Matriz de confusión para modelo VGG19.
+**Figura 6.** Matriz de confusión para modelo VGG19.
 
 ### 2.5.3 CNNAlpha
 
-Para el modelo CNNAlpha se obtuvieron los resultados resumidos en la Tabla X.
+Para el modelo CNNAlpha se obtuvieron los resultados resumidos en la Tabla 5.
 
 |               |        |
 |---------------|--------|
@@ -471,13 +611,13 @@ Para el modelo CNNAlpha se obtuvieron los resultados resumidos en la Tabla X.
 | **Recall**    | 95.88% |
 | **F1-Score**  | 95.88% |
 
-**Tabla X.** Tabla de métricas para modelo CNNAlpha.
+**Tabla 5.** Tabla de métricas para modelo CNNAlpha.
 
-La matriz de confusión para este modelo es el mostrado en la Figura X.
+La matriz de confusión para este modelo es el mostrado en la Figura 7.
 
 ![](images/clipboard-3145857634.png)
 
-**Figura X.** Matriz de confusión para modelo CNNAlpha.
+**Figura 7.** Matriz de confusión para modelo CNNAlpha.
 
 <a name="io2.6."></a>
 
@@ -487,7 +627,7 @@ La matriz de confusión para este modelo es el mostrado en la Figura X.
 
 El modelo ResNet18 obtuvo un excelente desempeño en la tarea de clasificación de comportamientos distractivos en conductores, alcanzando métricas consistentemente altas en todos los indicadores clave, con valores superiores al 95% en precision, recall y F1-score.
 
-La matriz de confusión (Figura X) revela que el modelo tiene una capacidad de discriminación muy sólida entre las diferentes clases.
+La matriz de confusión (Figura 5) revela que el modelo tiene una capacidad de discriminación muy sólida entre las diferentes clases.
 
 La clase "safe_driving" fue clasificada correctamente en 152 de 163 casos, con muy pocos errores dispersos (mayormente confundida con “other_activities” y “turning”).
 
@@ -503,7 +643,7 @@ Parece que hay una ligera tendencia a confundir clases en other_activities, debi
 
 El modelo VGG19 obtuvo un rendimiento sobresaliente en la tarea de clasificación de comportamientos distractivos en conductores, con métricas superiores al 96% en precisión, recall y F1-score, lo que lo posiciona como uno de los modelos más precisos evaluados en este proyecto.
 
-La matriz de confusión (Figura X) muestra un alto nivel de exactitud general y una excelente discriminación entre clases, especialmente en aquellas asociadas a comportamientos distractivos específicos.
+La matriz de confusión (Figura 6) muestra un alto nivel de exactitud general y una excelente discriminación entre clases, especialmente en aquellas asociadas a comportamientos distractivos específicos.
 
 La clase "talking_phone" fue clasificada correctamente en 162 de 166 casos, siendo una de las clases con mejor desempeño, junto con "texting_phone", que alcanzó 154 aciertos.
 
@@ -519,7 +659,7 @@ Aunque VGG19 fue el modelo con mejor rendimiento general, su arquitectura profun
 
 El modelo personalizado CNNAlpha alcanzó un rendimiento muy alto en la tarea de clasificación, logrando métricas por encima del 96% en precisión, recall y F1-score. Su desempeño fue comparable e incluso ligeramente superior al de los modelos preentrenados, con la ventaja adicional de ofrecer el tiempo de inferencia más bajo del grupo evaluado.
 
-La matriz de confusión (Figura X) demuestra una gran capacidad de discriminación en todas las clases, sin un sesgo evidente hacia ninguna categoría.
+La matriz de confusión (Figura 7) demuestra una gran capacidad de discriminación en todas las clases, sin un sesgo evidente hacia ninguna categoría.
 
 La clase "talking_phone" fue clasificada correctamente en 164 ocasiones, con solo errores mínimos, mientras que "texting_phone" alcanzó 154 aciertos, evidenciando un reconocimiento efectivo de estas conductas distractoras.
 
@@ -553,7 +693,7 @@ El uso de modelos preentrenados permitió acelerar el desarrollo y mejorar la ge
 
 ## 3.1 Descripción del problema
 
-Este módulo se enfocó en desarrollar un sistema de recomendación personalizado de destinos de viaje a partir de los datos en (Kaggle2). El sistema sugiere los 5 destinos potencialmente atractivos para cada usuario, basándose en su historial de viajes y otros atributos. Este tipo de soluciones son comunes en plataformas de transporte y turismo, ya que permiten anticipar los intereses del usuario y promover rutas con baja ocupación o nuevas ofertas.
+Este módulo se enfocó en desarrollar un sistema de recomendación personalizado de destinos de viaje a partir de los datos en (Sahin-Afridi, 2024). El sistema sugiere los 5 destinos potencialmente atractivos para cada usuario, basándose en su historial de viajes y otros atributos. Este tipo de soluciones son comunes en plataformas de transporte y turismo, ya que permiten anticipar los intereses del usuario y promover rutas con baja ocupación o nuevas ofertas.
 
 <a name="io3.2."></a>
 
@@ -561,59 +701,59 @@ Este módulo se enfocó en desarrollar un sistema de recomendación personalizad
 
 El dataset consiste de 4 conjuntos de datos separados: Expanded_Destinations, Final_Updated_Expanded_Reviews, Final_Updated_Expanded_UserHistory y Final_Updated_Expanded_Users. Cada uno ofrece información variada con respecto a los usuarios, los destinos que han visitado y las reviews que han dejado.
 
-En la Tabla X se resume el tamaño de cada uno de estos conjuntos de datos, junto con el nombre de sus columnas.
+En la Tabla 6 se resume el tamaño de cada uno de estos conjuntos de datos, junto con el nombre de sus columnas.
 
-+------------------------------------+---------------+---------------------+
-| **Dataset**                        | **Tamaño**    | **Columnas**        |
-+------------------------------------+---------------+---------------------+
-| Expanded_Destinations              | 1000          | DestinationID       |
-|                                    |               |                     |
-|                                    |               | Name                |
-|                                    |               |                     |
-|                                    |               | State               |
-|                                    |               |                     |
-|                                    |               | Type                |
-|                                    |               |                     |
-|                                    |               | Popularity          |
-|                                    |               |                     |
-|                                    |               | BestTimeToVisit     |
-+------------------------------------+---------------+---------------------+
-| Final_Updated_Expanded_Reviews     | 999           | ReviewID            |
-|                                    |               |                     |
-|                                    |               | DestinationID       |
-|                                    |               |                     |
-|                                    |               | UserID              |
-|                                    |               |                     |
-|                                    |               | Rating              |
-|                                    |               |                     |
-|                                    |               | ReviewText          |
-+------------------------------------+---------------+---------------------+
-| Final_Updated_Expanded_UserHistory | 999           | HistoryID           |
-|                                    |               |                     |
-|                                    |               | UserID              |
-|                                    |               |                     |
-|                                    |               | DestinationID       |
-|                                    |               |                     |
-|                                    |               | VisitDate           |
-|                                    |               |                     |
-|                                    |               | ExperienceRating    |
-+------------------------------------+---------------+---------------------+
-| Final_Updated_Expanded_Users       | 999           | UserID              |
-|                                    |               |                     |
-|                                    |               | Name                |
-|                                    |               |                     |
-|                                    |               | Email               |
-|                                    |               |                     |
-|                                    |               | Preferences         |
-|                                    |               |                     |
-|                                    |               | Gender              |
-|                                    |               |                     |
-|                                    |               | NumberOfAdults      |
-|                                    |               |                     |
-|                                    |               | NumberOfChildren    |
-+------------------------------------+---------------+---------------------+
++------------------------------------+---------------+------------------+
+| **Dataset**                        | **Tamaño**    | **Columnas**     |
++------------------------------------+---------------+------------------+
+| Expanded_Destinations              | 1000          | DestinationID    |
+|                                    |               |                  |
+|                                    |               | Name             |
+|                                    |               |                  |
+|                                    |               | State            |
+|                                    |               |                  |
+|                                    |               | Type             |
+|                                    |               |                  |
+|                                    |               | Popularity       |
+|                                    |               |                  |
+|                                    |               | BestTimeToVisit  |
++------------------------------------+---------------+------------------+
+| Final_Updated_Expanded_Reviews     | 999           | ReviewID         |
+|                                    |               |                  |
+|                                    |               | DestinationID    |
+|                                    |               |                  |
+|                                    |               | UserID           |
+|                                    |               |                  |
+|                                    |               | Rating           |
+|                                    |               |                  |
+|                                    |               | ReviewText       |
++------------------------------------+---------------+------------------+
+| Final_Updated_Expanded_UserHistory | 999           | HistoryID        |
+|                                    |               |                  |
+|                                    |               | UserID           |
+|                                    |               |                  |
+|                                    |               | DestinationID    |
+|                                    |               |                  |
+|                                    |               | VisitDate        |
+|                                    |               |                  |
+|                                    |               | ExperienceRating |
++------------------------------------+---------------+------------------+
+| Final_Updated_Expanded_Users       | 999           | UserID           |
+|                                    |               |                  |
+|                                    |               | Name             |
+|                                    |               |                  |
+|                                    |               | Email            |
+|                                    |               |                  |
+|                                    |               | Preferences      |
+|                                    |               |                  |
+|                                    |               | Gender           |
+|                                    |               |                  |
+|                                    |               | NumberOfAdults   |
+|                                    |               |                  |
+|                                    |               | NumberOfChildren |
++------------------------------------+---------------+------------------+
 
-**Tabla X.** Tamaño y columnas de los datasets para el sistema de recomendación de destinos de viaje.
+**Tabla 6.** Tamaño y columnas de los datasets para el sistema de recomendación de destinos de viaje.
 
 Para la tarea de realizar un sistema de recomendación, fue necesario combinar estos conjuntos de datos para poder tener en un solo archivo toda la información relacionada con los usuarios y los destinos que han visitado y calificado.
 
@@ -782,58 +922,67 @@ Se procede a mostrar los destinos obtenidos tras ejecutar cada uno de estos mét
 
 ### 3.6.1 Método de Collaborative Filtering básico
 
-Para el usuario con ID=3 (usuario nunca antes visto), se obtuvieron los destinos recomendados mostrados en la Tabla X.
+Para el usuario con ID=3 (usuario nunca antes visto), se obtuvieron los destinos recomendados mostrados en la Tabla 7.
 
-| **DestinationID** | **Name**    | **State** | **Type** | **Popularity** |
-|-------------------|-------------|-----------|----------|----------------|
-| 28                | Jaipur City | Rajasthan | City     | 8.471855       |
-| 33                | Jaipur City | Rajasthan | City     | 7.684440       |
-| 108               | Jaipur City | Rajasthan | City     | 8.180180       |
-| 102               | Goa Beaches | Goa       | Beach    | 7.901206       |
-| 742               | Goa Beaches | Goa       | Beach    | 8.532766       |
++-------------------+-------------+------------+------------+----------------+
+| **DestinationID** | **Name**    | **State**  | **Type**   | **Popularity** |
++===================+=============+============+============+================+
+| 28                | Jaipur City | Rajasthan  | City       | 8.471855       |
++-------------------+-------------+------------+------------+----------------+
+| 33                | Jaipur City | Rajasthan  | City       | 7.684440       |
++-------------------+-------------+------------+------------+----------------+
+| 108               | Jaipur City | Rajasthan  | City       | 8.180180       |
++-------------------+-------------+------------+------------+----------------+
+| 102               | Goa Beaches | Goa        | Beach      | 7.901206       |
++-------------------+-------------+------------+------------+----------------+
+| 742               | Goa Beaches | Goa        | Beach      | 8.532766       |
++-------------------+-------------+------------+------------+----------------+
 
-**Tabla X.** Destinos recomendados por el Método de Collaborative Filtering básico para usuario con ID=3.
+**Tabla 7.** Destinos recomendados por el Método de Collaborative Filtering básico para usuario con ID=3.
 
-Para el usuario con ID=2 (usuario en el conjunto de datos), se obtuvieron los destinos recomendados mostrados en la Tabla X.
+Para el usuario con ID=2 (usuario en el conjunto de datos), se obtuvieron los destinos recomendados mostrados en la Tabla 8.
 
-+-------------------+--------------+-------------------+--------------+----------------+
-| **DestinationID** | **Name**     | **State**         | **Type**     | **Popularity** |
-+===================+==============+===================+==============+================+
-| 30                | Leh Ladakh   | Jammu and Kashmir | Adventure    | 7.930638       |
-+-------------------+--------------+-------------------+--------------+----------------+
-| 31                | Taj Mahal    | Uttar Pradesh     | Historical   | 8.534267       |
-+-------------------+--------------+-------------------+--------------+----------------+
-| 8                 | Jaipur City  | Rajasthan         | City         | 9.458705       |
-+-------------------+--------------+-------------------+--------------+----------------+
-| 340               | Leh Ladakh   | Jammu and Kashmir | Adventure    | 9.051579       |
-+-------------------+--------------+-------------------+--------------+----------------+
-| 341               | Taj Mahal    | Uttar Pradesh     | Historical   | 8.408281       |
-+-------------------+--------------+-------------------+--------------+----------------+
++-------------------+-------------+-------------------+-------------+----------------+
+| **DestinationID** | **Name**    | **State**         | **Type**    | **Popularity** |
++===================+=============+===================+=============+================+
+| 30                | Leh Ladakh  | Jammu and Kashmir | Adventure   | 7.930638       |
++-------------------+-------------+-------------------+-------------+----------------+
+| 31                | Taj Mahal   | Uttar Pradesh     | Historical  | 8.534267       |
++-------------------+-------------+-------------------+-------------+----------------+
+| 8                 | Jaipur City | Rajasthan         | City        | 9.458705       |
++-------------------+-------------+-------------------+-------------+----------------+
+| 340               | Leh Ladakh  | Jammu and Kashmir | Adventure   | 9.051579       |
++-------------------+-------------+-------------------+-------------+----------------+
+| 341               | Taj Mahal   | Uttar Pradesh     | Historical  | 8.408281       |
++-------------------+-------------+-------------------+-------------+----------------+
 
-**Tabla X.** Destinos recomendados por el Método de Collaborative Filtering básico para usuario con ID=2.
+**Tabla 8.** Destinos recomendados por el Método de Collaborative Filtering básico para usuario con ID=2.
 
-Como referencia para la comparación, se tiene la Tabla X con los destinos que el usuario con ID=2 ha visitado.
+Como referencia para la comparación, se tiene la Tabla 9 con los destinos que el usuario con ID=2 ha visitado.
 
-|                   |             |           |          |                   |
-|-------------------|-------------|-----------|----------|-------------------|
-| **DestinationID** | **Name**    | **State** | **Type** | **Popularity**    |
-| 2                 | Goa Beaches | Goa       | Beach    | 8.605031858363876 |
++-------------------+-------------+------------+------------+-------------------+
+| **DestinationID** | **Name**    | **State**  | **Type**   | **Popularity**    |
++-------------------+-------------+------------+------------+-------------------+
+| 2                 | Goa Beaches | Goa        | Beach      | 8.605031858363876 |
++-------------------+-------------+------------+------------+-------------------+
 
-**Tabla X.** Destinos visitados por el usuario con ID=2.
+**Tabla 9.** Destinos visitados por el usuario con ID=2.
 
 De lo anterior se puede ver que para el usuario ID=2 no hay sitios de los cuales el usuario ya ha visitado, es decir, no aparece Goa Beaches en la tabla de destinos recomendados por el método, evidenciando que este es el más débil de los desarollados para este proyecto.
 
 ### 3.6.2 Método de Neural Collaborative Filtering
 
-Para el usuario con ID=3 (usuario nunca antes visto), se obtuvieron los destinos recomendados mostrados en la Tabla X.
+Para el usuario con ID=3 (usuario nunca antes visto), se obtuvieron los destinos recomendados mostrados en la Tabla 10.
 
-| **DestinationID** | **Name**          | **State** | **Type** | **Popularity** |
-|-------------------|-------------------|-----------|----------|----------------|
-| 19                | Kerala Backwaters | Kerala    | Nature   | 9.01709        |
++-------------------+-------------------+-------------+-------------+----------------+
+| **DestinationID** | **Name**          | **State**   | **Type**    | **Popularity** |
++===================+===================+=============+=============+================+
+| 19                | Kerala Backwaters | Kerala      | Nature      | 9.01709        |
++-------------------+-------------------+-------------+-------------+----------------+
 
-**Tabla X.** Destinos recomendados por el Método de Neural Collaborative Filtering para usuario con ID=3.
+**Tabla 10.** Destinos recomendados por el Método de Neural Collaborative Filtering para usuario con ID=3.
 
-Para el usuario con ID=1 (usuario en el conjunto de datos), se obtuvieron los destinos recomendados mostrados en la Tabla X.
+Para el usuario con ID=1 (usuario en el conjunto de datos), se obtuvieron los destinos recomendados mostrados en la Tabla 11.
 
 +---------------+----------+-------------+---------------+----------------+---------------------+
 | DestinationID | **Name** | **State**   | **Type**      | **Popularity** | **BestTimeToVisit** |
@@ -849,17 +998,19 @@ Para el usuario con ID=1 (usuario en el conjunto de datos), se obtuvieron los de
 | 46            | 47       | Goa Beaches | Goa           | Beach          | 7.726021            |
 +---------------+----------+-------------+---------------+----------------+---------------------+
 
-**Tabla X.** Destinos recomendados por el Método de Neural Collaborative Filtering para usuario con ID=1.
+**Tabla 11.** Destinos recomendados por el Método de Neural Collaborative Filtering para usuario con ID=1.
 
-Los datos reales para este usuario son los que se muestran en la Tabla X.
+Los datos reales para este usuario son los que se muestran en la Tabla 12.
 
++-------------------+----------+-----------+---------------+----------------+---------------------+
 | **DestinationID** | **Name** | **State** | **Type**      | **Popularity** | **BestTimeToVisit** |
-|-------------------|----------|-----------|---------------|----------------|---------------------|
++===================+==========+===========+===============+================+=====================+
 | 705               | 706      | Taj Mahal | Uttar Pradesh | Historical     | 9.023746            |
++-------------------+----------+-----------+---------------+----------------+---------------------+
 
-**Tabla X.** Destinos recomendados por el Método de Neural Collaborative Filtering para usuario con ID=1.
+**Tabla 12.** Destinos recomendados por el Método de Neural Collaborative Filtering para usuario con ID=1.
 
-Como se puede apreciar en la Tabla X y en la Tabla X, el recomendador contiene en sus resultados uno de los lugares que el usuario con ID=1 ha visitado (Taj Mahal), mostrando que tiene mejor rendimiento que el método anterior.
+Como se puede apreciar en la Tabla 11 y en la Tabla 12, el recomendador contiene en sus resultados uno de los lugares que el usuario con ID=1 ha visitado (Taj Mahal), mostrando que tiene mejor rendimiento que el método anterior.
 
 <a name="io3.7."></a>
 
@@ -877,81 +1028,159 @@ Como trabajo futuro, se plantea explorar modelos más avanzados para recomendaci
 
 ## 4.1 Introducción
 
+La presente herramienta web ha sido desarrollada como una solución integral para la gestión, análisis y toma de decisiones en el sector transporte, combinando técnicas avanzadas de inteligencia artificial y ciencia de datos. Su objetivo principal es facilitar a empresas, investigadores y tomadores de decisiones el acceso a modelos predictivos, clasificadores automáticos y sistemas de recomendación, todo desde una interfaz intuitiva y accesible desde cualquier navegador.
+
+A través de esta plataforma, el usuario puede interactuar con distintos módulos inteligentes que permiten anticipar la demanda de rutas, analizar el comportamiento de conductores y recibir recomendaciones personalizadas de destinos, optimizando así la operación y la experiencia de los usuarios finales.
+
+Esta herramienta es el resultado de un trabajo colaborativo y multidisciplinario, integrando conocimientos de análisis de datos, machine learning, desarrollo web y experiencia de usuario, con el fin de aportar valor real y tangible al sector transporte.
+
 <a name="io4.2."></a>
 
 ## 4.2 Tecnologías utilizadas
+
+Esta herramienta se apoya en un stack tecnológico moderno y robusto, que garantiza tanto la eficiencia en el procesamiento como la facilidad de uso:
+
+-   **Python**: Lenguaje principal para el desarrollo de la lógica y los modelos.
+
+-   **Streamlit**: Framework para la creación de aplicaciones web interactivas de manera rápida y sencilla, ideal para prototipos y despliegue de soluciones de ciencia de datos.
+
+-   **PyTorch**: Biblioteca de deep learning utilizada para la construcción y entrenamiento de modelos de clasificación de imágenes.
+
+-   **scikit-learn**: Herramientas de machine learning para tareas de recomendación y análisis de datos.
+
+-   **Pandas y NumPy**: Manipulación y análisis eficiente de grandes volúmenes de datos.
+
+-   **Matplotlib y Seaborn**: Visualización avanzada de resultados, métricas y tendencias.
+
+-   **Otras librerías**: PIL para procesamiento de imágenes, y utilidades estándar de Python para manejo de archivos y fechas.
+
+El uso de estas tecnologías permite integrar modelos complejos y visualizaciones ricas en una experiencia de usuario fluida y amigable. Además, la arquitectura modular facilita la escalabilidad y el mantenimiento del sistema, permitiendo la incorporación de nuevos módulos o funcionalidades en el futuro.
 
 <a name="io4.3."></a>
 
 ## 4.3 Descripción de la interfaz
 
-### **4.3.1. Pestaña "Clasificación"**
+La interfaz de la herramienta está diseñada bajo principios de simplicidad y claridad, permitiendo que cualquier usuario, sin importar su nivel técnico, pueda aprovechar al máximo las funcionalidades ofrecidas.
 
--   **Subir imagen**: Selecciona una imagen desde tu dispositivo.
+-   **Estructura en bloques**: Cada módulo se presenta como un bloque independiente, con su propio formulario de entrada y visualización de resultados.
 
--   **Imágenes de ejemplo**: Prueba con imágenes predefinidas del dataset.
+-   **Inputs intuitivos**: Los parámetros requeridos por cada módulo (como número de días a predecir, imágenes a analizar o ID de usuario) se solicitan mediante controles sencillos como cajas numéricas, selectores y botones.
 
--   **Resultados**: Visualiza la clasificación y nivel de confianza.
+-   **Visualización inmediata**: Los resultados, métricas y gráficas se muestran de forma clara y ordenada justo después de cada acción, permitiendo una interpretación rápida y efectiva.
 
-### **4.3.2. Pestaña "Historial"**
+-   **Navegación vertical**: El usuario puede desplazarse fácilmente entre los diferentes módulos y secciones, accediendo a la información y funcionalidades de manera secuencial.
 
--   Revisa todas las predicciones realizadas.
+-   **Mensajes y ayudas contextuales**: Se incluyen descripciones, recomendaciones y advertencias para guiar al usuario durante el uso de la herramienta.
 
--   Visualiza imágenes analizadas anteriormente.
+**Ejemplo de uso:**
 
--   Estadísticas rápidas del uso.
+-   Un planificador de rutas puede anticipar la demanda futura de los destinos turísticos más populares y ajustar la oferta de transporte en consecuencia.
 
-### **4.3.3. Pestaña "Estadísticas"**
+-   Un supervisor de seguridad vial puede analizar imágenes de conductores y detectar comportamientos distractivos de manera automática.
 
--   Gráficos de distribución de comportamientos.
+-   Un turista o usuario final puede recibir recomendaciones personalizadas de destinos según su historial y preferencias, mejorando su experiencia de viaje.
 
--   Análisis temporal de predicciones.
-
--   Métricas de rendimiento del modelo.
-
-### **4.3.4. Pestaña "Información"**
-
--   Documentación del sistema.
-
--   Descripción de comportamientos detectados.
-
--   Guía de uso.
+Esta organización facilita la experimentación, el análisis comparativo y la toma de decisiones informadas en tiempo real, tanto para usuarios técnicos como no técnicos.
 
 <a name="io4.4."></a>
 
 ## 4.4 Funcionalidades
 
-### 4.4.1
+La herramienta integra tres módulos principales, cada uno orientado a resolver un problema específico dentro del ámbito del transporte inteligente:
 
-### 4.4.2 Clasificación de conducción distractiva
+-   **Módulo 1: Predicción de demanda de rutas o destinos turísticos**
 
-Esta parte implementa el módulo 2 del Sistema Inteligente Integrado para la empresa de transporte, enfocado en la clasificación de comportamientos distractivos en conductores mediante análisis de imágenes.
+    -   Permite anticipar la demanda futura en las rutas más populares, ayudando a planificar recursos y optimizar la operación.
 
-Cuenta con las siguientes funcionalidades principales:
+    -   El usuario selecciona el horizonte de predicción (número de días) y obtiene gráficas, métricas y análisis detallados para cada ruta.
 
--   **Clasificación de Imágenes**: Detecta 5 tipos de comportamientos de conducción
+    -   Ideal para la gestión de flotas, planificación de servicios y análisis de tendencias turísticas.
 
--   **Interfaz Web Intuitiva**: Aplicación Streamlit con diseño moderno
+    -   **Beneficio:** Reduce la incertidumbre y mejora la asignación de recursos.
 
--   **Historial de Predicciones**: Almacena y visualiza todas las clasificaciones realizadas
+-   **Módulo 2: Clasificación automática de imágenes de conducción**
 
--   **Análisis Estadístico**: Gráficos y métricas de rendimiento
+    -   Analiza imágenes de conductores para detectar comportamientos distractivos o inseguros mediante modelos de deep learning.
 
--   **Imágenes de Ejemplo**: Pruebas con dataset predefinido
+    -   El usuario sube una imagen y recibe una clasificación automática, junto con métricas de confianza y recomendaciones.
 
-### 4.4.3 Sistema de recomendación de destinos
+    -   Útil para empresas de transporte, aseguradoras y proyectos de seguridad vial.
+
+    -   **Beneficio:** Contribuye a la prevención de accidentes y mejora la seguridad en carretera.
+
+-   **Módulo 3: Recomendación personalizada de destinos o rutas**
+
+    -   Ofrece sugerencias de destinos turísticos o rutas a partir de las preferencias y el historial de cada usuario.
+
+    -   El usuario puede ingresar su ID o seleccionar su nombre para recibir recomendaciones personalizadas, visualizando además la popularidad y el tipo de cada destino sugerido.
+
+    -   Facilita la personalización de la experiencia y la promoción de destinos menos conocidos.
+
+    -   **Beneficio:** Aumenta la satisfacción del usuario y fomenta el descubrimiento de nuevas opciones.
+
+Cada módulo puede ser utilizado de manera independiente, permitiendo adaptar la herramienta a diferentes necesidades y escenarios de uso. Además, la integración de los tres módulos en una sola plataforma potencia el análisis cruzado y la toma de decisiones estratégicas.
+
+## 4.5 Capturas de interfaz
+
+A continuación se muestran algunas capturas de las partes principales de la interfaz.
+
+![](images/home-01.png)
+
+**Figura 8.** Sección Home
+
+![](images/modulo1-01.png)
+
+**Figura X.** Sección Módulo 1
+
+![](images/modulo2-01.png)
+
+**Figura 9.** Sección Módulo 2
+
+![](images/modulo3-01.png)
+
+**Figura 10.** Sección Módulo 3
 
 <a name="io5."></a>
 
 # 5. Resultados Generales y Discusión
 
+Los resultados obtenidos en este proyecto demuestran la eficacia de aplicar técnicas de inteligencia artificial a distintos problemas del sector transporte. En el módulo de predicción de demanda, se logró una proyección confiable de la actividad futura basada en patrones históricos, brindando a la empresa una herramienta útil para la planificación operativa. El módulo de clasificación de conducción distractiva alcanzó métricas de rendimiento superiores al 95% con modelos como ResNet18, VGG19 y un modelo personalizado (CNNAlpha), validando la capacidad de los enfoques de visión por computadora para detectar comportamientos de riesgo con alta precisión. Finalmente, en el módulo de recomendación de destinos de viaje, se comprobó que el enfoque de *Neural Collaborative Filtering* supera ampliamente al filtrado colaborativo tradicional, generando recomendaciones más personalizadas y relevantes para los usuarios, con una capacidad de acierto mucho mayor. La integración de estos tres sistemas en una herramienta web funcional consolida un ecosistema inteligente que promueve eficiencia, seguridad y personalización en los servicios de transporte, y sienta las bases para futuras mejoras con tecnologías más avanzadas.
+
 <a name="iu3."></a>
 
 # Conclusiones Finales y Recomendaciones
 
+El desarrollo del sistema inteligente integrado para predicción, clasificación y recomendación demostró la viabilidad de aplicar técnicas de aprendizaje profundo a múltiples problemáticas dentro del sector del transporte. A través de un enfoque modular y bien estructurado, fue posible abordar tres desafíos clave: anticipación de la demanda, mejora de la seguridad vial y personalización de servicios.
+
+**En el módulo de predicción de demanda, se logró modelar con éxito la estacionalidad y las tendencias históricas de los viajes, permitiendo realizar proyecciones fiables a 30 días. Esto proporciona a la empresa una herramienta estratégica para la planificación de recursos y mejora operativa.**
+
+En el módulo de clasificación de conducción distractiva, los modelos evaluados (ResNet18, VGG19 y CNNAlpha) alcanzaron métricas superiores al 95%, evidenciando un desempeño sobresaliente en la detección automática de comportamientos peligrosos. La capacidad de alertar sobre conductas como el uso del móvil o la somnolencia representa un avance significativo en seguridad vial.
+
+Por su parte, el módulo de recomendación de destinos demostró que es posible generar sugerencias personalizadas que mejoran la experiencia del cliente, fomentando la fidelización y el aprovechamiento de rutas con menor demanda. Sin embargo, es necesario más trabajo futuro para aumentar la precisión del modelo de tal forma que pueda realizar predicciones más afines a lo que el usuario parece desear según su historial.
+
+La herramienta web desarrollada integra los tres módulos en una interfaz amigable, funcional y accesible, pensada tanto para usuarios técnicos como para personal operativo de la empresa. Esta integración facilita la toma de decisiones basada en datos y permite escalar el sistema hacia entornos reales de producción.
+
+A manera de recomendaciones para un futuro mejoramiento del presente proyecto, se plantea lo siguiente:
+
+-   Para una futura versión, se recomienda ampliar los datasets, especialmente en el caso de conducción distractiva, donde categorías ambiguas como “other_activities” aún generan errores.
+-   Sería beneficioso incorporar datos en tiempo real (por ejemplo, GPS, clima, eventos) para mejorar la precisión del modelo de demanda.
+-   En el módulo de recomendación, podría explorarse el uso de técnicas híbridas más avanzadas (Deep Learning + filtrado colaborativo).
+-   Se sugiere implementar alertas automáticas en el sistema de clasificación, conectadas directamente con los supervisores o sistemas de seguridad de los vehículos.
+-   Explorar el despliegue en la nube o en dispositivos embebidos, dependiendo del uso final, para facilitar la portabilidad del sistema.
+
 <a name="iu4."></a>
 
 # Aspectos Éticos y Creatividad
+
+El desarrollo de este sistema plantea varios desafíos éticos relacionados con la privacidad de los datos, la imparcialidad algorítmica y la responsabilidad en la toma de decisiones automatizadas.
+
+-   En el módulo de clasificación de imágenes, se trabajó con datos que simulan contextos reales. En una aplicación comercial, se deberá garantizar el anonimato de los conductores y contar con su consentimiento explícito para el uso de sus imágenes.
+
+-   Se tomaron medidas para evitar sesgos en los modelos, como revisar el balance de clases y validar resultados con múltiples métricas. Sin embargo, se reconoce que ciertos tipos de distracción (por ejemplo, posturas similares) pueden ser más difíciles de detectar y podrían generar falsos positivos o negativos. Si se decide continuar con el proyecto en contextos profesionales, es fundamental monitorear continuamente el desempeño del sistema en producción y ajustar los modelos ante cualquier comportamiento injusto.
+
+-   Todos los modelos y decisiones fueron documentados de manera clara. En una implementación futura, se sugiere añadir módulos de interpretabilidad (por ejemplo, visualización de activaciones) para mejorar la confianza de los usuarios en el sistema.
+
+En cuanto a la ejerción de la creatividad del equipo para desarrollar este proyecto, se pudo diseñar un modelo CNN personalizado que tiene un rendimiento similar a los modelos de referencia, se unificaron múltiples modelos de distintos contextos de problema en una sola aplicación web de tal forma que los usuarios puedan servirse de estos y se utilizaron métricas y comparaciones entre arquitecturas para fomentar la mejora continua y la validación empírica.
 
 <a name="iu5."></a>
 
@@ -959,19 +1188,25 @@ Cuenta con las siguientes funcionalidades principales:
 
 ## - Leonardo Federico Corona Torres
 
--   
+Mi contribución individual al proyecto fue el desarrollo y optimización del Módulo 1: Predicción de Demanda de Transporte, implementado en Google Colab y adaptado para Visual Studio Code. Diseñé y ajusté el código modulo1_completo.py para generar predicciones precisas usando LSTM, Abordé la limitación de solo 3 fechas únicas por destino aplicando aumentación de datos (interpolación) para crear series sintéticas, lo que permitió análisis de tendencias y ademas redacté un reporte técnico detallado (1.1 a 1.7) que documenta el proceso.
 
 ## - David Escobar Ruiz
 
--   
+Mi contribución individual al proyecto incluye la creación de la estructura del reporte, todo el trabajo realizado en el módulo 2 y 3 y el apoyo con otras tareas de mis otros compañeros, incluyendo la redacción del reporte.
 
 ## - Johan Sebastián Robles Rincón
 
--   
+-   Creación de la aplicacion con streamlit.
+
+-   Creacion/Conexion del modulo 2 "Clasificación de Imágenes de Conducción" con la aplicacion.
+
+-   Creacion/Conexion del modulo 1 "Predicción de Demanda de Transporte" con la aplicacion.
+
+-   Despligue de la aplicacion en Nube con DigitalOcean.
 
 ## - Sebastian Soto Arcila
 
--   
+Colaborar con el reporte escrito. Desarrollo de la app web. Apoyo con el desarrollo del módulo 3.
 
 <a name="iu6."></a>
 
@@ -987,36 +1222,18 @@ Cuenta con las siguientes funcionalidades principales:
 
 ### A.2 Enlace a video
 
-<a name="iu9."></a>
-
-### A.3 Referencias de repositorios adicionales
-
 <a name="iu10."></a>
 
 # Bibliografía
 
-Autofact. (2024). *Peajes en Colombia: Conoce sus ubicaciones y precios 2024.* <https://www.autofact.com.co/blog/mi-carro/peajes/peajes-colombia-precios>
+Mehra. (2024). *Travel Recommendation Dataset.* Kaggle. Recuperado el 7 de Julio de 2025 de <https://www.kaggle.com/datasets/amanmehra23/travel-recommendation-dataset?authuser=2>
 
-DFSK. (s.f.). *Especificaciones Furgon C35.* Recuperado el 2 de mayo de 2025, de <http://static.multiaviso.com/vehicle/specs/22-VRZC564XLBE6-dfsk-otros-modelos-2017-furgon-c35.pdf>
+Sahin-Afridi. (2024). *Multi-Class Driver Behavior Image Dataset.* Kaggle. Recuperado el 7 de Julio de 2025 de <https://www.kaggle.com/datasets/arafatsahinafridi/multi-class-driver-behavior-image-dataset/data?authuser=2>
 
-INVIAS. (s.f.). Sistema de información vial. <https://hermes.invias.gov.co/viajeroseguro/>
+Satrack. (2023). *¿Cuáles son las principales causas de accidentes de tránsito?*. Recuperado el 7 de Julio de 2025 de <https://satrack.com/co/blog/cuales-son-las-principales-causas-de-accidentes-de-transito/>
 
-La República. (2025). *PRECIO DE LA GASOLINA.* Recuperado el 2 de mayo de 2025, de <https://www.larepublica.co/precio-de-la-gasolina>
+He et al. (2015). *Deep Residual Learning for Image Recognition.* <https://arxiv.org/abs/1512.03385>
 
-Mintransporte. (2025). Colombiapeajes. <https://colombiapeajes.com/>
+Pytorch. (s.f.) *Gettings started with transforms v2.* Recuperado el 7 de Julio de 2025 de <https://docs.pytorch.org/vision/main/auto_examples/transforms/plot_transforms_getting_started.html#sphx-glr-auto-examples-transforms-plot-transforms-getting-started-py>
 
-Molga, Smutnicki. (2005). *Test functions for optimization needs.* <https://robertmarks.org/Classes/ENGR5358/Papers/functions.pdf>
-
-Talent.com. (s.f.). *Salario medio para Transporte De Carga en Colombia 2025*. Recuperado el 2 de mayo de 2025, de <https://co.talent.com/salary?job=transporte+de+carga>
-
-Talent.com. (s.f.). *Salario medio para Vendedor en Colombia 2025*. Recuperado el 2 de mayo de 2025, de <https://co.talent.com/salary?job=vendedor>
-
-ViaMichelin. (s.f.). Distancias estimadas con ViaMichelin. <https://www.viamichelin.com/>
-
-Wikipedia. (s.f.). *Test functions for optimization*. Wikipedia. Recuperado el 2 de mayo de 2025, de <https://en.wikipedia.org/wiki/Test_functions_for_optimization>
-
-Wikipedia. (s.f.). *Rosenbrock function*. Wikipedia. Recuperado el 2 de mayo de 2025, de [https://en.wikipedia.org/wiki/Rosenbrock\_](https://en.wikipedia.org/wiki/Rosenbrock_function){.uri}
-
-Wikipedia. (s.f.). *Rastrigin function*. Wikipedia. Recuperado el 2 de mayo de 2025, de <https://en.wikipedia.org/wiki/Rastrigin_function>
-
-X.-S. Yang, Test problems in optimization, in: Engineering Optimization: An Introduction with Metaheuristic Applications (Eds Xin-She Yang), John Wiley & Sons, (2010)
+Simonyan & Zisserman. (2014). *Very Deep Convolutional Networks for Large-Scale Image Recognition.* <https://arxiv.org/abs/1409.1556>

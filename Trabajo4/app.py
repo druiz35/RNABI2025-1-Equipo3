@@ -50,14 +50,51 @@ personajes = st.text_area("👥 Personajes", placeholder="Nombres y descripcione
 
 # Botón para generar el prompt
 if st.button("Generar la historia"):
-    user_prompt = storyAgent.build_prompt(genero, tono, longitud, personajes, periodo_de_tiempo, ubicacion, atmosfera, conflictos, obstaculos, resolucion)
-    input_message = {
-        "role": "user",
-        "input": user_prompt,
-        "chat_history": storyAgent.chat_history
-    }
-    response = storyAgent.agent_executor.invoke(input_message)
-    storyAgent.chat_history.append(HumanMessage(content=user_prompt))
-    storyAgent.chat_history.append(AIMessage(content=response["output"]))
-    st.subheader("📝 Historia generada:")
-    st.write(response["output"])
+    campos_vacios = []
+
+    if not periodo_de_tiempo:
+        campos_vacios.append("Período de tiempo")
+        
+    if not ubicacion:
+        campos_vacios.append("Ubicación")
+        
+    if not atmosfera:
+        campos_vacios.append("Atmósfera")
+        
+    if not conflictos:
+        campos_vacios.append("Conflictos")
+        
+    if not obstaculos:
+        campos_vacios.append("Obstáculos")
+        
+    if not resolucion:
+        campos_vacios.append("Resolución")
+        
+    if not personajes:
+        campos_vacios.append("Personajes")
+
+    if campos_vacios:
+        user_prompt = f"Recomienda posibles respuestas para los siguientes campos necesarios para generar una historia: {campos_vacios}"
+        input_message = {
+            "role": "user",
+            "input": user_prompt,
+            "chat_history": storyAgent.chat_history
+        }
+        response = storyAgent.agent_executor.invoke(input_message)
+        storyAgent.chat_history.append(HumanMessage(content=user_prompt))
+        storyAgent.chat_history.append(AIMessage(content=response["output"]))
+        st.subheader("❌ Campos Faltantes:")
+        st.write(response["output"])
+
+    else:
+        user_prompt = storyAgent.build_prompt(genero, tono, longitud, personajes, periodo_de_tiempo, ubicacion, atmosfera, conflictos, obstaculos, resolucion)
+        input_message = {
+            "role": "user",
+            "input": user_prompt,
+            "chat_history": storyAgent.chat_history
+        }
+        response = storyAgent.agent_executor.invoke(input_message)
+        storyAgent.chat_history.append(HumanMessage(content=user_prompt))
+        storyAgent.chat_history.append(AIMessage(content=response["output"]))
+        st.subheader("📝 Historia generada:")
+        st.write(response["output"])
